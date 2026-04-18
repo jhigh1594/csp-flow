@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useUpdateTask } from "@/hooks/mutations/task/use-update-task";
 import { cn } from "@/lib/cn";
 import { getGanttStatusColors } from "@/lib/gantt-status-colors";
+import { type GanttTimeline, getColumnIndex } from "@/lib/gantt-utils";
 import { toast } from "@/lib/toast";
 import type Task from "@/types/task";
 
@@ -17,12 +18,8 @@ type ScheduledTask = Task & {
 
 type GanttTaskBarProps = {
   task: ScheduledTask;
-  timeline: {
-    days: Date[];
-    rangeStart: Date;
-    gridTemplateColumns: string;
-  };
-  pixelsPerDay: number;
+  timeline: GanttTimeline;
+  pixelsPerColumn: number;
   isMobile?: boolean;
   onOpenTask: () => void;
 };
@@ -30,11 +27,19 @@ type GanttTaskBarProps = {
 function getBarGridColumns(
   scheduleStart: Date,
   scheduleEnd: Date,
-  rangeStart: Date,
-  trackCount: number,
+  timeline: GanttTimeline,
 ): { barInView: boolean; lineStart: number; lineEnd: number } {
-  const startIndex = differenceInCalendarDays(scheduleStart, rangeStart);
-  const endIndex = differenceInCalendarDays(scheduleEnd, rangeStart);
+  const trackCount = timeline.days.length;
+  const startIndex = getColumnIndex(
+    scheduleStart,
+    timeline.rangeStart,
+    timeline.granularity,
+  );
+  const endIndex = getColumnIndex(
+    scheduleEnd,
+    timeline.rangeStart,
+    timeline.granularity,
+  );
   const barInView = endIndex >= 0 && startIndex < trackCount && trackCount > 0;
   if (!barInView) {
     return { barInView: false, lineStart: 1, lineEnd: 1 };
@@ -54,7 +59,7 @@ function toIsoDay(d: Date) {
 export function GanttTaskBar({
   task,
   timeline,
-  pixelsPerDay,
+  pixelsPerColumn,
   isMobile = false,
   onOpenTask,
 }: GanttTaskBarProps) {
@@ -80,12 +85,10 @@ export function GanttTaskBar({
   const displayStart = dragDisplay?.start ?? task.scheduleStart;
   const displayEnd = dragDisplay?.end ?? task.scheduleEnd;
 
-  const trackCount = timeline.days.length;
   const { barInView, lineStart, lineEnd } = getBarGridColumns(
     displayStart,
     displayEnd,
-    timeline.rangeStart,
-    trackCount,
+    timeline,
   );
 
   const persistDates = useCallback(
@@ -109,7 +112,7 @@ export function GanttTaskBar({
     [task, updateTask, t],
   );
 
-  const pxPerDay = Math.max(pixelsPerDay, 1e-6);
+  const pxPerColumn = Math.max(pixelsPerColumn, 1e-6);
   const moveThresholdPx = isMobile
     ? MOBILE_MOVE_THRESHOLD_PX
     : CLICK_MOVE_THRESHOLD_PX;
@@ -120,19 +123,23 @@ export function GanttTaskBar({
     const originX = event.clientX;
     const initialStart = task.scheduleStart;
     const initialEnd = task.scheduleEnd;
-    const startIdx = differenceInCalendarDays(
+    const startIdx = getColumnIndex(
       initialStart,
       timeline.rangeStart,
+      timeline.granularity,
     );
-    const endIdx = differenceInCalendarDays(initialEnd, timeline.rangeStart);
+    const endIdx = getColumnIndex(
+      initialEnd,
+      timeline.rangeStart,
+      timeline.granularity,
+    );
 
     const onMove = (ev: PointerEvent) => {
-      const deltaDays = Math.round((ev.clientX - originX) / pxPerDay);
-      let nextStartIdx = startIdx + deltaDays;
+      const delta = Math.round((ev.clientX - originX) / pxPerColumn);
+      let nextStartIdx = startIdx + delta;
       nextStartIdx = Math.max(0, Math.min(nextStartIdx, endIdx));
       const nextStart = timeline.days[nextStartIdx] ?? initialStart;
-      const nextEnd = initialEnd;
-      setDragDisplay({ start: nextStart, end: nextEnd });
+      setDragDisplay({ start: nextStart, end: initialEnd });
     };
 
     const onUp = async (ev: PointerEvent) => {
@@ -143,8 +150,8 @@ export function GanttTaskBar({
         setDragDisplay(null);
         return;
       }
-      const deltaDays = Math.round((ev.clientX - originX) / pxPerDay);
-      let nextStartIdx = startIdx + deltaDays;
+      const delta = Math.round((ev.clientX - originX) / pxPerColumn);
+      let nextStartIdx = startIdx + delta;
       nextStartIdx = Math.max(0, Math.min(nextStartIdx, endIdx));
       const nextStart = timeline.days[nextStartIdx] ?? initialStart;
       if (nextStart.getTime() === initialStart.getTime()) {
@@ -170,19 +177,24 @@ export function GanttTaskBar({
     const originX = event.clientX;
     const initialStart = task.scheduleStart;
     const initialEnd = task.scheduleEnd;
-    const startIdx = differenceInCalendarDays(
+    const trackCount = timeline.days.length;
+    const startIdx = getColumnIndex(
       initialStart,
       timeline.rangeStart,
+      timeline.granularity,
     );
-    const endIdx = differenceInCalendarDays(initialEnd, timeline.rangeStart);
+    const endIdx = getColumnIndex(
+      initialEnd,
+      timeline.rangeStart,
+      timeline.granularity,
+    );
 
     const onMove = (ev: PointerEvent) => {
-      const deltaDays = Math.round((ev.clientX - originX) / pxPerDay);
-      let nextEndIdx = endIdx + deltaDays;
+      const delta = Math.round((ev.clientX - originX) / pxPerColumn);
+      let nextEndIdx = endIdx + delta;
       nextEndIdx = Math.max(startIdx, Math.min(nextEndIdx, trackCount - 1));
       const nextEnd = timeline.days[nextEndIdx] ?? initialEnd;
-      const nextStart = initialStart;
-      setDragDisplay({ start: nextStart, end: nextEnd });
+      setDragDisplay({ start: initialStart, end: nextEnd });
     };
 
     const onUp = async (ev: PointerEvent) => {
@@ -193,8 +205,8 @@ export function GanttTaskBar({
         setDragDisplay(null);
         return;
       }
-      const deltaDays = Math.round((ev.clientX - originX) / pxPerDay);
-      let nextEndIdx = endIdx + deltaDays;
+      const delta = Math.round((ev.clientX - originX) / pxPerColumn);
+      let nextEndIdx = endIdx + delta;
       nextEndIdx = Math.max(startIdx, Math.min(nextEndIdx, trackCount - 1));
       const nextEnd = timeline.days[nextEndIdx] ?? initialEnd;
       if (nextEnd.getTime() === initialEnd.getTime()) {
@@ -220,15 +232,17 @@ export function GanttTaskBar({
     const originX = event.clientX;
     const initialStart = task.scheduleStart;
     const initialEnd = task.scheduleEnd;
+    const trackCount = timeline.days.length;
     const durationDays = differenceInCalendarDays(initialEnd, initialStart);
-    const startIdx = differenceInCalendarDays(
+    const startIdx = getColumnIndex(
       initialStart,
       timeline.rangeStart,
+      timeline.granularity,
     );
 
     const onMove = (ev: PointerEvent) => {
-      const deltaDays = Math.round((ev.clientX - originX) / pxPerDay);
-      let nextStartIdx = startIdx + deltaDays;
+      const delta = Math.round((ev.clientX - originX) / pxPerColumn);
+      let nextStartIdx = startIdx + delta;
       const maxStart = trackCount - 1 - durationDays;
       nextStartIdx = Math.max(0, Math.min(nextStartIdx, maxStart));
       const nextStart = timeline.days[nextStartIdx] ?? initialStart;
@@ -245,8 +259,8 @@ export function GanttTaskBar({
         return;
       }
       const moved = Math.abs(ev.clientX - originX);
-      const deltaDays = Math.round((ev.clientX - originX) / pxPerDay);
-      let nextStartIdx = startIdx + deltaDays;
+      const delta = Math.round((ev.clientX - originX) / pxPerColumn);
+      let nextStartIdx = startIdx + delta;
       const maxStart = trackCount - 1 - durationDays;
       nextStartIdx = Math.max(0, Math.min(nextStartIdx, maxStart));
       const nextStart = timeline.days[nextStartIdx] ?? initialStart;

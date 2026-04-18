@@ -1,15 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  addDays,
-  eachDayOfInterval,
-  endOfWeek,
   format,
   isSameMonth,
+  isSameWeek,
   isToday,
   isWeekend,
   parseISO,
-  startOfWeek,
-  subDays,
 } from "date-fns";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -23,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { useGetTasks } from "@/hooks/queries/task/use-get-tasks";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/cn";
+import type { ZoomLevel } from "@/lib/gantt-utils";
+import { buildTimeline } from "@/lib/gantt-utils";
 import { getStatusLabel } from "@/lib/i18n/domain";
 
 type GanttSearchParams = {
@@ -53,13 +51,12 @@ function RouteComponent() {
   const [searchQuery, setSearchQuery] = useState("");
   const isMobile = useIsMobile();
   const [isTaskRailOpen, setIsTaskRailOpen] = useState(false);
+  const [zoom, setZoom] = useState<ZoomLevel>("day");
 
-  // Wider day columns on small screens so dragging and reading dates is easier.
-  const dayColumnWidthRem = isMobile ? 3.125 : 2.75;
   const taskColumnWidthRem = isMobile ? 12 : 14;
   const showTaskRail = !isMobile || isTaskRailOpen;
   const timelineTrackRef = useRef<HTMLDivElement>(null);
-  const [pixelsPerDay, setPixelsPerDay] = useState(44);
+  const [pixelsPerColumn, setPixelsPerColumn] = useState(44);
 
   useEffect(() => {
     if (!isMobile) {
@@ -119,36 +116,13 @@ function RouteComponent() {
     });
   }, [parsedTasks, project?.slug, searchQuery]);
 
-  const timeline = useMemo(() => {
-    if (parsedTasks.length === 0) return null;
+  const effectiveZoom: ZoomLevel = isMobile ? "day" : zoom;
+  const mobileColWidth = isMobile ? 3.125 : undefined;
 
-    const earliest = parsedTasks.reduce(
-      (current, task) =>
-        task.scheduleStart < current ? task.scheduleStart : current,
-      parsedTasks[0].scheduleStart,
-    );
-    const latest = parsedTasks.reduce(
-      (current, task) =>
-        task.scheduleEnd > current ? task.scheduleEnd : current,
-      parsedTasks[0].scheduleEnd,
-    );
-
-    // Week-aligned bounds around task dates, then pad with extra days so bars can
-    // be resized or moved past the current last task without running out of grid.
-    const weekStart = startOfWeek(earliest, { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(latest, { weekStartsOn: 1 });
-    const rangeStart = subDays(weekStart, 7);
-    const rangeEnd = addDays(weekEnd, 28);
-
-    const days = eachDayOfInterval({ start: rangeStart, end: rangeEnd });
-
-    return {
-      days,
-      rangeStart,
-      gridTemplateColumns: `repeat(${days.length}, minmax(${dayColumnWidthRem}rem, ${dayColumnWidthRem}rem))`,
-      timelineMinWidthRem: days.length * dayColumnWidthRem,
-    };
-  }, [parsedTasks, dayColumnWidthRem]);
+  const timeline = useMemo(
+    () => buildTimeline(parsedTasks, effectiveZoom, mobileColWidth),
+    [parsedTasks, effectiveZoom, mobileColWidth],
+  );
 
   useLayoutEffect(() => {
     const element = timelineTrackRef.current;
@@ -157,7 +131,7 @@ function RouteComponent() {
     const update = () => {
       const count = timeline.days.length;
       if (count <= 0) return;
-      setPixelsPerDay(element.clientWidth / count);
+      setPixelsPerColumn(element.clientWidth / count);
     };
 
     update();
@@ -193,6 +167,26 @@ function RouteComponent() {
                 placeholder={t("tasks:gantt.searchPlaceholder")}
                 className="h-9 min-h-11 touch-manipulation sm:h-8 sm:min-h-0 [&_[data-slot=input]]:pl-8 [&_[data-slot=input]]:text-xs"
               />
+            </div>
+
+            <div className="hidden items-center sm:flex">
+              <div className="flex overflow-hidden rounded-md border border-border">
+                {(["day", "week", "month"] as ZoomLevel[]).map((z) => (
+                  <button
+                    key={z}
+                    type="button"
+                    onClick={() => setZoom(z)}
+                    className={cn(
+                      "px-2.5 py-1 text-xs font-medium capitalize transition-colors",
+                      zoom === z
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-background text-muted-foreground hover:bg-muted",
+                    )}
+                  >
+                    {z.charAt(0).toUpperCase() + z.slice(1)}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <Button
@@ -259,29 +253,55 @@ function RouteComponent() {
                   }}
                 >
                   {timeline.days.map((day, index) => {
-                    const showMonth =
-                      index === 0 ||
-                      !isSameMonth(day, timeline.days[index - 1] ?? day);
+                    const prev = timeline.days[index - 1];
+                    const isCurrentCol =
+                      timeline.granularity === "day"
+                        ? isToday(day)
+                        : timeline.granularity === "week"
+                          ? isSameWeek(new Date(), day, { weekStartsOn: 1 })
+                          : isSameMonth(new Date(), day);
+
+                    let secondaryLabel = "";
+                    let primaryLabel = "";
+                    if (timeline.granularity === "day") {
+                      const showMonthLabel =
+                        index === 0 || !isSameMonth(day, prev ?? day);
+                      secondaryLabel = showMonthLabel ? format(day, "MMM") : "";
+                      primaryLabel = format(day, "d");
+                    } else if (timeline.granularity === "week") {
+                      const showMonthLabel =
+                        index === 0 || !isSameMonth(day, prev ?? day);
+                      secondaryLabel = showMonthLabel ? format(day, "MMM") : "";
+                      primaryLabel = format(day, "d");
+                    } else {
+                      const showYearLabel =
+                        index === 0 ||
+                        day.getFullYear() !== (prev ?? day).getFullYear();
+                      secondaryLabel = showYearLabel ? format(day, "yyyy") : "";
+                      primaryLabel = format(day, "MMM");
+                    }
 
                     return (
                       <div
                         key={day.toISOString()}
                         className={cn(
                           "border-r border-border/70 px-0.5 py-2 text-center sm:px-1",
-                          isWeekend(day) && "bg-muted/25",
+                          timeline.granularity === "day" &&
+                            isWeekend(day) &&
+                            "bg-muted/25",
                         )}
                       >
                         <div className="h-4 text-[10px] font-medium text-muted-foreground">
-                          {showMonth ? format(day, "MMM") : ""}
+                          {secondaryLabel}
                         </div>
                         <div
                           className={cn(
                             "mx-auto flex size-6 items-center justify-center rounded-full text-xs font-medium",
-                            isToday(day) &&
+                            isCurrentCol &&
                               "bg-primary text-primary-foreground",
                           )}
                         >
-                          {format(day, "d")}
+                          {primaryLabel}
                         </div>
                       </div>
                     );
@@ -308,7 +328,9 @@ function RouteComponent() {
                       key={`bg-line-${day.toISOString()}`}
                       className={cn(
                         "h-full min-h-0 border-r border-border/60",
-                        isWeekend(day) && "bg-muted/25",
+                        timeline.granularity === "day" &&
+                          isWeekend(day) &&
+                          "bg-muted/25",
                       )}
                     />
                   ))}
@@ -372,7 +394,7 @@ function RouteComponent() {
                           <GanttTaskBar
                             task={task}
                             timeline={timeline}
-                            pixelsPerDay={pixelsPerDay}
+                            pixelsPerColumn={pixelsPerColumn}
                             isMobile={isMobile}
                             onOpenTask={() =>
                               navigate({
