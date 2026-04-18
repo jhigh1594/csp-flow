@@ -1,6 +1,6 @@
 {
-	"name": "Kaneo",
-	"short_name": "Kaneo",
+	"name": "CSP Flow",
+	"short_name": "CSP Flow",
 	"icons": [
 		{
 			"src": "/web-app-manifest-192x192.png",
@@ -15,7 +15,7 @@
 			"purpose": "maskable"
 		}
 	],
-	"theme_color": "#ffffff",
-	"background_color": "#ffffff",
+	"theme_color": "#293E40",
+	"background_color": "#293E40",
 	"display": "standalone"
 }
