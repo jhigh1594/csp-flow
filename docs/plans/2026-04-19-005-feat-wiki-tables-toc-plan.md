@@ -68,7 +68,7 @@ The wiki editor (upgraded in plan 004) supports rich text but lacks two common d
 
 ## Implementation Units
 
-- [ ] **Unit 1: Add table extensions, toolbar button, and slash menu entry**
+- [x] **Unit 1: Add table extensions, toolbar button, and slash menu entry**
 
 **Goal:** Enable table insertion and editing in the wiki editor via toolbar and slash menu.
 
@@ -108,7 +108,7 @@ The wiki editor (upgraded in plan 004) supports rich text but lacks two common d
 
 ---
 
-- [ ] **Unit 2: Build Table of Contents sidebar component**
+- [x] **Unit 2: Build Table of Contents sidebar component**
 
 **Goal:** Create a ToC sidebar that displays document headings, tracks scroll state, and scrolls to heading on click.
 
@@ -180,7 +180,7 @@ The wiki editor (upgraded in plan 004) supports rich text but lacks two common d
 
 ---
 
-- [ ] **Unit 3: Verify integration and edge cases**
+- [x] **Unit 3: Verify integration and edge cases**
 
 **Goal:** Confirm tables + ToC work together, existing features are unaffected, and both light/dark modes render correctly.
 
