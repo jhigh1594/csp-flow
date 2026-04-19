@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  Flag,
   Search,
 } from "lucide-react";
 import {
@@ -25,12 +26,24 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import ProjectLayout from "@/components/common/project-layout";
+import { GanttMilestoneRow } from "@/components/gantt/gantt-milestone-row";
 import { GanttTaskBar } from "@/components/gantt/gantt-task-bar";
 import PageTitle from "@/components/page-title";
 import TaskDetailsSheet from "@/components/task/task-details-sheet";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogFooter,
+  DialogHeader,
+  DialogPopup,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { DEFAULT_COLUMNS } from "@/constants/columns";
+import { useCreateMilestone } from "@/hooks/mutations/milestone/use-create-milestone";
+import { useGetMilestones } from "@/hooks/queries/milestone/use-get-milestones";
 import { useGetTasks } from "@/hooks/queries/task/use-get-tasks";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/cn";
@@ -70,6 +83,33 @@ function RouteComponent() {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     new Set(),
   );
+
+  const { data: milestones = [] } = useGetMilestones(projectId);
+  const { mutate: createMilestone, isPending: isCreating } =
+    useCreateMilestone(projectId);
+  const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
+  const [newMilestoneTitle, setNewMilestoneTitle] = useState("");
+  const [newMilestoneDate, setNewMilestoneDate] = useState(
+    format(new Date(), "yyyy-MM-dd"),
+  );
+
+  const handleCreateMilestone = () => {
+    if (!newMilestoneTitle.trim() || !newMilestoneDate) return;
+    createMilestone(
+      {
+        projectId,
+        title: newMilestoneTitle.trim(),
+        targetDate: newMilestoneDate,
+      },
+      {
+        onSuccess: () => {
+          setMilestoneDialogOpen(false);
+          setNewMilestoneTitle("");
+          setNewMilestoneDate(format(new Date(), "yyyy-MM-dd"));
+        },
+      },
+    );
+  };
 
   const taskColumnWidthRem = isMobile ? 12 : 14;
   const showTaskRail = !isMobile || isTaskRailOpen;
@@ -312,6 +352,71 @@ function RouteComponent() {
                 <Calendar className="size-3.5" />
                 {t("tasks:gantt.today")}
               </Button>
+
+              <Dialog
+                open={milestoneDialogOpen}
+                onOpenChange={setMilestoneDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="xs">
+                    <Flag className="size-3.5" />
+                    Milestone
+                  </Button>
+                </DialogTrigger>
+                <DialogPopup>
+                  <DialogHeader>
+                    <DialogTitle>Add Milestone</DialogTitle>
+                  </DialogHeader>
+                  <div className="flex flex-col gap-4 px-6 pb-2">
+                    <div className="flex flex-col gap-1.5">
+                      <label
+                        className="text-sm text-muted-foreground"
+                        htmlFor="new-milestone-title"
+                      >
+                        Title
+                      </label>
+                      <Input
+                        id="new-milestone-title"
+                        placeholder="Milestone name"
+                        value={newMilestoneTitle}
+                        onChange={(e) => setNewMilestoneTitle(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label
+                        className="text-sm text-muted-foreground"
+                        htmlFor="new-milestone-date"
+                      >
+                        Target date
+                      </label>
+                      <Input
+                        id="new-milestone-date"
+                        type="date"
+                        value={newMilestoneDate}
+                        onChange={(e) => setNewMilestoneDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline" size="sm">
+                        Cancel
+                      </Button>
+                    </DialogClose>
+                    <Button
+                      size="sm"
+                      onClick={handleCreateMilestone}
+                      disabled={
+                        isCreating ||
+                        !newMilestoneTitle.trim() ||
+                        !newMilestoneDate
+                      }
+                    >
+                      Add Milestone
+                    </Button>
+                  </DialogFooter>
+                </DialogPopup>
+              </Dialog>
             </div>
 
             <Button
@@ -465,6 +570,16 @@ function RouteComponent() {
                 </div>
 
                 <div className="relative z-10 flex flex-col">
+                  {!isMobile && milestones.length > 0 && (
+                    <GanttMilestoneRow
+                      isMobile={isMobile}
+                      milestones={milestones}
+                      projectId={projectId}
+                      showTaskRail={showTaskRail}
+                      taskColumnWidthRem={taskColumnWidthRem}
+                      timeline={timeline}
+                    />
+                  )}
                   {statusGroups.map((group) => {
                     const GroupIcon = group.icon;
                     const isCollapsed = collapsedGroups.has(group.columnId);
