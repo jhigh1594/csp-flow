@@ -40,7 +40,7 @@ export default function WikiPageEditor({
     (contentHtml: string, contentJson: Record<string, unknown>) => {
       updatePage.mutate({ id: pageId, contentHtml, contentJson });
     },
-    [updatePage, pageId],
+    [updatePage.mutate, pageId],
   );
 
   const pendingContentRef = useRef<{
@@ -64,11 +64,13 @@ export default function WikiPageEditor({
     return () => {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
+        debounceRef.current = undefined;
         if (pendingContentRef.current) {
           handleSaveContent(
             pendingContentRef.current.html,
             pendingContentRef.current.json,
           );
+          pendingContentRef.current = null;
         }
       }
     };
