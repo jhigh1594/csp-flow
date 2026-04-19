@@ -314,6 +314,23 @@ export default function TaskPropertiesSidebar({
                   </Button>
                 </TaskDueDatePopover>
               )}
+              {task && (
+                <TaskMilestonePopover task={task}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start h-7 px-1.5 gap-1.5"
+                  >
+                    <Diamond className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-xs font-semibold truncate max-w-[100px]">
+                      {task.milestoneId
+                        ? (milestones?.find((m) => m.id === task.milestoneId)
+                            ?.title ?? t("tasks:properties.milestone"))
+                        : t("tasks:properties.milestone")}
+                    </span>
+                  </Button>
+                </TaskMilestonePopover>
+              )}
             </div>
           </div>
         )}
