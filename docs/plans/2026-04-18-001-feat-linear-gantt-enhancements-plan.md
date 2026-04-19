@@ -1,7 +1,7 @@
 ---
 title: "feat: Linear-style Gantt enhancements (80/20) + milestones"
 type: feat
-status: active
+status: completed
 date: 2026-04-18
 ---
 
