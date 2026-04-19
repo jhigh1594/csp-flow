@@ -26,6 +26,7 @@ import {
   userNotificationWorkspaceRuleTable,
   userTable,
   verificationTable,
+  wikiPageTable,
   workflowRuleTable,
   workspaceTable,
   workspaceUserTable,
@@ -105,6 +106,7 @@ export const projectTableRelations = relations(
     assets: many(assetTable),
     columns: many(columnTable),
     milestones: many(milestoneTable),
+    wikiPages: many(wikiPageTable),
     workflowRules: many(workflowRuleTable),
     githubIntegration: many(githubIntegrationTable),
     integrations: many(integrationTable),
@@ -112,16 +114,23 @@ export const projectTableRelations = relations(
   }),
 );
 
-export const milestoneTableRelations = relations(
-  milestoneTable,
-  ({ one, many }) => ({
-    project: one(projectTable, {
-      fields: [milestoneTable.projectId],
-      references: [projectTable.id],
-    }),
-    tasks: many(taskTable),
+export const milestoneTableRelations = relations(milestoneTable, ({ one }) => ({
+  project: one(projectTable, {
+    fields: [milestoneTable.projectId],
+    references: [projectTable.id],
   }),
-);
+}));
+
+export const wikiPageTableRelations = relations(wikiPageTable, ({ one }) => ({
+  project: one(projectTable, {
+    fields: [wikiPageTable.projectId],
+    references: [projectTable.id],
+  }),
+  creator: one(userTable, {
+    fields: [wikiPageTable.createdBy],
+    references: [userTable.id],
+  }),
+}));
 
 export const columnTableRelations = relations(columnTable, ({ one, many }) => ({
   project: one(projectTable, {
@@ -168,10 +177,6 @@ export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
   sourceRelations: many(taskRelationTable, { relationName: "sourceTask" }),
   targetRelations: many(taskRelationTable, { relationName: "targetTask" }),
   remindersSent: many(taskReminderSentTable),
-  milestone: one(milestoneTable, {
-    fields: [taskTable.milestoneId],
-    references: [milestoneTable.id],
-  }),
 }));
 
 export const timeEntryTableRelations = relations(timeEntryTable, ({ one }) => ({

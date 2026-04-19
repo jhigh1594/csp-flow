@@ -1,3 +1,6 @@
+@import './styles/_variables.scss';
+@import './styles/_keyframe-animations.scss';
+
 @import "tailwindcss";
 
 input:-webkit-autofill,
@@ -1245,6 +1248,164 @@ input:-webkit-autofill:active {
   }
 
   .kaneo-tiptap-content .ProseMirror ::selection {
+    background: color-mix(in srgb, var(--primary) 18%, transparent);
+  }
+
+  /* Wiki editor styles */
+  .wiki-editor-wrapper {
+    position: relative;
+  }
+
+  .wiki-editor-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1rem 2rem 30vh;
+  }
+
+  .wiki-editor-title {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    outline: none;
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--foreground);
+    padding: 0.5rem 0 1rem;
+    caret-color: var(--foreground);
+  }
+
+  .wiki-editor-title::placeholder {
+    color: color-mix(in srgb, var(--foreground) 35%, transparent);
+  }
+
+  .wiki-editor-title:disabled {
+    opacity: 0.8;
+    cursor: default;
+  }
+
+  .wiki-editor-content-wrapper {
+    min-height: 400px;
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror {
+    min-height: 400px;
+    outline: none;
+    color: var(--foreground);
+    caret-color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror p {
+    margin: 0.25rem 0;
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror h1,
+  .wiki-editor-content-wrapper .tiptap.ProseMirror h2,
+  .wiki-editor-content-wrapper .tiptap.ProseMirror h3 {
+    margin: 1rem 0 0.4rem;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: var(--foreground);
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror h1 { font-size: 1.3rem; }
+  .wiki-editor-content-wrapper .tiptap.ProseMirror h2 { font-size: 1.15rem; }
+  .wiki-editor-content-wrapper .tiptap.ProseMirror h3 { font-size: 1.05rem; }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror ul,
+  .wiki-editor-content-wrapper .tiptap.ProseMirror ol {
+    margin: 0.3rem 0;
+    padding-inline-start: 1.35rem;
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror ul { list-style-type: disc; }
+  .wiki-editor-content-wrapper .tiptap.ProseMirror ol { list-style-type: decimal; }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror li::marker {
+    color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror blockquote {
+    margin: 0.5rem 0;
+    border-left: 2px solid var(--border);
+    padding-left: 0.75rem;
+    color: color-mix(in srgb, var(--foreground) 78%, transparent);
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror pre {
+    margin: 0.5rem 0;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 3px);
+    background: var(--code);
+    padding: 0.75rem 0.9rem;
+    overflow-x: auto;
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror pre code {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--code-foreground);
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror :not(pre) > code {
+    border: 1px solid var(--border);
+    border-radius: 0.34rem;
+    background: var(--code-highlight);
+    font-family: var(--font-mono);
+    font-size: 0.84em;
+    padding: 0.11rem 0.32rem;
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror img {
+    display: block;
+    max-width: 100%;
+    margin: 0.75rem 0;
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror ul[data-type="taskList"] {
+    list-style: none;
+    padding-inline-start: 0;
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror li[data-type="taskItem"] {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0.18rem 0;
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror li[data-type="taskItem"][data-checked="true"] > div p {
+    color: color-mix(in srgb, var(--foreground) 62%, transparent);
+    text-decoration: line-through;
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror a {
+    color: var(--primary);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    text-decoration-color: color-mix(in srgb, var(--primary) 68%, transparent);
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror .is-editor-empty:first-child::before {
+    pointer-events: none;
+    content: attr(data-placeholder);
+    height: 0;
+    float: left;
+    color: color-mix(in srgb, var(--foreground) 40%, transparent);
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror ::selection {
     background: color-mix(in srgb, var(--primary) 18%, transparent);
   }
 

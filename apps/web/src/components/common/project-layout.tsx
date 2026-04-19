@@ -1,5 +1,10 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { CalendarDays, SquareKanban, SquircleDashed } from "lucide-react";
+import {
+  CalendarDays,
+  FileText,
+  SquareKanban,
+  SquircleDashed,
+} from "lucide-react";
 import { type ReactNode, useState } from "react";
 import MobileProjectNav from "@/components/common/header/mobile-project-nav";
 import ProjectCrumbSelect from "@/components/common/header/project-crumb-select";
@@ -25,7 +30,7 @@ type ProjectLayoutProps = {
   headerActions?: ReactNode;
   children: ReactNode;
   showViewSwitcher?: boolean;
-  activeView?: "backlog" | "board" | "gantt";
+  activeView?: "backlog" | "board" | "gantt" | "wiki";
 };
 
 export default function ProjectLayout({
@@ -48,7 +53,9 @@ export default function ProjectLayout({
       ? "backlog"
       : location.pathname.includes("/gantt")
         ? "gantt"
-        : "board");
+        : location.pathname.includes("/wiki")
+          ? "wiki"
+          : "board");
 
   const handleNavigateToBacklog = () => {
     navigate({
@@ -71,6 +78,13 @@ export default function ProjectLayout({
     });
   };
 
+  const handleNavigateToWiki = () => {
+    navigate({
+      to: "/dashboard/workspace/$workspaceId/project/$projectId/wiki",
+      params: { workspaceId, projectId },
+    });
+  };
+
   const handleProjectSwitch = (nextProjectId: string) => {
     navigate({
       to:
@@ -78,7 +92,9 @@ export default function ProjectLayout({
           ? "/dashboard/workspace/$workspaceId/project/$projectId/backlog"
           : resolvedView === "gantt"
             ? "/dashboard/workspace/$workspaceId/project/$projectId/gantt"
-            : "/dashboard/workspace/$workspaceId/project/$projectId/board",
+            : resolvedView === "wiki"
+              ? "/dashboard/workspace/$workspaceId/project/$projectId/wiki"
+              : "/dashboard/workspace/$workspaceId/project/$projectId/board",
       params: {
         workspaceId,
         projectId: nextProjectId,
@@ -132,6 +148,7 @@ export default function ProjectLayout({
                 onSelectBacklog={handleNavigateToBacklog}
                 onSelectBoard={handleNavigateToBoard}
                 onSelectGantt={handleNavigateToGantt}
+                onSelectWiki={handleNavigateToWiki}
                 onSelectProject={handleProjectSwitch}
                 onAddProject={() => setIsCreateProjectModalOpen(true)}
               />
@@ -174,6 +191,18 @@ export default function ProjectLayout({
                 >
                   <CalendarDays className="size-3.5" />
                   Gantt
+                </Button>
+                <Button
+                  variant={resolvedView === "wiki" ? "secondary" : "ghost"}
+                  size="xs"
+                  onClick={handleNavigateToWiki}
+                  className={cn(
+                    "h-6 gap-1.5 rounded-md px-2 text-xs",
+                    resolvedView !== "wiki" && "text-muted-foreground",
+                  )}
+                >
+                  <FileText className="size-3.5" />
+                  Wiki
                 </Button>
               </div>
             )}

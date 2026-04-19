@@ -1416,7 +1416,7 @@
 			"start": "Start",
 			"startDate": "Start date",
 			"noDate": "No date",
-"milestone": "Milestone"
+			"milestone": "Milestone"
 		},
 		"move": {
 			"title": "Move task",

@@ -23,14 +23,26 @@
 			"!**/.cache",
 			"!**/coverage",
 			"!**/.claude",
-			"!**/openapi.json"
+			"!**/openapi.json",
+			"!**/tiptap-icons",
+			"!**/tiptap-node",
+			"!**/tiptap-ui",
+			"!**/tiptap-ui-primitive",
+			"!**/tiptap-templates",
+			"!**/tiptap-extension"
 		]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab"
 	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {
