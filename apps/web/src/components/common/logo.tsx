@@ -17,14 +17,9 @@ export function Logo({ className = "" }: LogoProps) {
       className={`w-auto ${className}`}
     >
       <img
-        src="/logo-dark.svg"
-        alt="CSP Flow"
-        className="h-6 w-auto dark:hidden"
-      />
-      <img
-        src="/logo-light.svg"
-        alt="CSP Flow"
-        className="hidden h-6 w-auto dark:block"
+        src="/servicenow-logo.png"
+        alt="ServiceNow"
+        className="h-6 w-auto dark:brightness-0 dark:invert"
       />
     </Link>
   );
