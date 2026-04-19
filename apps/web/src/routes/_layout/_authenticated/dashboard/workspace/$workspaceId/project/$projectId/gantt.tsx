@@ -35,7 +35,7 @@ import MilestoneFormDialog from "@/components/milestone/milestone-form-dialog";
 import PageTitle from "@/components/page-title";
 import TaskDetailsSheet from "@/components/task/task-details-sheet";
 import { Button } from "@/components/ui/button";
-import { DialogTrigger } from "@/components/ui/dialog";
+
 import { Input } from "@/components/ui/input";
 import { DEFAULT_COLUMNS } from "@/constants/columns";
 import { useGetMilestones } from "@/hooks/queries/milestone/use-get-milestones";
@@ -324,15 +324,14 @@ function RouteComponent() {
                 {t("tasks:gantt.today")}
               </Button>
 
-              <DialogTrigger
-                asChild
+              <Button
+                variant="outline"
+                size="xs"
                 onClick={() => setMilestoneDialogOpen(true)}
               >
-                <Button variant="outline" size="xs">
-                  <Flag className="size-3.5" />
-                  Milestone
-                </Button>
-              </DialogTrigger>
+                <Flag className="size-3.5" />
+                Milestone
+              </Button>
               <MilestoneFormDialog
                 open={milestoneDialogOpen}
                 onOpenChange={setMilestoneDialogOpen}
