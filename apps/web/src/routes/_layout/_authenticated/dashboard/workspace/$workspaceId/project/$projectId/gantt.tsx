@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Clock,
   Flag,
+  Layers,
   Search,
 } from "lucide-react";
 import {
@@ -45,6 +46,20 @@ import { cn } from "@/lib/cn";
 import type { ZoomLevel } from "@/lib/gantt-utils";
 import { buildTimeline, getColumnIndex } from "@/lib/gantt-utils";
 import { getStatusLabel } from "@/lib/i18n/domain";
+
+type GroupByMode = "status" | "roadmap" | "priority" | "assignee" | "none";
+
+const ROADMAP_GROUPS = ["now", "next", "later"] as const;
+const ROADMAP_LABELS: Record<string, string> = {
+  now: "Now",
+  next: "Next",
+  later: "Later",
+};
+const ROADMAP_COLORS: Record<string, string> = {
+  now: "text-emerald-600",
+  next: "text-blue-600",
+  later: "text-violet-600",
+};
 
 type GanttSearchParams = {
   taskId?: string;
@@ -78,6 +93,7 @@ function RouteComponent() {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
     new Set(),
   );
+  const [groupBy, setGroupBy] = useState<GroupByMode>("status");
 
   const { data: milestones = [] } = useGetMilestones(projectId);
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
@@ -132,7 +148,7 @@ function RouteComponent() {
       );
   }, [allTasks]);
 
-  const statusGroups = useMemo(() => {
+  const taskGroups = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
     const matchesQuery = (task: (typeof parsedTasks)[number]) => {
@@ -146,7 +162,7 @@ function RouteComponent() {
       );
     };
 
-    const parsedMap = new Map(parsedTasks.map((t) => [t.id, t]));
+    const filteredTasks = parsedTasks.filter(matchesQuery);
 
     type Group = {
       columnId: string;
@@ -154,6 +170,75 @@ function RouteComponent() {
       icon: typeof Clock;
       tasks: typeof parsedTasks;
     };
+
+    if (groupBy === "none") {
+      return filteredTasks.length > 0
+        ? [
+            {
+              columnId: "all",
+              columnName: "Tasks",
+              icon: Layers,
+              tasks: filteredTasks,
+            },
+          ]
+        : [];
+    }
+
+    if (groupBy === "roadmap") {
+      const grouped = new Map<string, typeof parsedTasks>();
+      for (const task of filteredTasks) {
+        const key = task.roadmapGroup ?? "later";
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key)!.push(task);
+      }
+
+      return ROADMAP_GROUPS.filter((g) => grouped.has(g)).map((g) => ({
+        columnId: g,
+        columnName: ROADMAP_LABELS[g],
+        icon: Layers,
+        tasks: grouped.get(g)!,
+      }));
+    }
+
+    if (groupBy === "priority") {
+      const priorityOrder = ["urgent", "high", "medium", "low", "no-priority"];
+      const grouped = new Map<string, typeof parsedTasks>();
+      for (const task of filteredTasks) {
+        const key = task.priority ?? "no-priority";
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key)!.push(task);
+      }
+
+      return priorityOrder
+        .filter((p) => grouped.has(p))
+        .map((p) => ({
+          columnId: p,
+          columnName: p
+            .replace(/-/g, " ")
+            .replace(/\b\w/g, (c) => c.toUpperCase()),
+          icon: Flag,
+          tasks: grouped.get(p)!,
+        }));
+    }
+
+    if (groupBy === "assignee") {
+      const grouped = new Map<string, typeof parsedTasks>();
+      for (const task of filteredTasks) {
+        const key = task.assigneeName ?? "Unassigned";
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key)!.push(task);
+      }
+
+      return Array.from(grouped.entries()).map(([name, tasks]) => ({
+        columnId: name,
+        columnName: name,
+        icon: Clock,
+        tasks,
+      }));
+    }
+
+    // Default: group by status (existing behavior)
+    const parsedMap = new Map(parsedTasks.map((t) => [t.id, t]));
 
     const groups: Group[] = [];
 
@@ -196,6 +281,7 @@ function RouteComponent() {
     project?.plannedTasks,
     project?.slug,
     searchQuery,
+    groupBy,
     t,
   ]);
 
@@ -298,6 +384,26 @@ function RouteComponent() {
 
             <div className="hidden items-center gap-2 sm:flex">
               <div className="flex overflow-hidden rounded-md border border-border">
+                {(["status", "roadmap", "priority", "assignee", "none"] as GroupByMode[]).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => {
+                      setGroupBy(mode);
+                      setCollapsedGroups(new Set());
+                    }}
+                    className={cn(
+                      "px-2 py-1 text-xs font-medium capitalize transition-colors",
+                      groupBy === mode
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-background text-muted-foreground hover:bg-muted",
+                    )}
+                  >
+                    {mode === "roadmap" ? "N/N/L" : mode === "none" ? "Flat" : mode}
+                  </button>
+                ))}
+              </div>
+              <div className="flex overflow-hidden rounded-md border border-border">
                 {(["day", "week", "month"] as ZoomLevel[]).map((z) => (
                   <button
                     key={z}
@@ -368,7 +474,7 @@ function RouteComponent() {
               </p>
             </div>
           </div>
-        ) : statusGroups.length === 0 ? (
+        ) : taskGroups.length === 0 ? (
           <div className="flex flex-1 items-center justify-center px-6">
             <div className="max-w-sm text-center">
               <h2 className="text-sm font-semibold text-foreground">
@@ -507,7 +613,7 @@ function RouteComponent() {
                         timeline={timeline}
                       />
                     )}
-                    {statusGroups.map((group) => {
+                    {taskGroups.map((group) => {
                       const GroupIcon = group.icon;
                       const isCollapsed = collapsedGroups.has(group.columnId);
                       const railWidth = isMobile
