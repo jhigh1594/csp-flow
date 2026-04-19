@@ -4,13 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Kaneo is a self-hosted project management platform built with simplicity and performance as core principles. The codebase is organized as a **pnpm monorepo** with TurboRepo.
+**CSP Flow** is a self-hosted project management platform (forked and rebranded from Kaneo) built for ServiceNow workflows. The codebase is organized as a **pnpm monorepo** with TurboRepo. Internal package names remain `@kaneo/api` and `@kaneo/web`.
 
 **Key Philosophy**: Features exist to solve real problems, not to impress. Avoid over-engineering - keep solutions simple and focused. Don't add features, refactoring, or improvements beyond what was asked.
 
 ## Development Commands
 
 ### Getting Started
+
 ```bash
 # Install dependencies (uses pnpm)
 pnpm install
@@ -26,6 +27,7 @@ pnpm build
 ```
 
 ### API-Specific Commands
+
 ```bash
 # Run API in development mode
 pnpm --filter @kaneo/api dev
@@ -47,6 +49,7 @@ pnpm --filter @kaneo/api lint
 ```
 
 ### Web-Specific Commands
+
 ```bash
 # Run web app in development mode
 pnpm --filter @kaneo/web dev
@@ -59,17 +62,35 @@ pnpm --filter @kaneo/web preview
 
 # Lint web code
 pnpm --filter @kaneo/web lint
+
+# Type-check web app (no emit)
+pnpm --filter @kaneo/web typecheck
+
+# Run a single test file
+pnpm --filter @kaneo/web test -- path/to/test.ts
+```
+
+### Running a Single Test
+
+```bash
+# API unit - single file
+pnpm --filter @kaneo/api test:unit -- path/to/test.ts
+
+# Web - single file
+pnpm --filter @kaneo/web test -- path/to/test.ts
 ```
 
 ## Architecture Overview
 
 ### Monorepo Structure
+
 ```
-kaneo/
+csp-flow/
 ├── apps/
 │   ├── api/          # Backend API (Hono/Node.js/PostgreSQL)
 │   ├── web/          # Frontend app (React/Vite/TanStack)
-│   └── docs/         # Documentation site (Next.js)
+│   ├── docs/         # Documentation site
+│   └── site/         # Marketing/landing site
 ├── packages/
 │   ├── email/        # Email utilities
 │   ├── libs/         # Shared libraries
@@ -80,6 +101,7 @@ kaneo/
 ### Technology Stack
 
 **Backend (API)**
+
 - Framework: Hono (lightweight web framework)
 - Database: PostgreSQL with Drizzle ORM
 - Authentication: Better Auth
@@ -88,6 +110,7 @@ kaneo/
 - IDs: CUID2 (via @paralleldrive/cuid2)
 
 **Frontend (Web)**
+
 - Framework: React 19+
 - Routing: TanStack Router (file-based)
 - Data Fetching: TanStack Query (React Query)
@@ -99,6 +122,7 @@ kaneo/
 ### Key Architectural Patterns
 
 **Backend API Structure**
+
 - Routes organized by feature in `apps/api/src/{feature}/`
 - Controller pattern: business logic extracted to `{feature}/controllers/`
 - All routes use OpenAPI decorators (`describeRoute`)
@@ -106,6 +130,7 @@ kaneo/
 - Migrations auto-run on API startup
 
 **Frontend Structure**
+
 - File-based routing in `apps/web/src/routes/`
 - Query hooks in `apps/web/src/hooks/queries/`
 - Mutation hooks in `apps/web/src/hooks/mutations/`
@@ -113,6 +138,7 @@ kaneo/
 - Components in `apps/web/src/components/`
 
 **Database Schema Conventions**
+
 - All tables use CUID2 for primary keys (`createId()`)
 - Every table has `createdAt` and `updatedAt` timestamps
 - Foreign keys always specify cascade behavior (`onDelete`, `onUpdate`)
@@ -121,19 +147,30 @@ kaneo/
 - Relations defined in `apps/api/src/database/relations.ts`
 
 **Authentication Flow**
+
 - Better Auth handles authentication
 - User context available in Hono via `c.get("userId")`, `c.get("user")`, `c.get("session")`
 - API keys supported via Bearer token
 - Frontend uses Better Auth client from `@/lib/auth-client`
 
 **Event System**
+
 - Events published for activity tracking
 - Use `publishEvent()` from `apps/api/src/events/`
 - Events tracked for features like status changes, assignments, etc.
 
+**Gantt Chart View**
+
+- Route: `apps/web/src/routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/gantt.tsx`
+- Task bar component: `apps/web/src/components/gantt/gantt-task-bar.tsx`
+- Timeline/zoom utilities: `apps/web/src/lib/gantt-utils.ts` (exports `ZoomLevel`, `GanttTimeline`, `buildTimeline`, `getColumnIndex`)
+- Status color mapping: `apps/web/src/lib/gantt-status-colors.ts`
+- Supports Day/Week/Month zoom, workflow status grouping with collapsible sections, color-coded bars, Today button with auto-scroll
+
 ## Code Style
 
 ### Formatting (Biome)
+
 - **Indentation**: Spaces for JavaScript/TypeScript/TSX (tabs for other file types)
 - **Quotes**: Double quotes
 - **Semicolons**: Required
@@ -141,19 +178,24 @@ kaneo/
 - Run `pnpm lint` to auto-fix
 
 ### TypeScript Conventions
+
 - Prefer `type` over `interface` (only use interface when extending/merging)
 - Prefer type inference when obvious
 - File naming: PascalCase for components, kebab-case for utilities/hooks
 - Hooks use `use` prefix: `use-task.ts`
 
 ### Import Organization
+
 1. External packages
 2. Internal packages (`@/` aliases)
 3. Relative imports
+
 Biome auto-organizes imports.
 
 ### Git Commits
+
 Use Conventional Commits:
+
 - `feat:` - New features
 - `fix:` - Bug fixes
 - `docs:` - Documentation
@@ -163,7 +205,9 @@ Use Conventional Commits:
 Husky enforces commit message format via commitlint.
 
 ### Pre-commit Hooks
+
 The pre-commit hook (`.husky/pre-commit`) runs two checks:
+
 1. `biome ci .` — linting and formatting validation
 2. `pnpm run build` — full monorepo build
 
@@ -174,15 +218,17 @@ Commits will be slow due to the build step. Ensure code compiles before committi
 **Single `.env` file** in project root shared by all apps.
 
 Required variables:
-- `KANEO_CLIENT_URL` - Web app URL (e.g., http://localhost:5173)
-- `KANEO_API_URL` - API URL (e.g., http://localhost:1337)
+
+- `KANEO_CLIENT_URL` - Web app URL (e.g., [http://localhost:5173](http://localhost:5173))
+- `KANEO_API_URL` - API URL (e.g., [http://localhost:1337](http://localhost:1337))
 - `AUTH_SECRET` - JWT secret (min 32 chars)
 - `DATABASE_URL` - PostgreSQL connection string
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
 
 Optional:
+
 - `CORS_ORIGINS` - Comma-separated allowed origins (empty = allow all in dev)
-- `VITE_API_URL` - API URL for web dev (defaults to http://localhost:1337)
+- `VITE_API_URL` - API URL for web dev (defaults to [http://localhost:1337](http://localhost:1337))
 - SSO providers (GitHub, Google, Discord, Custom OAuth/OIDC)
 - SMTP configuration
 
@@ -235,6 +281,7 @@ See `ENVIRONMENT_SETUP.md` for detailed configuration and troubleshooting.
 ## Common Patterns
 
 ### Backend Route Example
+
 ```typescript
 // apps/api/src/{feature}/index.ts
 import { Hono } from "hono";
@@ -259,6 +306,7 @@ const feature = new Hono<{ Variables: { userId: string } }>()
 ```
 
 ### Frontend Query Hook Example
+
 ```typescript
 // apps/web/src/hooks/queries/{feature}/use-item.ts
 import { useQuery } from "@tanstack/react-query";
@@ -273,6 +321,7 @@ export function useItem(itemId: string) {
 ```
 
 ### Database Schema Example
+
 ```typescript
 // apps/api/src/database/schema.ts
 export const exampleTable = pgTable("example", {
@@ -293,3 +342,4 @@ export const exampleTable = pgTable("example", {
   index("example_projectId_idx").on(table.projectId),
 ]);
 ```
+

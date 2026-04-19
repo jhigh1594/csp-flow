@@ -31,6 +31,7 @@ import invitation from "./invitation";
 import label from "./label";
 import mcpRoutes, { mcpWellKnownRoutes } from "./mcp";
 import { migrateColumns } from "./migrations/column-migration";
+import milestone from "./milestone";
 import notification from "./notification";
 import notificationPreferences from "./notification-preferences";
 import { initializePlugins } from "./plugins";
@@ -477,6 +478,7 @@ export function createApp() {
   const workflowRuleApi = api.route("/workflow-rule", workflowRule);
   const invitationApi = api.route("/invitation", invitation);
   const workspaceApi = api.route("/workspace", workspace);
+  const milestoneApi = api.route("/milestone", milestone);
 
   app.route(
     "/",
@@ -505,6 +507,7 @@ export function createApp() {
     invitationApi,
     invitationPublicApi,
     labelApi,
+    milestoneApi,
     notificationApi,
     notificationPreferencesApi,
     projectApi,
@@ -581,6 +584,7 @@ const {
   invitationApi,
   invitationPublicApi,
   labelApi,
+  milestoneApi,
   notificationApi,
   notificationPreferencesApi,
   projectApi,
@@ -612,6 +616,7 @@ export type AppType =
   | typeof commentApi
   | typeof timeEntryApi
   | typeof labelApi
+  | typeof milestoneApi
   | typeof notificationApi
   | typeof notificationPreferencesApi
   | typeof searchApi

@@ -1,6 +1,6 @@
 {
 	"common": {
-		"appName": "Kaneo",
+		"appName": "CSP Flow",
 		"actions": {
 			"cancel": "Annuleren",
 			"close": "Sluiten",
@@ -73,7 +73,7 @@
 				"errorToast": "Aanmaken van project mislukt"
 			},
 			"createWorkspace": {
-				"breadcrumbKaneo": "KANEO",
+				"breadcrumbKaneo": "CSP FLOW",
 				"title": "Een nieuwe werkruimte aanmaken",
 				"description": "Maak een nieuwe werkruimte aan door een naam op te geven.",
 				"namePlaceholder": "Naam werkruimte",
@@ -240,7 +240,7 @@
 			"workspaceLabel": "Werkruimte: {{workspaceName}}",
 			"joinWorkspace": "Deelnemen aan {{workspaceName}}",
 			"inviteBodySignedIn": "<inviter>{{inviterName}}</inviter> heeft je uitgenodigd voor hun werkruimte.",
-			"inviteBodySignedOut": "<inviter>{{inviterName}}</inviter> heeft je uitgenodigd om deel te nemen aan hun werkruimte op Kaneo.",
+			"inviteBodySignedOut": "<inviter>{{inviterName}}</inviter> heeft je uitgenodigd om deel te nemen aan hun werkruimte op CSP Flow.",
 			"signInToAccept": "Log in om deze uitnodiging te accepteren.",
 			"accepting": "Accepteren...",
 			"acceptInvitation": "Uitnodiging accepteren",
@@ -360,7 +360,7 @@
 			"title": "Ontwikkelaarsinstellingen",
 			"subtitle": "Beheer je API-sleutels en ontwikkelaarsbronnen.",
 			"apiKeysCardTitle": "API-sleutels",
-			"apiKeysCardDescription": "Maak en beheer API-sleutels voor programmatische toegang tot Kaneo.",
+			"apiKeysCardDescription": "Maak en beheer API-sleutels voor programmatische toegang tot CSP Flow.",
 			"createApiKey": "API-sleutel maken",
 			"unnamedKey": "Naamloze sleutel"
 		},
@@ -399,7 +399,7 @@
 			},
 			"createDialog": {
 				"title": "API-sleutel maken",
-				"description": "Maak een nieuwe API-sleutel aan om programmatisch toegang te krijgen tot de Kaneo API.",
+				"description": "Maak een nieuwe API-sleutel aan om programmatisch toegang te krijgen tot de CSP Flow API.",
 				"nameLabel": "Naam",
 				"namePlaceholder": "Mijn API-sleutel",
 				"nameDescription": "Een beschrijvende naam voor deze API-sleutel",
@@ -581,7 +581,7 @@
 			"repository": "Repository",
 			"repositoryHint": "Verbonden GitHub repository",
 			"commentTaskLinkTitle": "Reageer met Kaneo-link op nieuwe issues",
-			"commentTaskLinkHint": "Wanneer ingeschakeld, plaatst Kaneo een reactie op elke nieuwe GitHub issue met een link naar de taak.",
+			"commentTaskLinkHint": "Wanneer ingeschakeld, plaatst CSP Flow een reactie op elke nieuwe GitHub issue met een link naar de taak.",
 			"appStatusTitle": "GitHub App Status",
 			"appStatusHint": "Installatie- en permissiestatus",
 			"statusProperlyConfigured": "Correct geconfigureerd",
@@ -699,7 +699,7 @@
 				"removeError": "Verwijderen generieke webhook-integratie mislukt"
 			},
 			"connectionTitle": "Uitgaande webhook-verbinding",
-			"connectionHint": "Stuur taakgebeurtenissen naar je eigen eindpunt als JSON. Een ondertekende 'X-Kaneo-Signature' header wordt meegezonden wanneer er een geheim is geconfigureerd.",
+			"connectionHint": "Stuur taakgebeurtenissen naar je eigen eindpunt als JSON. Een ondertekende 'X-CSP-Signature' header wordt meegezonden wanneer er een geheim is geconfigureerd.",
 			"connected": "Verbonden",
 			"paused": "Gepauzeerd",
 			"webhookLabel": "Eindpunt-URL (Endpoint URL)",
@@ -707,7 +707,7 @@
 			"webhookHint": "Kaneo verzendt POST-verzoeken met een JSON-payload voor elke ingeschakelde gebeurtenis.",
 			"secretLabel": "Ondertekeningsgeheim (Signing secret)",
 			"secretPlaceholder": "Optioneel gedeeld geheim",
-			"secretHint": "Optioneel. Indien opgegeven, ondertekent Kaneo de verzoektekst en verzendt de hex-digest in de 'X-Kaneo-Signature' header.",
+			"secretHint": "Optioneel. Indien opgegeven, ondertekent CSP Flow de verzoektekst en verzendt de hex-digest in de 'X-CSP-Signature' header.",
 			"secretHintConfigured": "Er is al een ondertekeningsgeheim geconfigureerd ({{secret}}). Voer een nieuwe in om deze te vervangen.",
 			"eventsTitle": "Gebeurtenis-meldingen",
 			"eventsHint": "Kies welke projectwijzigingen uitgaande webhooks moeten activeren.",
@@ -1320,7 +1320,9 @@
 			"updateDatesError": "Bijwerken taakdatums mislukt",
 			"resizeStart": "Startdatum wijzigen",
 			"resizeDue": "Einddatum wijzigen",
-			"taskAriaLabel": "{{title}} — openen of slepen om te verplaatsen"
+			"taskAriaLabel": "{{title}} — openen of slepen om te verplaatsen",
+			"groupPlanned": "Gepland",
+			"today": "Vandaag"
 		},
 		"delete": {
 			"title": "Taak verwijderen?",
