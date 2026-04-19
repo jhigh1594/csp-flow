@@ -29,7 +29,9 @@
 			"!**/tiptap-ui",
 			"!**/tiptap-ui-primitive",
 			"!**/tiptap-templates",
-			"!**/tiptap-extension"
+			"!**/tiptap-extension",
+			"!**/.reference",
+			"!**/.superpowers"
 		]
 	},
 	"formatter": {
