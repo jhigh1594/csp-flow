@@ -54,6 +54,7 @@ import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProject
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBoardRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/board'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBacklogRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/backlog'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiIndexRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/wiki/index'
+import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesIndexRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/milestones.index'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiPageIdRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/wiki/$pageId'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdTaskTaskIdRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId_'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesMilestoneIdRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/milestones.$milestoneId'
@@ -342,6 +343,15 @@ const LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiIndexR
         LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiRoute,
     } as any,
   )
+const LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesIndexRoute =
+  LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesIndexRouteImport.update(
+    {
+      id: '/',
+      path: '/',
+      getParentRoute: () =>
+        LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesRoute,
+    } as any,
+  )
 const LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiPageIdRoute =
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiPageIdRouteImport.update(
     {
@@ -416,6 +426,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/workspace/$workspaceId/project/$projectId/milestones/$milestoneId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesMilestoneIdRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdTaskTaskIdRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/wiki/$pageId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiPageIdRoute
+  '/dashboard/workspace/$workspaceId/project/$projectId/milestones/': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesIndexRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/wiki/': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiIndexRoute
 }
 export interface FileRoutesByTo {
@@ -455,11 +466,11 @@ export interface FileRoutesByTo {
   '/dashboard/workspace/$workspaceId/project/$projectId/backlog': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBacklogRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/board': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBoardRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/gantt': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdGanttRoute
-  '/dashboard/workspace/$workspaceId/project/$projectId/milestones': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesRouteWithChildren
   '/dashboard/workspace/$workspaceId/project/$projectId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdIndexRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/milestones/$milestoneId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesMilestoneIdRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdTaskTaskIdRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/wiki/$pageId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiPageIdRoute
+  '/dashboard/workspace/$workspaceId/project/$projectId/milestones': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesIndexRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/wiki': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiIndexRoute
 }
 export interface FileRoutesById {
@@ -511,6 +522,7 @@ export interface FileRoutesById {
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/milestones/$milestoneId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesMilestoneIdRoute
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId_': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdTaskTaskIdRoute
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/wiki/$pageId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiPageIdRoute
+  '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/milestones/': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesIndexRoute
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/wiki/': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiIndexRoute
 }
 export interface FileRouteTypes {
@@ -561,6 +573,7 @@ export interface FileRouteTypes {
     | '/dashboard/workspace/$workspaceId/project/$projectId/milestones/$milestoneId'
     | '/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId'
     | '/dashboard/workspace/$workspaceId/project/$projectId/wiki/$pageId'
+    | '/dashboard/workspace/$workspaceId/project/$projectId/milestones/'
     | '/dashboard/workspace/$workspaceId/project/$projectId/wiki/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -600,11 +613,11 @@ export interface FileRouteTypes {
     | '/dashboard/workspace/$workspaceId/project/$projectId/backlog'
     | '/dashboard/workspace/$workspaceId/project/$projectId/board'
     | '/dashboard/workspace/$workspaceId/project/$projectId/gantt'
-    | '/dashboard/workspace/$workspaceId/project/$projectId/milestones'
     | '/dashboard/workspace/$workspaceId/project/$projectId'
     | '/dashboard/workspace/$workspaceId/project/$projectId/milestones/$milestoneId'
     | '/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId'
     | '/dashboard/workspace/$workspaceId/project/$projectId/wiki/$pageId'
+    | '/dashboard/workspace/$workspaceId/project/$projectId/milestones'
     | '/dashboard/workspace/$workspaceId/project/$projectId/wiki'
   id:
     | '__root__'
@@ -655,6 +668,7 @@ export interface FileRouteTypes {
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/milestones/$milestoneId'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId_'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/wiki/$pageId'
+    | '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/milestones/'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/wiki/'
   fileRoutesById: FileRoutesById
 }
@@ -985,6 +999,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiIndexRouteImport
       parentRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdWikiRoute
     }
+    '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/milestones/': {
+      id: '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/milestones/'
+      path: '/'
+      fullPath: '/dashboard/workspace/$workspaceId/project/$projectId/milestones/'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesIndexRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesRoute
+    }
     '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/wiki/$pageId': {
       id: '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/wiki/$pageId'
       path: '/$pageId'
@@ -1095,12 +1116,15 @@ const LayoutAuthenticatedDashboardSettingsRouteWithChildren =
 
 interface LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesRouteChildren {
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesMilestoneIdRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesMilestoneIdRoute
+  LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesIndexRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesIndexRoute
 }
 
 const LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesRouteChildren: LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesRouteChildren =
   {
     LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesMilestoneIdRoute:
       LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesMilestoneIdRoute,
+    LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesIndexRoute:
+      LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesIndexRoute,
   }
 
 const LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdMilestonesRouteWithChildren =

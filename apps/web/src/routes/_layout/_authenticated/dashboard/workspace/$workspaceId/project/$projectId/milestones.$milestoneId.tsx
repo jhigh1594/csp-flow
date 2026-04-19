@@ -2,7 +2,6 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { isAfter, parseISO } from "date-fns";
 import { ChevronLeft, Diamond, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
-import ProjectLayout from "@/components/common/project-layout";
 import MilestoneAddTaskPopover from "@/components/milestone/milestone-add-task-popover";
 import MilestoneFormDialog from "@/components/milestone/milestone-form-dialog";
 import MilestoneHealthMetrics from "@/components/milestone/milestone-health-metrics";
@@ -64,24 +63,14 @@ function MilestoneDetailRoute() {
 
   if (!milestone) {
     return (
-      <ProjectLayout
-        projectId={projectId}
-        workspaceId={workspaceId}
-        activeView="milestones"
-      >
-        <div className="flex flex-1 items-center justify-center">
-          <p className="text-sm text-muted-foreground">Milestone not found</p>
-        </div>
-      </ProjectLayout>
+      <div className="flex flex-1 items-center justify-center">
+        <p className="text-sm text-muted-foreground">Milestone not found</p>
+      </div>
     );
   }
 
   return (
-    <ProjectLayout
-      projectId={projectId}
-      workspaceId={workspaceId}
-      activeView="milestones"
-    >
+    <>
       <PageTitle title={milestone.title} />
 
       <div className="flex flex-1 flex-col gap-6 overflow-auto p-6">
@@ -191,6 +180,6 @@ function MilestoneDetailRoute() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </ProjectLayout>
+    </>
   );
 }
