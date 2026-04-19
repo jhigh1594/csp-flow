@@ -1,5 +1,17 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
+  closestCorners,
+  DndContext,
+  type DragEndEvent,
+  DragOverlay,
+  type DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+  useDraggable,
+} from "@dnd-kit/core";
+import {
   format,
   isSameMonth,
   isSameWeek,
@@ -42,6 +54,8 @@ import { DEFAULT_COLUMNS } from "@/constants/columns";
 import { useGetMilestones } from "@/hooks/queries/milestone/use-get-milestones";
 import { useGetTasks } from "@/hooks/queries/task/use-get-tasks";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUpdateTaskRoadmapGroup } from "@/hooks/mutations/task/use-update-task-roadmap-group";
+import { useUpdateTask } from "@/hooks/mutations/task/use-update-task";
 import { cn } from "@/lib/cn";
 import type { ZoomLevel } from "@/lib/gantt-utils";
 import { buildTimeline, getColumnIndex } from "@/lib/gantt-utils";
@@ -80,6 +94,46 @@ function parseTaskDate(value: string | null) {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
+function DroppableGroup({
+  groupId,
+  children,
+}: {
+  groupId: string;
+  children: React.ReactNode;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: groupId });
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(isOver && "ring-2 ring-primary/30 ring-inset")}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DraggableTask({
+  taskId,
+  children,
+}: {
+  taskId: string;
+  children: React.ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: taskId,
+  });
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      className={cn(isDragging && "opacity-50")}
+    >
+      {children}
+    </div>
+  );
+}
+
 function RouteComponent() {
   const { t } = useTranslation();
   const { projectId, workspaceId } = Route.useParams();
@@ -97,6 +151,47 @@ function RouteComponent() {
 
   const { data: milestones = [] } = useGetMilestones(projectId);
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
+  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const updateTaskRoadmapGroup = useUpdateTaskRoadmapGroup();
+  const updateTaskMutation = useUpdateTask();
+
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setDraggedTaskId(event.active.id as string);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setDraggedTaskId(null);
+    if (!over) return;
+
+    const taskId = active.id as string;
+    const targetGroup = over.id as string;
+
+    const task = parsedTasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    if (groupBy === "roadmap") {
+      if (task.roadmapGroup === targetGroup) return;
+      updateTaskRoadmapGroup.mutate({
+        ...task,
+        roadmapGroup: targetGroup,
+      });
+    } else if (groupBy === "priority") {
+      if (task.priority === targetGroup) return;
+      updateTaskMutation.mutate({
+        ...task,
+        priority: targetGroup,
+      });
+    } else if (groupBy === "assignee") {
+      if (task.assigneeName === targetGroup) return;
+    }
+  };
 
   const taskColumnWidthRem = isMobile ? 12 : 14;
   const showTaskRail = !isMobile || isTaskRailOpen;
@@ -613,6 +708,19 @@ function RouteComponent() {
                         timeline={timeline}
                       />
                     )}
+                    <DndContext
+                      sensors={dndSensors}
+                      collisionDetection={closestCorners}
+                      onDragStart={handleDragStart}
+                      onDragEnd={handleDragEnd}
+                    >
+                    <DragOverlay>
+                      {draggedTaskId ? (
+                        <div className="rounded border border-primary/50 bg-background px-3 py-1.5 text-xs font-medium shadow-lg">
+                          {parsedTasks.find((t) => t.id === draggedTaskId)?.title}
+                        </div>
+                      ) : null}
+                    </DragOverlay>
                     {taskGroups.map((group) => {
                       const GroupIcon = group.icon;
                       const isCollapsed = collapsedGroups.has(group.columnId);
@@ -624,7 +732,7 @@ function RouteComponent() {
                         : "max-content";
 
                       return (
-                        <div key={group.columnId}>
+                        <DroppableGroup key={group.columnId} groupId={group.columnId}>
                           <div
                             className="grid items-stretch border-b border-border/70 bg-muted/30"
                             style={{ gridTemplateColumns: gridCols }}
@@ -666,8 +774,8 @@ function RouteComponent() {
 
                           {!isCollapsed &&
                             group.tasks.map((task) => (
+                              <DraggableTask key={task.id} taskId={task.id}>
                               <div
-                                key={task.id}
                                 className="grid items-stretch border-b border-border/70"
                                 style={{ gridTemplateColumns: gridCols }}
                               >
@@ -727,10 +835,12 @@ function RouteComponent() {
                                   />
                                 </div>
                               </div>
+                              </DraggableTask>
                             ))}
-                        </div>
+                        </DroppableGroup>
                       );
                     })}
+                    </DndContext>
                   </div>
                 </div>
               </div>
