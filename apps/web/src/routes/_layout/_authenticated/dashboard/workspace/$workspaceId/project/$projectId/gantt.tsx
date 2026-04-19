@@ -1,4 +1,3 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   closestCorners,
   DndContext,
@@ -6,11 +5,12 @@ import {
   DragOverlay,
   type DragStartEvent,
   PointerSensor,
+  useDraggable,
+  useDroppable,
   useSensor,
   useSensors,
-  useDroppable,
-  useDraggable,
 } from "@dnd-kit/core";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   format,
   isSameMonth,
@@ -51,11 +51,11 @@ import { Button } from "@/components/ui/button";
 
 import { Input } from "@/components/ui/input";
 import { DEFAULT_COLUMNS } from "@/constants/columns";
+import { useUpdateTask } from "@/hooks/mutations/task/use-update-task";
+import { useUpdateTaskRoadmapGroup } from "@/hooks/mutations/task/use-update-task-roadmap-group";
 import { useGetMilestones } from "@/hooks/queries/milestone/use-get-milestones";
 import { useGetTasks } from "@/hooks/queries/task/use-get-tasks";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useUpdateTaskRoadmapGroup } from "@/hooks/mutations/task/use-update-task-roadmap-group";
-import { useUpdateTask } from "@/hooks/mutations/task/use-update-task";
 import { cn } from "@/lib/cn";
 import type { ZoomLevel } from "@/lib/gantt-utils";
 import { buildTimeline, getColumnIndex } from "@/lib/gantt-utils";
@@ -68,11 +68,6 @@ const ROADMAP_LABELS: Record<string, string> = {
   now: "Now",
   next: "Next",
   later: "Later",
-};
-const ROADMAP_COLORS: Record<string, string> = {
-  now: "text-emerald-600",
-  next: "text-blue-600",
-  later: "text-violet-600",
 };
 
 type GanttSearchParams = {
@@ -479,7 +474,15 @@ function RouteComponent() {
 
             <div className="hidden items-center gap-2 sm:flex">
               <div className="flex overflow-hidden rounded-md border border-border">
-                {(["status", "roadmap", "priority", "assignee", "none"] as GroupByMode[]).map((mode) => (
+                {(
+                  [
+                    "status",
+                    "roadmap",
+                    "priority",
+                    "assignee",
+                    "none",
+                  ] as GroupByMode[]
+                ).map((mode) => (
                   <button
                     key={mode}
                     type="button"
@@ -494,7 +497,11 @@ function RouteComponent() {
                         : "bg-background text-muted-foreground hover:bg-muted",
                     )}
                   >
-                    {mode === "roadmap" ? "N/N/L" : mode === "none" ? "Flat" : mode}
+                    {mode === "roadmap"
+                      ? "N/N/L"
+                      : mode === "none"
+                        ? "Flat"
+                        : mode}
                   </button>
                 ))}
               </div>
@@ -714,132 +721,142 @@ function RouteComponent() {
                       onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
                     >
-                    <DragOverlay>
-                      {draggedTaskId ? (
-                        <div className="rounded border border-primary/50 bg-background px-3 py-1.5 text-xs font-medium shadow-lg">
-                          {parsedTasks.find((t) => t.id === draggedTaskId)?.title}
-                        </div>
-                      ) : null}
-                    </DragOverlay>
-                    {taskGroups.map((group) => {
-                      const GroupIcon = group.icon;
-                      const isCollapsed = collapsedGroups.has(group.columnId);
-                      const railWidth = isMobile
-                        ? `${taskColumnWidthRem}rem`
-                        : "20rem";
-                      const gridCols = showTaskRail
-                        ? `${railWidth} max-content`
-                        : "max-content";
-
-                      return (
-                        <DroppableGroup key={group.columnId} groupId={group.columnId}>
-                          <div
-                            className="grid items-stretch border-b border-border/70 bg-muted/30"
-                            style={{ gridTemplateColumns: gridCols }}
-                          >
-                            {showTaskRail ? (
-                              <div
-                                className="sticky left-0 z-[11] border-r border-border bg-muted/30"
-                                style={{
-                                  width: isMobile ? railWidth : undefined,
-                                }}
-                              >
-                                <button
-                                  type="button"
-                                  className="flex min-h-[36px] w-full items-center gap-2 px-2 py-2 text-left transition-colors hover:bg-muted sm:px-3 sm:py-1.5"
-                                  onClick={() => toggleGroup(group.columnId)}
-                                >
-                                  <GroupIcon className="size-3.5 shrink-0 text-muted-foreground" />
-                                  <span className="flex-1 truncate text-xs font-semibold text-foreground">
-                                    {group.columnName}
-                                  </span>
-                                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                                    {group.tasks.length}
-                                  </span>
-                                  <ChevronDown
-                                    className={cn(
-                                      "size-3.5 shrink-0 text-muted-foreground transition-transform",
-                                      isCollapsed && "-rotate-90",
-                                    )}
-                                  />
-                                </button>
-                              </div>
-                            ) : null}
-                            <div
-                              style={{
-                                minWidth: `${timeline.timelineMinWidthRem}rem`,
-                              }}
-                            />
+                      <DragOverlay>
+                        {draggedTaskId ? (
+                          <div className="rounded border border-primary/50 bg-background px-3 py-1.5 text-xs font-medium shadow-lg">
+                            {
+                              parsedTasks.find((t) => t.id === draggedTaskId)
+                                ?.title
+                            }
                           </div>
+                        ) : null}
+                      </DragOverlay>
+                      {taskGroups.map((group) => {
+                        const GroupIcon = group.icon;
+                        const isCollapsed = collapsedGroups.has(group.columnId);
+                        const railWidth = isMobile
+                          ? `${taskColumnWidthRem}rem`
+                          : "20rem";
+                        const gridCols = showTaskRail
+                          ? `${railWidth} max-content`
+                          : "max-content";
 
-                          {!isCollapsed &&
-                            group.tasks.map((task) => (
-                              <DraggableTask key={task.id} taskId={task.id}>
-                              <div
-                                className="grid items-stretch border-b border-border/70"
-                                style={{ gridTemplateColumns: gridCols }}
-                              >
-                                {showTaskRail ? (
-                                  <div className="sticky left-0 z-[11] h-full border-r border-border bg-background">
-                                    <button
-                                      type="button"
-                                      className="flex min-h-[44px] w-full min-w-0 flex-col items-start justify-center gap-0.5 px-2 py-2 text-left transition-colors hover:bg-muted sm:min-h-0 sm:px-3 sm:py-1.5"
-                                      onClick={() =>
-                                        navigate({
-                                          to: ".",
-                                          search: { taskId: task.id },
-                                          replace: true,
-                                        })
-                                      }
-                                    >
-                                      <div className="flex w-full items-center gap-1.5">
-                                        <span className="max-w-[7rem] truncate rounded-full bg-secondary px-1.5 py-px text-[10px] font-medium uppercase tracking-wide text-secondary-foreground sm:max-w-none">
-                                          {getStatusLabel(task.status)}
-                                        </span>
-                                        <span className="truncate text-[10px] text-muted-foreground">
-                                          {project?.slug}-{task.number}
-                                        </span>
-                                      </div>
-                                      <p className="w-full line-clamp-1 text-xs font-medium leading-tight text-foreground">
-                                        {task.title}
-                                      </p>
-                                      <p className="w-full truncate text-[11px] leading-tight text-muted-foreground">
-                                        {format(task.scheduleStart, "MMM d")} -{" "}
-                                        {format(task.scheduleEnd, "MMM d")}
-                                        {task.assigneeName
-                                          ? ` • ${task.assigneeName}`
-                                          : ""}
-                                      </p>
-                                    </button>
-                                  </div>
-                                ) : null}
-
+                        return (
+                          <DroppableGroup
+                            key={group.columnId}
+                            groupId={group.columnId}
+                          >
+                            <div
+                              className="grid items-stretch border-b border-border/70 bg-muted/30"
+                              style={{ gridTemplateColumns: gridCols }}
+                            >
+                              {showTaskRail ? (
                                 <div
-                                  className="relative min-h-11 shrink-0 select-none"
+                                  className="sticky left-0 z-[11] border-r border-border bg-muted/30"
                                   style={{
-                                    minWidth: `${timeline.timelineMinWidthRem}rem`,
+                                    width: isMobile ? railWidth : undefined,
                                   }}
                                 >
-                                  <GanttTaskBar
-                                    task={task}
-                                    timeline={timeline}
-                                    pixelsPerColumn={pixelsPerColumn}
-                                    isMobile={isMobile}
-                                    onOpenTask={() =>
-                                      navigate({
-                                        to: ".",
-                                        search: { taskId: task.id },
-                                        replace: true,
-                                      })
-                                    }
-                                  />
+                                  <button
+                                    type="button"
+                                    className="flex min-h-[36px] w-full items-center gap-2 px-2 py-2 text-left transition-colors hover:bg-muted sm:px-3 sm:py-1.5"
+                                    onClick={() => toggleGroup(group.columnId)}
+                                  >
+                                    <GroupIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                                    <span className="flex-1 truncate text-xs font-semibold text-foreground">
+                                      {group.columnName}
+                                    </span>
+                                    <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                      {group.tasks.length}
+                                    </span>
+                                    <ChevronDown
+                                      className={cn(
+                                        "size-3.5 shrink-0 text-muted-foreground transition-transform",
+                                        isCollapsed && "-rotate-90",
+                                      )}
+                                    />
+                                  </button>
                                 </div>
-                              </div>
-                              </DraggableTask>
-                            ))}
-                        </DroppableGroup>
-                      );
-                    })}
+                              ) : null}
+                              <div
+                                style={{
+                                  minWidth: `${timeline.timelineMinWidthRem}rem`,
+                                }}
+                              />
+                            </div>
+
+                            {!isCollapsed &&
+                              group.tasks.map((task) => (
+                                <DraggableTask key={task.id} taskId={task.id}>
+                                  <div
+                                    className="grid items-stretch border-b border-border/70"
+                                    style={{ gridTemplateColumns: gridCols }}
+                                  >
+                                    {showTaskRail ? (
+                                      <div className="sticky left-0 z-[11] h-full border-r border-border bg-background">
+                                        <button
+                                          type="button"
+                                          className="flex min-h-[44px] w-full min-w-0 flex-col items-start justify-center gap-0.5 px-2 py-2 text-left transition-colors hover:bg-muted sm:min-h-0 sm:px-3 sm:py-1.5"
+                                          onClick={() =>
+                                            navigate({
+                                              to: ".",
+                                              search: { taskId: task.id },
+                                              replace: true,
+                                            })
+                                          }
+                                        >
+                                          <div className="flex w-full items-center gap-1.5">
+                                            <span className="max-w-[7rem] truncate rounded-full bg-secondary px-1.5 py-px text-[10px] font-medium uppercase tracking-wide text-secondary-foreground sm:max-w-none">
+                                              {getStatusLabel(task.status)}
+                                            </span>
+                                            <span className="truncate text-[10px] text-muted-foreground">
+                                              {project?.slug}-{task.number}
+                                            </span>
+                                          </div>
+                                          <p className="w-full line-clamp-1 text-xs font-medium leading-tight text-foreground">
+                                            {task.title}
+                                          </p>
+                                          <p className="w-full truncate text-[11px] leading-tight text-muted-foreground">
+                                            {format(
+                                              task.scheduleStart,
+                                              "MMM d",
+                                            )}{" "}
+                                            -{" "}
+                                            {format(task.scheduleEnd, "MMM d")}
+                                            {task.assigneeName
+                                              ? ` • ${task.assigneeName}`
+                                              : ""}
+                                          </p>
+                                        </button>
+                                      </div>
+                                    ) : null}
+
+                                    <div
+                                      className="relative min-h-11 shrink-0 select-none"
+                                      style={{
+                                        minWidth: `${timeline.timelineMinWidthRem}rem`,
+                                      }}
+                                    >
+                                      <GanttTaskBar
+                                        task={task}
+                                        timeline={timeline}
+                                        pixelsPerColumn={pixelsPerColumn}
+                                        isMobile={isMobile}
+                                        onOpenTask={() =>
+                                          navigate({
+                                            to: ".",
+                                            search: { taskId: task.id },
+                                            replace: true,
+                                          })
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                </DraggableTask>
+                              ))}
+                          </DroppableGroup>
+                        );
+                      })}
                     </DndContext>
                   </div>
                 </div>
