@@ -26,6 +26,7 @@ import {
   userNotificationWorkspaceRuleTable,
   userTable,
   verificationTable,
+  wikiPageTable,
   workflowRuleTable,
   workspaceTable,
   workspaceUserTable,
@@ -105,6 +106,7 @@ export const projectTableRelations = relations(
     assets: many(assetTable),
     columns: many(columnTable),
     milestones: many(milestoneTable),
+    wikiPages: many(wikiPageTable),
     workflowRules: many(workflowRuleTable),
     githubIntegration: many(githubIntegrationTable),
     integrations: many(integrationTable),
@@ -116,6 +118,17 @@ export const milestoneTableRelations = relations(milestoneTable, ({ one }) => ({
   project: one(projectTable, {
     fields: [milestoneTable.projectId],
     references: [projectTable.id],
+  }),
+}));
+
+export const wikiPageTableRelations = relations(wikiPageTable, ({ one }) => ({
+  project: one(projectTable, {
+    fields: [wikiPageTable.projectId],
+    references: [projectTable.id],
+  }),
+  creator: one(userTable, {
+    fields: [wikiPageTable.createdBy],
+    references: [userTable.id],
   }),
 }));
 

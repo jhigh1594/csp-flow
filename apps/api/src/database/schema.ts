@@ -775,6 +775,38 @@ export const milestoneTable = pgTable(
   (table) => [index("milestone_projectId_idx").on(table.projectId)],
 );
 
+export const wikiPageTable = pgTable(
+  "wiki_page",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    title: text("title").notNull(),
+    contentHtml: text("content_html"),
+    contentJson: jsonb("content_json"),
+    isLocked: boolean("is_locked").default(false).notNull(),
+    archivedAt: timestamp("archived_at", { mode: "date" }),
+    createdBy: text("created_by")
+      .notNull()
+      .references(() => userTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("wiki_page_projectId_idx").on(table.projectId)],
+);
+
 export const taskRelationTable = pgTable(
   "task_relation",
   {
