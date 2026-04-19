@@ -2,8 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Archive, ArrowLeft, Lock, Unlock } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import TiptapEditor from "@/components/wiki/tiptap-editor";
+import WikiEditor from "@/components/wiki/wiki-editor";
 import { useArchiveWikiPage } from "@/hooks/mutations/wiki/use-archive-wiki-page";
 import { useLockWikiPage } from "@/hooks/mutations/wiki/use-lock-wiki-page";
 import { useUnlockWikiPage } from "@/hooks/mutations/wiki/use-unlock-wiki-page";
@@ -44,11 +43,18 @@ export default function WikiPageEditor({
     [updatePage, pageId],
   );
 
+  const pendingContentRef = useRef<{
+    html: string;
+    json: Record<string, unknown>;
+  } | null>(null);
+
   const handleContentUpdate = useCallback(
     (html: string, json: Record<string, unknown>) => {
+      pendingContentRef.current = { html, json };
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         handleSaveContent(html, json);
+        pendingContentRef.current = null;
       }, 300);
     },
     [handleSaveContent],
@@ -56,9 +62,17 @@ export default function WikiPageEditor({
 
   useEffect(() => {
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+        if (pendingContentRef.current) {
+          handleSaveContent(
+            pendingContentRef.current.html,
+            pendingContentRef.current.json,
+          );
+        }
+      }
     };
-  }, []);
+  }, [handleSaveContent]);
 
   const handleTitleBlur = () => {
     if (page && title.trim() && title.trim() !== page.title) {
@@ -126,19 +140,14 @@ export default function WikiPageEditor({
         </div>
       </div>
 
-      <div className="flex-1 px-4 py-4">
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          onBlur={handleTitleBlur}
-          disabled={page.isLocked}
-          className="mb-4 border-0 px-0 text-xl font-semibold shadow-none focus-visible:ring-0"
-          placeholder="Page title"
-        />
-        <TiptapEditor
+      <div className="flex-1">
+        <WikiEditor
           contentJson={page.contentJson as Record<string, unknown> | null}
           editable={!page.isLocked}
           onUpdate={handleContentUpdate}
+          title={title}
+          onTitleChange={setTitle}
+          onTitleBlur={handleTitleBlur}
         />
       </div>
     </div>

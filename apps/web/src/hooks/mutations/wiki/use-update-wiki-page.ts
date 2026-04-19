@@ -6,8 +6,9 @@ export function useUpdateWikiPage(projectId: string) {
 
   return useMutation({
     mutationFn: updateWikiPage,
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["wiki-pages", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["wiki-page", variables.id] });
     },
   });
 }

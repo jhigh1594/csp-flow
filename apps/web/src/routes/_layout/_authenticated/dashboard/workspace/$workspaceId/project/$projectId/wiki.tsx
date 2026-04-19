@@ -1,14 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 import ProjectLayout from "@/components/common/project-layout";
-import WikiPageList from "@/components/wiki/wiki-page-list";
 
 export const Route = createFileRoute(
   "/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/wiki",
 )({
-  component: WikiRouteComponent,
+  component: WikiLayoutRoute,
 });
 
-function WikiRouteComponent() {
+function WikiLayoutRoute() {
   const { projectId, workspaceId } = Route.useParams();
 
   return (
@@ -17,9 +16,7 @@ function WikiRouteComponent() {
       workspaceId={workspaceId}
       activeView="wiki"
     >
-      <div className="flex h-full flex-col overflow-y-auto">
-        <WikiPageList projectId={projectId} workspaceId={workspaceId} />
-      </div>
+      <Outlet />
     </ProjectLayout>
   );
 }

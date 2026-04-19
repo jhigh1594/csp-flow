@@ -8,6 +8,7 @@ export function useLockWikiPage(projectId: string) {
     mutationFn: lockWikiPage,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wiki-pages", projectId] });
+      queryClient.invalidateQueries({ queryKey: ["wiki-page"] });
     },
   });
 }
