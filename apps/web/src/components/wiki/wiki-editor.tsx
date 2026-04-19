@@ -1,5 +1,6 @@
 import { Highlight } from "@tiptap/extension-highlight";
 import { Image } from "@tiptap/extension-image";
+import { Link } from "@tiptap/extension-link";
 import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
 import { TaskItem } from "@tiptap/extension-task-item";
@@ -171,6 +172,7 @@ export default function WikiEditor({
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
+      Link.configure({ openOnClick: false }),
       Underline,
       Image,
       Typography,
