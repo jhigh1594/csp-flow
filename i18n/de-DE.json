@@ -1547,7 +1547,9 @@
 			"updateDatesError": "Aufgabendaten konnten nicht aktualisiert werden",
 			"resizeStart": "Startdatum anpassen",
 			"resizeDue": "Fälligkeitsdatum anpassen",
-			"taskAriaLabel": "{{title}} — öffnen oder ziehen zum Verschieben"
+			"taskAriaLabel": "{{title}} — öffnen oder ziehen zum Verschieben",
+			"groupPlanned": "Geplant",
+			"today": "Heute"
 		},
 		"delete": {
 			"title": "Aufgabe löschen?",

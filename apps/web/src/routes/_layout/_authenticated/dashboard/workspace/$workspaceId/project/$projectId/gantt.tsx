@@ -7,7 +7,13 @@ import {
   isWeekend,
   parseISO,
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Search,
+} from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ProjectLayout from "@/components/common/project-layout";
@@ -16,6 +22,7 @@ import PageTitle from "@/components/page-title";
 import TaskDetailsSheet from "@/components/task/task-details-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DEFAULT_COLUMNS } from "@/constants/columns";
 import { useGetTasks } from "@/hooks/queries/task/use-get-tasks";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/cn";
@@ -52,6 +59,9 @@ function RouteComponent() {
   const isMobile = useIsMobile();
   const [isTaskRailOpen, setIsTaskRailOpen] = useState(false);
   const [zoom, setZoom] = useState<ZoomLevel>("day");
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
+    new Set(),
+  );
 
   const taskColumnWidthRem = isMobile ? 12 : 14;
   const showTaskRail = !isMobile || isTaskRailOpen;
@@ -101,11 +111,11 @@ function RouteComponent() {
       );
   }, [allTasks]);
 
-  const scheduledTasks = useMemo(() => {
+  const statusGroups = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
-    if (!normalizedQuery) return parsedTasks;
 
-    return parsedTasks.filter((task) => {
+    const matchesQuery = (task: (typeof parsedTasks)[number]) => {
+      if (!normalizedQuery) return true;
       return (
         task.title.toLowerCase().includes(normalizedQuery) ||
         `${project?.slug ?? ""}-${task.number ?? ""}`
@@ -113,8 +123,72 @@ function RouteComponent() {
           .includes(normalizedQuery) ||
         task.status.toLowerCase().includes(normalizedQuery)
       );
+    };
+
+    const parsedMap = new Map(parsedTasks.map((t) => [t.id, t]));
+
+    type Group = {
+      columnId: string;
+      columnName: string;
+      icon: typeof Clock;
+      tasks: typeof parsedTasks;
+    };
+
+    const groups: Group[] = [];
+
+    const plannedTasks = (project?.plannedTasks ?? [])
+      .map((t) => parsedMap.get(t.id))
+      .filter((t): t is NonNullable<typeof t> => !!t && matchesQuery(t));
+
+    if (plannedTasks.length > 0) {
+      groups.push({
+        columnId: "planned",
+        columnName: t("tasks:gantt.groupPlanned"),
+        icon: Clock,
+        tasks: plannedTasks,
+      });
+    }
+
+    for (const column of project?.columns ?? []) {
+      const tasks = column.tasks
+        .map((task) => parsedMap.get(task.id))
+        .filter(
+          (task): task is NonNullable<typeof task> =>
+            !!task && matchesQuery(task),
+        );
+
+      if (tasks.length === 0) continue;
+
+      const defaultCol = DEFAULT_COLUMNS.find((c) => c.id === column.slug);
+      groups.push({
+        columnId: column.id,
+        columnName: column.name,
+        icon: (defaultCol?.icon ?? Clock) as typeof Clock,
+        tasks,
+      });
+    }
+
+    return groups;
+  }, [
+    parsedTasks,
+    project?.columns,
+    project?.plannedTasks,
+    project?.slug,
+    searchQuery,
+    t,
+  ]);
+
+  const toggleGroup = (columnId: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(columnId)) {
+        next.delete(columnId);
+      } else {
+        next.add(columnId);
+      }
+      return next;
     });
-  }, [parsedTasks, project?.slug, searchQuery]);
+  };
 
   const effectiveZoom: ZoomLevel = isMobile ? "day" : zoom;
   const mobileColWidth = isMobile ? 3.125 : undefined;
@@ -218,7 +292,7 @@ function RouteComponent() {
               </p>
             </div>
           </div>
-        ) : scheduledTasks.length === 0 ? (
+        ) : statusGroups.length === 0 ? (
           <div className="flex flex-1 items-center justify-center px-6">
             <div className="max-w-sm text-center">
               <h2 className="text-sm font-semibold text-foreground">
@@ -337,74 +411,121 @@ function RouteComponent() {
                 </div>
 
                 <div className="relative z-10 flex flex-col">
-                  {scheduledTasks.map((task) => {
-                    return (
-                      <div
-                        key={task.id}
-                        className="grid items-stretch border-b border-border/70"
-                        style={{
-                          gridTemplateColumns: showTaskRail
-                            ? isMobile
-                              ? `${taskColumnWidthRem}rem max-content`
-                              : "20rem max-content"
-                            : "max-content",
-                        }}
-                      >
-                        {showTaskRail ? (
-                          <div className="sticky left-0 z-[11] h-full border-r border-border bg-background">
-                            <button
-                              type="button"
-                              className="flex min-h-[44px] w-full min-w-0 flex-col items-start justify-center gap-0.5 px-2 py-2 text-left transition-colors hover:bg-muted sm:min-h-0 sm:px-3 sm:py-1.5"
-                              onClick={() =>
-                                navigate({
-                                  to: ".",
-                                  search: { taskId: task.id },
-                                  replace: true,
-                                })
-                              }
-                            >
-                              <div className="flex w-full items-center gap-1.5">
-                                <span className="max-w-[7rem] truncate rounded-full bg-secondary px-1.5 py-px text-[10px] font-medium uppercase tracking-wide text-secondary-foreground sm:max-w-none">
-                                  {getStatusLabel(task.status)}
-                                </span>
-                                <span className="truncate text-[10px] text-muted-foreground">
-                                  {project?.slug}-{task.number}
-                                </span>
-                              </div>
-                              <p className="w-full line-clamp-1 text-xs font-medium leading-tight text-foreground">
-                                {task.title}
-                              </p>
-                              <p className="w-full truncate text-[11px] leading-tight text-muted-foreground">
-                                {format(task.scheduleStart, "MMM d")} -{" "}
-                                {format(task.scheduleEnd, "MMM d")}
-                                {task.assigneeName
-                                  ? ` • ${task.assigneeName}`
-                                  : ""}
-                              </p>
-                            </button>
-                          </div>
-                        ) : null}
+                  {statusGroups.map((group) => {
+                    const GroupIcon = group.icon;
+                    const isCollapsed = collapsedGroups.has(group.columnId);
+                    const railWidth = isMobile
+                      ? `${taskColumnWidthRem}rem`
+                      : "20rem";
+                    const gridCols = showTaskRail
+                      ? `${railWidth} max-content`
+                      : "max-content";
 
+                    return (
+                      <div key={group.columnId}>
                         <div
-                          className="relative min-h-11 shrink-0 select-none"
-                          style={{
-                            minWidth: `${timeline.timelineMinWidthRem}rem`,
-                          }}
+                          className="grid items-stretch border-b border-border/70 bg-muted/30"
+                          style={{ gridTemplateColumns: gridCols }}
                         >
-                          <GanttTaskBar
-                            task={task}
-                            timeline={timeline}
-                            pixelsPerColumn={pixelsPerColumn}
-                            isMobile={isMobile}
-                            onOpenTask={() =>
-                              navigate({
-                                to: ".",
-                                search: { taskId: task.id },
-                                replace: true,
-                              })
-                            }
+                          {showTaskRail ? (
+                            <div
+                              className="sticky left-0 z-[11] border-r border-border bg-muted/30"
+                              style={{
+                                width: isMobile ? railWidth : undefined,
+                              }}
+                            >
+                              <button
+                                type="button"
+                                className="flex min-h-[36px] w-full items-center gap-2 px-2 py-2 text-left transition-colors hover:bg-muted sm:px-3 sm:py-1.5"
+                                onClick={() => toggleGroup(group.columnId)}
+                              >
+                                <GroupIcon className="size-3.5 shrink-0 text-muted-foreground" />
+                                <span className="flex-1 truncate text-xs font-semibold text-foreground">
+                                  {group.columnName}
+                                </span>
+                                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                  {group.tasks.length}
+                                </span>
+                                <ChevronDown
+                                  className={cn(
+                                    "size-3.5 shrink-0 text-muted-foreground transition-transform",
+                                    isCollapsed && "-rotate-90",
+                                  )}
+                                />
+                              </button>
+                            </div>
+                          ) : null}
+                          <div
+                            style={{
+                              minWidth: `${timeline.timelineMinWidthRem}rem`,
+                            }}
                           />
                         </div>
+
+                        {!isCollapsed &&
+                          group.tasks.map((task) => (
+                            <div
+                              key={task.id}
+                              className="grid items-stretch border-b border-border/70"
+                              style={{ gridTemplateColumns: gridCols }}
+                            >
+                              {showTaskRail ? (
+                                <div className="sticky left-0 z-[11] h-full border-r border-border bg-background">
+                                  <button
+                                    type="button"
+                                    className="flex min-h-[44px] w-full min-w-0 flex-col items-start justify-center gap-0.5 px-2 py-2 text-left transition-colors hover:bg-muted sm:min-h-0 sm:px-3 sm:py-1.5"
+                                    onClick={() =>
+                                      navigate({
+                                        to: ".",
+                                        search: { taskId: task.id },
+                                        replace: true,
+                                      })
+                                    }
+                                  >
+                                    <div className="flex w-full items-center gap-1.5">
+                                      <span className="max-w-[7rem] truncate rounded-full bg-secondary px-1.5 py-px text-[10px] font-medium uppercase tracking-wide text-secondary-foreground sm:max-w-none">
+                                        {getStatusLabel(task.status)}
+                                      </span>
+                                      <span className="truncate text-[10px] text-muted-foreground">
+                                        {project?.slug}-{task.number}
+                                      </span>
+                                    </div>
+                                    <p className="w-full line-clamp-1 text-xs font-medium leading-tight text-foreground">
+                                      {task.title}
+                                    </p>
+                                    <p className="w-full truncate text-[11px] leading-tight text-muted-foreground">
+                                      {format(task.scheduleStart, "MMM d")} -{" "}
+                                      {format(task.scheduleEnd, "MMM d")}
+                                      {task.assigneeName
+                                        ? ` • ${task.assigneeName}`
+                                        : ""}
+                                    </p>
+                                  </button>
+                                </div>
+                              ) : null}
+
+                              <div
+                                className="relative min-h-11 shrink-0 select-none"
+                                style={{
+                                  minWidth: `${timeline.timelineMinWidthRem}rem`,
+                                }}
+                              >
+                                <GanttTaskBar
+                                  task={task}
+                                  timeline={timeline}
+                                  pixelsPerColumn={pixelsPerColumn}
+                                  isMobile={isMobile}
+                                  onOpenTask={() =>
+                                    navigate({
+                                      to: ".",
+                                      search: { taskId: task.id },
+                                      replace: true,
+                                    })
+                                  }
+                                />
+                              </div>
+                            </div>
+                          ))}
                       </div>
                     );
                   })}

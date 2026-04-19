@@ -1320,7 +1320,9 @@
 			"updateDatesError": "Bijwerken taakdatums mislukt",
 			"resizeStart": "Startdatum wijzigen",
 			"resizeDue": "Einddatum wijzigen",
-			"taskAriaLabel": "{{title}} — openen of slepen om te verplaatsen"
+			"taskAriaLabel": "{{title}} — openen of slepen om te verplaatsen",
+			"groupPlanned": "Gepland",
+			"today": "Vandaag"
 		},
 		"delete": {
 			"title": "Taak verwijderen?",

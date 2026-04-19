@@ -1547,7 +1547,9 @@
 			"updateDatesError": "Failed to update task dates",
 			"resizeStart": "Resize start date",
 			"resizeDue": "Resize due date",
-			"taskAriaLabel": "{{title}} — open or drag to move"
+			"taskAriaLabel": "{{title}} — open or drag to move",
+			"groupPlanned": "Planned",
+			"today": "Today"
 		},
 		"delete": {
 			"title": "Delete Task?",
