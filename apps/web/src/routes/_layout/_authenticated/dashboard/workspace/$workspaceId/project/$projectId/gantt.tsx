@@ -8,13 +8,21 @@ import {
   parseISO,
 } from "date-fns";
 import {
+  Calendar,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock,
   Search,
 } from "lucide-react";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import ProjectLayout from "@/components/common/project-layout";
 import { GanttTaskBar } from "@/components/gantt/gantt-task-bar";
@@ -27,7 +35,7 @@ import { useGetTasks } from "@/hooks/queries/task/use-get-tasks";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/cn";
 import type { ZoomLevel } from "@/lib/gantt-utils";
-import { buildTimeline } from "@/lib/gantt-utils";
+import { buildTimeline, getColumnIndex } from "@/lib/gantt-utils";
 import { getStatusLabel } from "@/lib/i18n/domain";
 
 type GanttSearchParams = {
@@ -65,7 +73,9 @@ function RouteComponent() {
 
   const taskColumnWidthRem = isMobile ? 12 : 14;
   const showTaskRail = !isMobile || isTaskRailOpen;
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const timelineTrackRef = useRef<HTMLDivElement>(null);
+  const hasAutoScrolled = useRef(false);
   const [pixelsPerColumn, setPixelsPerColumn] = useState(44);
 
   useEffect(() => {
@@ -214,6 +224,38 @@ function RouteComponent() {
     return () => observer.disconnect();
   }, [timeline]);
 
+  const handleScrollToToday = useCallback(
+    (behavior: ScrollBehavior = "smooth") => {
+      const container = scrollContainerRef.current;
+      if (!container || !timeline) return;
+      const rootFontSize = Number.parseFloat(
+        getComputedStyle(document.documentElement).fontSize,
+      );
+      const columnWidthPx = timeline.columnWidthRem * rootFontSize;
+      const todayColIdx = getColumnIndex(
+        new Date(),
+        timeline.rangeStart,
+        timeline.granularity,
+      );
+      const railWidthPx = showTaskRail
+        ? (isMobile ? taskColumnWidthRem : 20) * rootFontSize
+        : 0;
+      const offset =
+        railWidthPx +
+        todayColIdx * columnWidthPx -
+        (container.clientWidth - railWidthPx) / 2 +
+        columnWidthPx / 2;
+      container.scrollTo({ left: Math.max(0, offset), behavior });
+    },
+    [timeline, showTaskRail, isMobile, taskColumnWidthRem],
+  );
+
+  useLayoutEffect(() => {
+    if (hasAutoScrolled.current || !timeline) return;
+    hasAutoScrolled.current = true;
+    handleScrollToToday("instant");
+  }, [timeline, handleScrollToToday]);
+
   return (
     <ProjectLayout
       projectId={projectId}
@@ -243,7 +285,7 @@ function RouteComponent() {
               />
             </div>
 
-            <div className="hidden items-center sm:flex">
+            <div className="hidden items-center gap-2 sm:flex">
               <div className="flex overflow-hidden rounded-md border border-border">
                 {(["day", "week", "month"] as ZoomLevel[]).map((z) => (
                   <button
@@ -261,6 +303,15 @@ function RouteComponent() {
                   </button>
                 ))}
               </div>
+              <Button
+                variant="outline"
+                size="xs"
+                disabled={!timeline}
+                onClick={() => handleScrollToToday()}
+              >
+                <Calendar className="size-3.5" />
+                {t("tasks:gantt.today")}
+              </Button>
             </div>
 
             <Button
@@ -304,7 +355,10 @@ function RouteComponent() {
             </div>
           </div>
         ) : (
-          <div className="min-h-0 flex-1 overflow-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">
+          <div
+            ref={scrollContainerRef}
+            className="min-h-0 flex-1 overflow-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]"
+          >
             <div className="relative min-w-max touch-pan-x touch-pan-y">
               <div className="sticky top-0 z-20 flex border-b border-border bg-background/95 backdrop-blur">
                 {showTaskRail ? (
