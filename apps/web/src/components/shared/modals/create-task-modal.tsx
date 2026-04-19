@@ -97,6 +97,7 @@ function normalizeTask(
     assigneeId: task.assigneeId ?? task.userId ?? null,
     assigneeName: task.assigneeName ?? null,
     assigneeImage: task.assigneeImage ?? null,
+    milestoneId: task.milestoneId ?? null,
     labels: task.labels ?? [],
     externalLinks: task.externalLinks ?? [],
   };

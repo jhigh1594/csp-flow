@@ -4,10 +4,32 @@ import * as v from "valibot";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import createMilestone from "./controllers/create-milestone";
 import deleteMilestone from "./controllers/delete-milestone";
+import getMilestoneTasks from "./controllers/get-milestone-tasks";
 import getMilestones from "./controllers/get-milestones";
 import updateMilestone from "./controllers/update-milestone";
 
 const milestone = new Hono<{ Variables: { userId: string } }>()
+  .get(
+    "/:milestoneId/tasks",
+    describeRoute({
+      operationId: "getMilestoneTasks",
+      tags: ["Milestones"],
+      description: "Get all tasks assigned to a milestone",
+      responses: {
+        200: {
+          description: "List of tasks",
+          content: { "application/json": { schema: resolver(v.any()) } },
+        },
+      },
+    }),
+    validator("param", v.object({ milestoneId: v.string() })),
+    workspaceAccess.fromMilestone("milestoneId"),
+    async (c) => {
+      const { milestoneId } = c.req.valid("param");
+      const tasks = await getMilestoneTasks(milestoneId);
+      return c.json(tasks);
+    },
+  )
   .get(
     "/project/:projectId",
     describeRoute({

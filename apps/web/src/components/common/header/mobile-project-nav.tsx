@@ -1,6 +1,7 @@
 import {
   CalendarDays,
   Check,
+  Diamond,
   FileText,
   Menu,
   Plus,
@@ -19,11 +20,12 @@ import { cn } from "@/lib/cn";
 type MobileProjectNavProps = {
   workspaceId: string;
   projectId: string;
-  activeView: "backlog" | "board" | "gantt" | "wiki";
+  activeView: "backlog" | "board" | "gantt" | "wiki" | "milestones";
   onSelectBoard: () => void;
   onSelectBacklog: () => void;
   onSelectGantt: () => void;
   onSelectWiki: () => void;
+  onSelectMilestones: () => void;
   onSelectProject: (projectId: string) => void;
   onAddProject: () => void;
 };
@@ -36,6 +38,7 @@ export default function MobileProjectNav({
   onSelectBacklog,
   onSelectGantt,
   onSelectWiki,
+  onSelectMilestones,
   onSelectProject,
   onAddProject,
 }: MobileProjectNavProps) {
@@ -60,7 +63,7 @@ export default function MobileProjectNav({
             <p className="px-1 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
               View
             </p>
-            <div className="grid grid-cols-4 gap-1">
+            <div className="grid grid-cols-5 gap-1">
               <button
                 type="button"
                 onClick={onSelectBacklog}
@@ -111,6 +114,19 @@ export default function MobileProjectNav({
               >
                 <FileText className="size-3.5" />
                 Wiki
+              </button>
+              <button
+                type="button"
+                onClick={onSelectMilestones}
+                className={cn(
+                  "flex w-full items-center justify-center gap-1 whitespace-nowrap rounded-md border px-2 py-1.5 text-xs font-medium transition-colors",
+                  activeView === "milestones"
+                    ? "border-border bg-secondary text-foreground"
+                    : "border-transparent text-muted-foreground hover:bg-accent",
+                )}
+              >
+                <Diamond className="size-3.5" />
+                Milestones
               </button>
             </div>
           </div>

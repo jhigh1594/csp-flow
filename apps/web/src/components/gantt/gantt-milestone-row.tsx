@@ -133,8 +133,8 @@ function MilestoneDiamond({
   return (
     <TooltipProvider delay={300}>
       <Tooltip>
-        <TooltipTrigger>
-          <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={setOpen}>
+          <TooltipTrigger asChild>
             <PopoverTrigger
               aria-label={milestone.title}
               className="absolute top-1/2 size-3 -translate-y-1/2 rotate-45 cursor-pointer rounded-[2px] border border-primary/60 bg-primary transition-transform hover:scale-125 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
@@ -142,62 +142,62 @@ function MilestoneDiamond({
                 left: `calc(${colIndex} * ${timeline.columnWidthRem}rem + ${timeline.columnWidthRem / 2}rem - 0.375rem)`,
               }}
             />
-            <PopoverContent className="w-56 p-0" side="top">
-              <div className="flex flex-col gap-3 p-3">
-                <p className="truncate text-xs font-semibold text-foreground">
-                  {milestone.title}
-                </p>
-                <div className="flex flex-col gap-1.5">
-                  <label
-                    className="text-[11px] text-muted-foreground"
-                    htmlFor={`ms-title-${milestone.id}`}
-                  >
-                    Title
-                  </label>
-                  <Input
-                    id={`ms-title-${milestone.id}`}
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="h-7 text-xs"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label
-                    className="text-[11px] text-muted-foreground"
-                    htmlFor={`ms-date-${milestone.id}`}
-                  >
-                    Target date
-                  </label>
-                  <Input
-                    id={`ms-date-${milestone.id}`}
-                    type="date"
-                    value={dateValue}
-                    onChange={(e) => setDateValue(e.target.value)}
-                    className="h-7 text-xs"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    className="flex-1"
-                    disabled={isUpdating}
-                    onClick={handleSave}
-                    size="xs"
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    disabled={isDeleting}
-                    onClick={handleDelete}
-                    size="xs"
-                    variant="destructive"
-                  >
-                    Delete
-                  </Button>
-                </div>
+          </TooltipTrigger>
+          <PopoverContent className="w-56 p-0" side="top">
+            <div className="flex flex-col gap-3 p-3">
+              <p className="truncate text-xs font-semibold text-foreground">
+                {milestone.title}
+              </p>
+              <div className="flex flex-col gap-1.5">
+                <label
+                  className="text-[11px] text-muted-foreground"
+                  htmlFor={`ms-title-${milestone.id}`}
+                >
+                  Title
+                </label>
+                <Input
+                  id={`ms-title-${milestone.id}`}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="h-7 text-xs"
+                />
               </div>
-            </PopoverContent>
-          </Popover>
-        </TooltipTrigger>
+              <div className="flex flex-col gap-1.5">
+                <label
+                  className="text-[11px] text-muted-foreground"
+                  htmlFor={`ms-date-${milestone.id}`}
+                >
+                  Target date
+                </label>
+                <Input
+                  id={`ms-date-${milestone.id}`}
+                  type="date"
+                  value={dateValue}
+                  onChange={(e) => setDateValue(e.target.value)}
+                  className="h-7 text-xs"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1"
+                  disabled={isUpdating}
+                  onClick={handleSave}
+                  size="xs"
+                >
+                  Save
+                </Button>
+                <Button
+                  disabled={isDeleting}
+                  onClick={handleDelete}
+                  size="xs"
+                  variant="destructive"
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
         <TooltipContent className="px-3 py-2" side="top" sideOffset={8}>
           <div className="flex flex-col gap-1.5">
             <p className="truncate text-xs font-semibold text-popover-foreground">

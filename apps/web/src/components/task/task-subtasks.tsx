@@ -104,6 +104,7 @@ export default function TaskSubtasks({
     startDate: null,
     dueDate: null,
     position: null,
+    milestoneId: null,
     createdAt: "",
     userId: subtask.task.userId,
     assigneeId: subtask.task.userId,

@@ -67,6 +67,7 @@ import {
   normalizeOrganizationAuthOperations,
 } from "./utils/openapi-spec";
 import { validateWorkspaceAccess } from "./utils/validate-workspace-access";
+import wiki from "./wiki";
 import workflowRule from "./workflow-rule";
 import workspace from "./workspace";
 
@@ -479,6 +480,7 @@ export function createApp() {
   const invitationApi = api.route("/invitation", invitation);
   const workspaceApi = api.route("/workspace", workspace);
   const milestoneApi = api.route("/milestone", milestone);
+  const wikiApi = api.route("/wiki", wiki);
 
   app.route(
     "/",
@@ -518,6 +520,7 @@ export function createApp() {
     taskRelationApi,
     telegramIntegrationApi,
     timeEntryApi,
+    wikiApi,
     workflowRuleApi,
     workspaceApi,
   };
@@ -595,6 +598,7 @@ const {
   taskRelationApi,
   telegramIntegrationApi,
   timeEntryApi,
+  wikiApi,
   workflowRuleApi,
   workspaceApi,
 } = createdApp;
@@ -628,6 +632,7 @@ export type AppType =
   | typeof telegramIntegrationApi
   | typeof taskRelationApi
   | typeof externalLinkApi
+  | typeof wikiApi
   | typeof workflowRuleApi
   | typeof invitationApi
   | typeof workspaceApi

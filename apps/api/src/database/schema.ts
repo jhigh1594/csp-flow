@@ -306,6 +306,10 @@ export const taskTable = pgTable(
     priority: text("priority").default("low"),
     startDate: timestamp("start_date", { mode: "date" }),
     dueDate: timestamp("due_date", { mode: "date" }),
+    milestoneId: text("milestone_id").references(() => milestoneTable.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { mode: "date" })
       .defaultNow()
@@ -315,6 +319,7 @@ export const taskTable = pgTable(
   (table) => [
     index("task_projectId_idx").on(table.projectId),
     index("task_dueDate_idx").on(table.dueDate),
+    index("task_milestoneId_idx").on(table.milestoneId),
     unique("task_project_number_unique").on(table.projectId, table.number),
   ],
 );
@@ -765,6 +770,7 @@ export const milestoneTable = pgTable(
         onUpdate: "cascade",
       }),
     title: text("title").notNull(),
+    description: text("description"),
     targetDate: timestamp("target_date", { mode: "date" }).notNull(),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { mode: "date" })

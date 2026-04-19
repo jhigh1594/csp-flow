@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import {
   CalendarDays,
+  Diamond,
   FileText,
   SquareKanban,
   SquircleDashed,
@@ -30,7 +31,7 @@ type ProjectLayoutProps = {
   headerActions?: ReactNode;
   children: ReactNode;
   showViewSwitcher?: boolean;
-  activeView?: "backlog" | "board" | "gantt" | "wiki";
+  activeView?: "backlog" | "board" | "gantt" | "wiki" | "milestones";
 };
 
 export default function ProjectLayout({
@@ -55,7 +56,9 @@ export default function ProjectLayout({
         ? "gantt"
         : location.pathname.includes("/wiki")
           ? "wiki"
-          : "board");
+          : location.pathname.includes("/milestones")
+            ? "milestones"
+            : "board");
 
   const handleNavigateToBacklog = () => {
     navigate({
@@ -85,6 +88,13 @@ export default function ProjectLayout({
     });
   };
 
+  const handleNavigateToMilestones = () => {
+    navigate({
+      to: "/dashboard/workspace/$workspaceId/project/$projectId/milestones",
+      params: { workspaceId, projectId },
+    });
+  };
+
   const handleProjectSwitch = (nextProjectId: string) => {
     navigate({
       to:
@@ -94,7 +104,9 @@ export default function ProjectLayout({
             ? "/dashboard/workspace/$workspaceId/project/$projectId/gantt"
             : resolvedView === "wiki"
               ? "/dashboard/workspace/$workspaceId/project/$projectId/wiki"
-              : "/dashboard/workspace/$workspaceId/project/$projectId/board",
+              : resolvedView === "milestones"
+                ? "/dashboard/workspace/$workspaceId/project/$projectId/milestones"
+                : "/dashboard/workspace/$workspaceId/project/$projectId/board",
       params: {
         workspaceId,
         projectId: nextProjectId,
@@ -149,6 +161,7 @@ export default function ProjectLayout({
                 onSelectBoard={handleNavigateToBoard}
                 onSelectGantt={handleNavigateToGantt}
                 onSelectWiki={handleNavigateToWiki}
+                onSelectMilestones={handleNavigateToMilestones}
                 onSelectProject={handleProjectSwitch}
                 onAddProject={() => setIsCreateProjectModalOpen(true)}
               />
@@ -203,6 +216,20 @@ export default function ProjectLayout({
                 >
                   <FileText className="size-3.5" />
                   Wiki
+                </Button>
+                <Button
+                  variant={
+                    resolvedView === "milestones" ? "secondary" : "ghost"
+                  }
+                  size="xs"
+                  onClick={handleNavigateToMilestones}
+                  className={cn(
+                    "h-6 gap-1.5 rounded-md px-2 text-xs",
+                    resolvedView !== "milestones" && "text-muted-foreground",
+                  )}
+                >
+                  <Diamond className="size-3.5" />
+                  Milestones
                 </Button>
               </div>
             )}

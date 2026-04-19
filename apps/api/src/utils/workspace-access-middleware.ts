@@ -19,7 +19,8 @@ type WorkspaceIdSource =
         | "comment"
         | "column"
         | "workflowRule"
-        | "milestone";
+        | "milestone"
+        | "wikiPage";
       idKey: string;
     };
 
@@ -101,7 +102,8 @@ async function lookupWorkspaceId(
     | "comment"
     | "column"
     | "workflowRule"
-    | "milestone",
+    | "milestone"
+    | "wikiPage",
   id: string,
 ): Promise<string | null> {
   try {
@@ -241,6 +243,21 @@ async function lookupWorkspaceId(
         return milestone?.workspaceId || null;
       }
 
+      case "wikiPage": {
+        const [wikiPage] = await db
+          .select({
+            workspaceId: schema.projectTable.workspaceId,
+          })
+          .from(schema.wikiPageTable)
+          .innerJoin(
+            schema.projectTable,
+            eq(schema.wikiPageTable.projectId, schema.projectTable.id),
+          )
+          .where(eq(schema.wikiPageTable.id, id))
+          .limit(1);
+        return wikiPage?.workspaceId || null;
+      }
+
       default:
         return null;
     }
@@ -336,6 +353,14 @@ export const workspaceAccess = {
     workspaceAccessMiddleware({
       sources: [
         { type: "lookup", resource: "milestone", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
+  fromWikiPage: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "wikiPage", idKey },
         { type: "query", key: "workspaceId" },
       ],
     }),
