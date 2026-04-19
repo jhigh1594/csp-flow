@@ -32,6 +32,7 @@ import updateTask from "./controllers/update-task";
 import updateTaskAssignee from "./controllers/update-task-assignee";
 import updateTaskDescription from "./controllers/update-task-description";
 import updateTaskDueDate from "./controllers/update-task-due-date";
+import updateTaskMilestone from "./controllers/update-task-milestone";
 import updateTaskPriority from "./controllers/update-task-priority";
 import updateTaskStatus from "./controllers/update-task-status";
 import updateTaskTitle from "./controllers/update-task-title";
@@ -957,6 +958,41 @@ const task = new Hono<{
         oldDescription: existingTask.description,
         newDescription: description,
         type: "description_changed",
+      });
+
+      return c.json(task);
+    },
+  )
+  .put(
+    "/milestone/:id",
+    describeRoute({
+      operationId: "updateTaskMilestone",
+      tags: ["Tasks"],
+      description: "Update the milestone of a task",
+      responses: {
+        200: {
+          description: "Task milestone updated successfully",
+          content: {
+            "application/json": { schema: resolver(taskSchema) },
+          },
+        },
+      },
+    }),
+    validator("param", v.object({ id: v.string() })),
+    validator(
+      "json",
+      v.object({
+        milestoneId: v.optional(v.nullable(v.string())),
+      }),
+    ),
+    workspaceAccess.fromTask(),
+    async (c) => {
+      const { id } = c.req.valid("param");
+      const { milestoneId } = c.req.valid("json");
+
+      const task = await updateTaskMilestone({
+        id,
+        milestoneId: milestoneId ?? null,
       });
 
       return c.json(task);

@@ -4,6 +4,7 @@ import {
   CalendarDays,
   CalendarX,
   Copy,
+  Diamond,
   GitBranch,
   Plus,
 } from "lucide-react";
@@ -23,6 +24,7 @@ import { useGetColumns } from "@/hooks/queries/column/use-get-columns";
 import useGetGiteaIntegration from "@/hooks/queries/gitea-integration/use-get-gitea-integration";
 import useGetGithubIntegration from "@/hooks/queries/github-integration/use-get-github-integration";
 import useGetLabelsByTask from "@/hooks/queries/label/use-get-labels-by-task";
+import { useGetMilestones } from "@/hooks/queries/milestone/use-get-milestones";
 import useGetProject from "@/hooks/queries/project/use-get-project";
 import useGetProjects from "@/hooks/queries/project/use-get-projects";
 import useGetTask from "@/hooks/queries/task/use-get-task";
@@ -37,6 +39,7 @@ import { toast } from "@/lib/toast";
 import TaskAssigneePopover from "./task-assignee-popover";
 import TaskDueDatePopover from "./task-due-date-popover";
 import TaskLabelsPopover from "./task-labels-popover";
+import TaskMilestonePopover from "./task-milestone-popover";
 import TaskMovePopover from "./task-move-popover";
 import TaskPriorityPopover from "./task-priority-popover";
 import TaskStartDatePopover from "./task-start-date-popover";
@@ -85,6 +88,7 @@ export default function TaskPropertiesSidebar({
   const { data: columns = [] } = useGetColumns(projectId);
   const { data: workspaceUsers } = useGetActiveWorkspaceUsers(workspaceId);
   const { data: taskLabels = [] } = useGetLabelsByTask(taskId ?? "");
+  const { data: milestones } = useGetMilestones(projectId);
   const { data: githubIntegration } = useGetGithubIntegration(projectId);
   const { data: giteaIntegration } = useGetGiteaIntegration(projectId);
   const { data: workspaceProjects = [] } = useGetProjects({ workspaceId });
@@ -681,6 +685,23 @@ export default function TaskPropertiesSidebar({
                       )}
                     </Button>
                   </TaskDueDatePopover>
+                )}
+                {task && (
+                  <TaskMilestonePopover task={task}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="justify-start h-7 px-1.5 gap-1.5"
+                    >
+                      <Diamond className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-semibold truncate max-w-[100px]">
+                        {task.milestoneId
+                          ? (milestones?.find((m) => m.id === task.milestoneId)
+                              ?.title ?? t("tasks:properties.milestone"))
+                          : t("tasks:properties.milestone")}
+                      </span>
+                    </Button>
+                  </TaskMilestonePopover>
                 )}
               </div>
             </div>

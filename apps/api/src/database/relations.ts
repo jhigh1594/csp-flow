@@ -112,12 +112,16 @@ export const projectTableRelations = relations(
   }),
 );
 
-export const milestoneTableRelations = relations(milestoneTable, ({ one }) => ({
-  project: one(projectTable, {
-    fields: [milestoneTable.projectId],
-    references: [projectTable.id],
+export const milestoneTableRelations = relations(
+  milestoneTable,
+  ({ one, many }) => ({
+    project: one(projectTable, {
+      fields: [milestoneTable.projectId],
+      references: [projectTable.id],
+    }),
+    tasks: many(taskTable),
   }),
-}));
+);
 
 export const columnTableRelations = relations(columnTable, ({ one, many }) => ({
   project: one(projectTable, {
@@ -164,6 +168,10 @@ export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
   sourceRelations: many(taskRelationTable, { relationName: "sourceTask" }),
   targetRelations: many(taskRelationTable, { relationName: "targetTask" }),
   remindersSent: many(taskReminderSentTable),
+  milestone: one(milestoneTable, {
+    fields: [taskTable.milestoneId],
+    references: [milestoneTable.id],
+  }),
 }));
 
 export const timeEntryTableRelations = relations(timeEntryTable, ({ one }) => ({

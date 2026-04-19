@@ -1415,7 +1415,8 @@
 			"copyTaskBranch": "Copy task branch",
 			"start": "Start",
 			"startDate": "Start date",
-			"noDate": "No date"
+			"noDate": "No date",
+"milestone": "Milestone"
 		},
 		"move": {
 			"title": "Move task",
@@ -1438,6 +1439,10 @@
 			},
 			"priority": {
 				"updateError": "Failed to update task priority"
+			},
+			"milestone": {
+				"noMilestone": "No milestone",
+				"updateError": "Failed to update task milestone"
 			},
 			"dueDate": {
 				"updateSuccess": "Task due date updated successfully",
