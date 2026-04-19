@@ -1,26 +1,40 @@
+import { Highlight } from "@tiptap/extension-highlight";
 import { Image } from "@tiptap/extension-image";
-import { Placeholder } from "@tiptap/extension-placeholder";
+import { Subscript } from "@tiptap/extension-subscript";
+import { Superscript } from "@tiptap/extension-superscript";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
+import { TextAlign } from "@tiptap/extension-text-align";
+import { Typography } from "@tiptap/extension-typography";
 import { Underline } from "@tiptap/extension-underline";
+import { Selection } from "@tiptap/extensions";
 import type { Editor } from "@tiptap/react";
 import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { HorizontalRule } from "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node-extension";
+import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
 import { BlockquoteButton } from "@/components/tiptap-ui/blockquote-button";
 import { CodeBlockButton } from "@/components/tiptap-ui/code-block-button";
+import { ColorHighlightPopover } from "@/components/tiptap-ui/color-highlight-popover";
 import { HeadingDropdownMenu } from "@/components/tiptap-ui/heading-dropdown-menu";
+import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button";
+import { LinkPopover } from "@/components/tiptap-ui/link-popover";
 import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu";
 import { MarkButton } from "@/components/tiptap-ui/mark-button";
+import { TextAlignButton } from "@/components/tiptap-ui/text-align-button";
+import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
 import { Spacer } from "@/components/tiptap-ui-primitive/spacer";
 import {
   Toolbar,
   ToolbarGroup,
   ToolbarSeparator,
 } from "@/components/tiptap-ui-primitive/toolbar";
+import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 
 import "@/components/tiptap-node/blockquote-node/blockquote-node.scss";
 import "@/components/tiptap-node/code-block-node/code-block-node.scss";
+import "@/components/tiptap-node/horizontal-rule-node/horizontal-rule-node.scss";
 import "@/components/tiptap-node/list-node/list-node.scss";
 import "@/components/tiptap-node/heading-node/heading-node.scss";
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
@@ -57,7 +71,7 @@ const SLASH_COMMANDS: SlashCommand[] = [
     id: "heading-1",
     label: "Heading 1",
     group: "Headings",
-    shortcut: "⌘⌥1",
+    shortcut: "\u2318\u23251",
     run: (ed, range) =>
       ed.chain().focus().deleteRange(range).setHeading({ level: 1 }).run(),
   },
@@ -65,7 +79,7 @@ const SLASH_COMMANDS: SlashCommand[] = [
     id: "heading-2",
     label: "Heading 2",
     group: "Headings",
-    shortcut: "⌘⌥2",
+    shortcut: "\u2318\u23252",
     run: (ed, range) =>
       ed.chain().focus().deleteRange(range).setHeading({ level: 2 }).run(),
   },
@@ -73,7 +87,7 @@ const SLASH_COMMANDS: SlashCommand[] = [
     id: "heading-3",
     label: "Heading 3",
     group: "Headings",
-    shortcut: "⌘⌥3",
+    shortcut: "\u2318\u23253",
     run: (ed, range) =>
       ed.chain().focus().deleteRange(range).setHeading({ level: 3 }).run(),
   },
@@ -109,7 +123,7 @@ const SLASH_COMMANDS: SlashCommand[] = [
     id: "code-block",
     label: "Code Block",
     group: "Blocks",
-    shortcut: "⌘⌥\\",
+    shortcut: "\u2318\u2325\\",
     run: (ed, range) =>
       ed.chain().focus().deleteRange(range).toggleCodeBlock().run(),
   },
@@ -122,7 +136,6 @@ type WikiEditorProps = {
   title: string;
   onTitleChange: (value: string) => void;
   onTitleBlur: () => void;
-  placeholder?: string;
 };
 
 export default function WikiEditor({
@@ -132,7 +145,6 @@ export default function WikiEditor({
   title,
   onTitleChange,
   onTitleBlur,
-  placeholder = "Start writing...",
 }: WikiEditorProps) {
   const [slashMenu, setSlashMenu] = useState<SlashMenuState | null>(null);
   const slashMenuRef = useRef<SlashMenuState | null>(null);
@@ -149,20 +161,37 @@ export default function WikiEditor({
 
   const editor = useEditor({
     immediatelyRender: false,
+    shouldRerenderOnTransaction: false,
     extensions: [
       StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
+        horizontalRule: false,
       }),
+      HorizontalRule,
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
       TaskList,
       TaskItem.configure({ nested: true }),
+      Highlight.configure({ multicolor: true }),
       Underline,
       Image,
-      Placeholder.configure({ placeholder }),
+      Typography,
+      Superscript,
+      Subscript,
+      Selection,
+      ImageUploadNode.configure({
+        accept: "image/*",
+        maxSize: MAX_FILE_SIZE,
+        limit: 3,
+        upload: handleImageUpload,
+      }),
     ],
     content: contentJson,
     editable,
     editorProps: {
       attributes: {
+        autocomplete: "off",
+        autocorrect: "off",
+        autocapitalize: "off",
+        "aria-label": "Main content area, start typing to enter text.",
         class: "wiki-editor-content",
       },
     },
@@ -173,6 +202,14 @@ export default function WikiEditor({
       onUpdateRef.current(html, json);
     },
   });
+
+  useEffect(() => {
+    if (editor && !editable) {
+      editor.setEditable(false);
+    } else if (editor && editable) {
+      editor.setEditable(true);
+    }
+  }, [editor, editable]);
 
   useEffect(() => {
     return () => {
@@ -350,47 +387,75 @@ export default function WikiEditor({
 
   return (
     <div className="wiki-editor-wrapper">
-      <div className="wiki-editor-inner">
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
-          onBlur={onTitleBlur}
-          disabled={!editable}
-          className="wiki-editor-title"
-          placeholder="Untitled"
-        />
-
+      <EditorContext.Provider value={{ editor }}>
         {editable && (
-          <EditorContext.Provider value={{ editor }}>
-            <Toolbar>
-              <Spacer />
-              <ToolbarGroup>
-                <HeadingDropdownMenu modal={false} levels={[1, 2, 3]} />
-                <ListDropdownMenu
-                  modal={false}
-                  types={["bulletList", "orderedList", "taskList"]}
-                />
-                <BlockquoteButton />
-                <CodeBlockButton />
-              </ToolbarGroup>
-              <ToolbarSeparator />
-              <ToolbarGroup>
-                <MarkButton type="bold" />
-                <MarkButton type="italic" />
-                <MarkButton type="underline" />
-                <MarkButton type="strike" />
-                <MarkButton type="code" />
-              </ToolbarGroup>
-              <Spacer />
-            </Toolbar>
-          </EditorContext.Provider>
+          <Toolbar>
+            <Spacer />
+
+            <ToolbarGroup>
+              <UndoRedoButton action="undo" />
+              <UndoRedoButton action="redo" />
+            </ToolbarGroup>
+
+            <ToolbarSeparator />
+
+            <ToolbarGroup>
+              <HeadingDropdownMenu modal={false} levels={[1, 2, 3]} />
+              <ListDropdownMenu
+                modal={false}
+                types={["bulletList", "orderedList", "taskList"]}
+              />
+              <BlockquoteButton />
+              <CodeBlockButton />
+            </ToolbarGroup>
+
+            <ToolbarSeparator />
+
+            <ToolbarGroup>
+              <MarkButton type="bold" />
+              <MarkButton type="italic" />
+              <MarkButton type="strike" />
+              <MarkButton type="code" />
+              <MarkButton type="underline" />
+              <ColorHighlightPopover />
+              <LinkPopover />
+            </ToolbarGroup>
+
+            <ToolbarSeparator />
+
+            <ToolbarGroup>
+              <TextAlignButton align="left" />
+              <TextAlignButton align="center" />
+              <TextAlignButton align="right" />
+              <TextAlignButton align="justify" />
+            </ToolbarGroup>
+
+            <ToolbarSeparator />
+
+            <ToolbarGroup>
+              <ImageUploadButton text="Add" />
+            </ToolbarGroup>
+
+            <Spacer />
+          </Toolbar>
         )}
 
-        <div className="wiki-editor-content-wrapper">
-          <EditorContent editor={editor} />
+        <div className="wiki-editor-inner">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => onTitleChange(e.target.value)}
+            onBlur={onTitleBlur}
+            disabled={!editable}
+            className="wiki-editor-title"
+            placeholder="Untitled"
+          />
+
+          <div className="wiki-editor-content-wrapper">
+            <EditorContent editor={editor} role="presentation" />
+          </div>
         </div>
-      </div>
+      </EditorContext.Provider>
 
       {slashMenu && filteredSlashCommands.length > 0 && (
         <div
