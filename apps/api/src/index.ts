@@ -608,7 +608,7 @@ const isMainModule =
   import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isMainModule) {
-  void startServer();
+  void startServer(Number(process.env.PORT) || 1337);
 }
 
 export type AppType =
