@@ -15,6 +15,7 @@ async function updateTask(
   priority: string,
   position: number,
   userId?: string,
+  roadmapGroup?: string | null,
 ) {
   const existingTask = await db.query.taskTable.findFirst({
     where: eq(taskTable.id, id),
@@ -48,6 +49,8 @@ async function updateTask(
       priority,
       position,
       userId: userId || null,
+      roadmapGroup:
+        roadmapGroup !== undefined ? roadmapGroup : existingTask.roadmapGroup,
     })
     .where(eq(taskTable.id, id))
     .returning();

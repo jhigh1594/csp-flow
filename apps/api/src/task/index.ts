@@ -34,9 +34,12 @@ import updateTaskDescription from "./controllers/update-task-description";
 import updateTaskDueDate from "./controllers/update-task-due-date";
 import updateTaskMilestone from "./controllers/update-task-milestone";
 import updateTaskPriority from "./controllers/update-task-priority";
+import updateTaskRoadmapGroup from "./controllers/update-task-roadmap-group";
 import updateTaskStatus from "./controllers/update-task-status";
 import updateTaskTitle from "./controllers/update-task-title";
 import { VALID_PRIORITIES } from "./validate-task-fields";
+
+const VALID_ROADMAP_GROUPS = ["now", "next", "later"] as const;
 
 const task = new Hono<{
   Variables: {
@@ -546,6 +549,56 @@ const task = new Hono<{
         newPriority: priority,
         title: task.title,
         type: "priority_changed",
+      });
+
+      return c.json(task);
+    },
+  )
+  .put(
+    "/roadmap-group/:id",
+    describeRoute({
+      operationId: "updateTaskRoadmapGroup",
+      tags: ["Tasks"],
+      description: "Update the roadmap group (now/next/later) of a task",
+      responses: {
+        200: {
+          description: "Task roadmap group updated successfully",
+          content: {
+            "application/json": { schema: resolver(taskSchema) },
+          },
+        },
+      },
+    }),
+    validator("param", v.object({ id: v.string() })),
+    validator(
+      "json",
+      v.object({
+        roadmapGroup: v.union([v.picklist(VALID_ROADMAP_GROUPS), v.null()]),
+      }),
+    ),
+    workspaceAccess.fromTask(),
+    async (c) => {
+      const { id } = c.req.valid("param");
+      const { roadmapGroup } = c.req.valid("json");
+      const user = c.get("userId");
+      const existingTask = await db.query.taskTable.findFirst({
+        where: eq(taskTable.id, id),
+      });
+
+      if (!existingTask) {
+        throw new HTTPException(404, { message: "Task not found" });
+      }
+
+      const task = await updateTaskRoadmapGroup({ id, roadmapGroup });
+
+      await publishEvent("task.roadmap_group_changed", {
+        taskId: task.id,
+        projectId: task.projectId,
+        userId: user,
+        oldGroup: existingTask.roadmapGroup,
+        newGroup: roadmapGroup,
+        title: task.title,
+        type: "roadmap_group_changed",
       });
 
       return c.json(task);
