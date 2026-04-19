@@ -752,6 +752,29 @@ export const commentTable = pgTable(
   ],
 );
 
+export const milestoneTable = pgTable(
+  "milestone",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    title: text("title").notNull(),
+    targetDate: timestamp("target_date", { mode: "date" }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("milestone_projectId_idx").on(table.projectId)],
+);
+
 export const taskRelationTable = pgTable(
   "task_relation",
   {
