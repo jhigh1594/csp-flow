@@ -274,11 +274,13 @@ export function GanttMilestoneRow({
 type MilestoneLinesProps = {
   milestones: Milestone[];
   timeline: GanttTimeline;
+  taskRailOffsetRem: number;
 };
 
 export function GanttMilestoneLines({
   milestones,
   timeline,
+  taskRailOffsetRem,
 }: MilestoneLinesProps) {
   return (
     <>
@@ -294,7 +296,7 @@ export function GanttMilestoneLines({
             key={milestone.id}
             className="absolute top-0 z-[5] h-full w-0 border-l-2 border-dashed border-primary/30"
             style={{
-              left: `calc(${colIndex} * ${timeline.columnWidthRem}rem + ${timeline.columnWidthRem / 2}rem)`,
+              left: `calc(${taskRailOffsetRem}rem + ${colIndex} * ${timeline.columnWidthRem}rem + ${timeline.columnWidthRem / 2}rem)`,
             }}
           />
         );

@@ -505,6 +505,7 @@ function RouteComponent() {
                       <GanttMilestoneLines
                         milestones={milestones}
                         timeline={timeline}
+                        taskRailOffsetRem={showTaskRail ? 20 : 0}
                       />
                     )}
                     {statusGroups.map((group) => {

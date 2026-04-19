@@ -26,6 +26,9 @@ export function useUpdateTaskAssignee() {
       queryClient.invalidateQueries({
         queryKey: ["task-relations"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["milestone-tasks"],
+      });
     },
   });
 }

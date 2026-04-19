@@ -23,6 +23,9 @@ export function useUpdateTaskDueDate() {
       queryClient.invalidateQueries({
         queryKey: ["activities", variables.id],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["milestone-tasks"],
+      });
     },
   });
 }
