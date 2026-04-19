@@ -31,7 +31,9 @@
 			"!**/tiptap-templates",
 			"!**/tiptap-extension",
 			"!**/.reference",
-			"!**/.superpowers"
+			"!**/.superpowers",
+			"!**/.vercel",
+			"!**/drizzle/meta"
 		]
 	},
 	"formatter": {
