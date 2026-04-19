@@ -1406,6 +1406,44 @@ input:-webkit-autofill:active {
     padding: 0.05em 0.1em;
   }
 
+  .wiki-editor-content-wrapper .tiptap.ProseMirror table {
+    border-collapse: collapse;
+    margin: 0.7rem 0;
+    overflow: hidden;
+    table-layout: fixed;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 3px);
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror table td,
+  .wiki-editor-content-wrapper .tiptap.ProseMirror table th {
+    min-width: 1em;
+    border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+    padding: 0.45rem 0.55rem;
+    vertical-align: top;
+    position: relative;
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror table th {
+    background: color-mix(in srgb, var(--accent) 70%, transparent);
+    font-weight: 600;
+    text-align: left;
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror .selectedCell:after {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    content: "";
+    background: color-mix(in srgb, var(--primary) 16%, transparent);
+  }
+
+  .wiki-editor-content-wrapper .tiptap.ProseMirror .tableWrapper {
+    overflow-x: auto;
+  }
+
   .wiki-editor-content-wrapper .tiptap.ProseMirror ::selection {
     background: color-mix(in srgb, var(--primary) 18%, transparent);
   }

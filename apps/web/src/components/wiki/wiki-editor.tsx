@@ -3,6 +3,7 @@ import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
 import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
+import { TableKit } from "@tiptap/extension-table";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
 import { TextAlign } from "@tiptap/extension-text-align";
@@ -23,6 +24,7 @@ import { ImageUploadButton } from "@/components/tiptap-ui/image-upload-button";
 import { LinkPopover } from "@/components/tiptap-ui/link-popover";
 import { ListDropdownMenu } from "@/components/tiptap-ui/list-dropdown-menu";
 import { MarkButton } from "@/components/tiptap-ui/mark-button";
+import { TableInsertButton } from "@/components/tiptap-ui/table-insert-button/table-insert-button";
 import { TextAlignButton } from "@/components/tiptap-ui/text-align-button";
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
 import { Spacer } from "@/components/tiptap-ui-primitive/spacer";
@@ -128,6 +130,18 @@ const SLASH_COMMANDS: SlashCommand[] = [
     run: (ed, range) =>
       ed.chain().focus().deleteRange(range).toggleCodeBlock().run(),
   },
+  {
+    id: "table",
+    label: "Table",
+    group: "Blocks",
+    run: (ed, range) =>
+      ed
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+        .run(),
+  },
 ];
 
 type WikiEditorProps = {
@@ -179,6 +193,7 @@ export default function WikiEditor({
       Superscript,
       Subscript,
       Selection,
+      TableKit,
       ImageUploadNode.configure({
         accept: "image/*",
         maxSize: MAX_FILE_SIZE,
@@ -436,6 +451,7 @@ export default function WikiEditor({
 
             <ToolbarGroup>
               <ImageUploadButton text="Add" />
+              <TableInsertButton />
             </ToolbarGroup>
 
             <Spacer />
