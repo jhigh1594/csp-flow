@@ -169,15 +169,18 @@ export type WikiEditorHandle = {
 };
 
 const WikiEditor = forwardRef<WikiEditorHandle, WikiEditorProps>(
-  function WikiEditorInner({
-    contentJson,
-    editable,
-    onUpdate,
-    title,
-    onTitleChange,
-    onTitleBlur,
-    onTocAnchorsChange,
-  }: WikiEditorProps) {
+  function WikiEditorInner(
+    {
+      contentJson,
+      editable,
+      onUpdate,
+      title,
+      onTitleChange,
+      onTitleBlur,
+      onTocAnchorsChange,
+    },
+    ref,
+  ) {
     const [slashMenu, setSlashMenu] = useState<SlashMenuState | null>(null);
     const [_tocAnchors, setTocAnchors] = useState<TocAnchor[]>([]);
     const contentWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -216,7 +219,7 @@ const WikiEditor = forwardRef<WikiEditorHandle, WikiEditorProps>(
         Selection,
         TableKit,
         TableOfContents.configure({
-          scrollParent: () => contentWrapperRef.current,
+          scrollParent: () => contentWrapperRef.current ?? window,
           onUpdate: (anchors) => {
             const mapped = anchors.map((a) => ({
               id: a.id,
