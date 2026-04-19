@@ -31,21 +31,13 @@ import {
   GanttMilestoneRow,
 } from "@/components/gantt/gantt-milestone-row";
 import { GanttTaskBar } from "@/components/gantt/gantt-task-bar";
+import MilestoneFormDialog from "@/components/milestone/milestone-form-dialog";
 import PageTitle from "@/components/page-title";
 import TaskDetailsSheet from "@/components/task/task-details-sheet";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogFooter,
-  DialogHeader,
-  DialogPopup,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import { Input } from "@/components/ui/input";
 import { DEFAULT_COLUMNS } from "@/constants/columns";
-import { useCreateMilestone } from "@/hooks/mutations/milestone/use-create-milestone";
 import { useGetMilestones } from "@/hooks/queries/milestone/use-get-milestones";
 import { useGetTasks } from "@/hooks/queries/task/use-get-tasks";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -88,31 +80,7 @@ function RouteComponent() {
   );
 
   const { data: milestones = [] } = useGetMilestones(projectId);
-  const { mutate: createMilestone, isPending: isCreating } =
-    useCreateMilestone(projectId);
   const [milestoneDialogOpen, setMilestoneDialogOpen] = useState(false);
-  const [newMilestoneTitle, setNewMilestoneTitle] = useState("");
-  const [newMilestoneDate, setNewMilestoneDate] = useState(
-    format(new Date(), "yyyy-MM-dd"),
-  );
-
-  const handleCreateMilestone = () => {
-    if (!newMilestoneTitle.trim() || !newMilestoneDate) return;
-    createMilestone(
-      {
-        projectId,
-        title: newMilestoneTitle.trim(),
-        targetDate: newMilestoneDate,
-      },
-      {
-        onSuccess: () => {
-          setMilestoneDialogOpen(false);
-          setNewMilestoneTitle("");
-          setNewMilestoneDate(format(new Date(), "yyyy-MM-dd"));
-        },
-      },
-    );
-  };
 
   const taskColumnWidthRem = isMobile ? 12 : 14;
   const showTaskRail = !isMobile || isTaskRailOpen;
@@ -356,70 +324,19 @@ function RouteComponent() {
                 {t("tasks:gantt.today")}
               </Button>
 
-              <Dialog
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={() => setMilestoneDialogOpen(true)}
+              >
+                <Flag className="size-3.5" />
+                Milestone
+              </Button>
+              <MilestoneFormDialog
                 open={milestoneDialogOpen}
                 onOpenChange={setMilestoneDialogOpen}
-              >
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="xs">
-                    <Flag className="size-3.5" />
-                    Milestone
-                  </Button>
-                </DialogTrigger>
-                <DialogPopup>
-                  <DialogHeader>
-                    <DialogTitle>Add Milestone</DialogTitle>
-                  </DialogHeader>
-                  <div className="flex flex-col gap-4 px-6 pb-2">
-                    <div className="flex flex-col gap-1.5">
-                      <label
-                        className="text-sm text-muted-foreground"
-                        htmlFor="new-milestone-title"
-                      >
-                        Title
-                      </label>
-                      <Input
-                        id="new-milestone-title"
-                        placeholder="Milestone name"
-                        value={newMilestoneTitle}
-                        onChange={(e) => setNewMilestoneTitle(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <label
-                        className="text-sm text-muted-foreground"
-                        htmlFor="new-milestone-date"
-                      >
-                        Target date
-                      </label>
-                      <Input
-                        id="new-milestone-date"
-                        type="date"
-                        value={newMilestoneDate}
-                        onChange={(e) => setNewMilestoneDate(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline" size="sm">
-                        Cancel
-                      </Button>
-                    </DialogClose>
-                    <Button
-                      size="sm"
-                      onClick={handleCreateMilestone}
-                      disabled={
-                        isCreating ||
-                        !newMilestoneTitle.trim() ||
-                        !newMilestoneDate
-                      }
-                    >
-                      Add Milestone
-                    </Button>
-                  </DialogFooter>
-                </DialogPopup>
-              </Dialog>
+                projectId={projectId}
+              />
             </div>
 
             <Button

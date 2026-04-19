@@ -15,6 +15,7 @@ async function getTask(taskId: string) {
       startDate: taskTable.startDate,
       dueDate: taskTable.dueDate,
       position: taskTable.position,
+      milestoneId: taskTable.milestoneId,
       createdAt: taskTable.createdAt,
       userId: taskTable.userId,
       assigneeName: userTable.name,

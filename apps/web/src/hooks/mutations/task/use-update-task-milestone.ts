@@ -23,6 +23,9 @@ export function useUpdateTaskMilestone() {
       queryClient.invalidateQueries({
         queryKey: ["milestones", variables.projectId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["milestone-tasks"],
+      });
     },
   });
 }

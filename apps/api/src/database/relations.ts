@@ -114,12 +114,16 @@ export const projectTableRelations = relations(
   }),
 );
 
-export const milestoneTableRelations = relations(milestoneTable, ({ one }) => ({
-  project: one(projectTable, {
-    fields: [milestoneTable.projectId],
-    references: [projectTable.id],
+export const milestoneTableRelations = relations(
+  milestoneTable,
+  ({ one, many }) => ({
+    project: one(projectTable, {
+      fields: [milestoneTable.projectId],
+      references: [projectTable.id],
+    }),
+    tasks: many(taskTable),
   }),
-}));
+);
 
 export const wikiPageTableRelations = relations(wikiPageTable, ({ one }) => ({
   project: one(projectTable, {
@@ -167,6 +171,10 @@ export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
   column: one(columnTable, {
     fields: [taskTable.columnId],
     references: [columnTable.id],
+  }),
+  milestone: one(milestoneTable, {
+    fields: [taskTable.milestoneId],
+    references: [milestoneTable.id],
   }),
   timeEntries: many(timeEntryTable),
   activities: many(activityTable),

@@ -1,4 +1,4 @@
-import { asc, count, eq, sql } from "drizzle-orm";
+import { asc, count, eq, inArray, sql } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
 import { milestoneTable, projectTable, taskTable } from "../../database/schema";
@@ -32,7 +32,7 @@ async function getMilestones(projectId: string) {
         ),
     })
     .from(taskTable)
-    .where(sql`${taskTable.milestoneId} = any(${milestoneIds})`)
+    .where(inArray(taskTable.milestoneId, milestoneIds))
     .groupBy(taskTable.milestoneId);
 
   const countMap = new Map(taskCounts.map((r) => [r.milestoneId, r]));

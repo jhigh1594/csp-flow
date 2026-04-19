@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import ProjectLayout from "@/components/common/project-layout";
 import WikiPageEditor from "@/components/wiki/wiki-page-editor";
 
 export const Route = createFileRoute(
@@ -12,16 +11,10 @@ function WikiPageEditorRoute() {
   const { projectId, workspaceId, pageId } = Route.useParams();
 
   return (
-    <ProjectLayout
+    <WikiPageEditor
+      pageId={pageId}
       projectId={projectId}
       workspaceId={workspaceId}
-      activeView="wiki"
-    >
-      <WikiPageEditor
-        pageId={pageId}
-        projectId={projectId}
-        workspaceId={workspaceId}
-      />
-    </ProjectLayout>
+    />
   );
 }
