@@ -1,5 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { marked } from "marked";
+import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
 
 class ApiClient {
@@ -60,6 +62,51 @@ function run(fn: () => Promise<unknown>): Promise<CallToolResult> {
     .catch((e: unknown) =>
       errorResult(e instanceof Error ? e.message : String(e)),
     );
+}
+
+const WIKI_ALLOWED_TAGS = [
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "p",
+  "br",
+  "hr",
+  "strong",
+  "em",
+  "s",
+  "code",
+  "pre",
+  "ul",
+  "ol",
+  "li",
+  "blockquote",
+  "a",
+  "img",
+  "table",
+  "thead",
+  "tbody",
+  "tr",
+  "th",
+  "td",
+];
+
+async function markdownToSafeHtml(md: string): Promise<string> {
+  const html = await marked.parse(md);
+  return sanitizeHtml(html, {
+    allowedTags: WIKI_ALLOWED_TAGS,
+    allowedAttributes: {
+      a: ["href", "title", "target"],
+      img: ["src", "alt", "title"],
+      code: ["class"],
+      pre: ["class"],
+      th: ["align"],
+      td: ["align"],
+    },
+    allowedSchemes: ["http", "https", "mailto"],
+  });
 }
 
 const PRIORITIES = ["no-priority", "low", "medium", "high", "urgent"] as const;
@@ -576,6 +623,311 @@ export function registerMcpTools(
       run(() =>
         client.json(`/api/label/${encodeURIComponent(args.labelId)}/task`, {
           method: "DELETE",
+        }),
+      ),
+  );
+
+  // ── Search ──────────────────────────────────────────────────────────────────
+
+  server.registerTool(
+    "search",
+    {
+      description:
+        "Search across tasks, projects, workspaces, comments, and activities. Returns results with relevance scores. Use this to discover content by keyword before operating on it.",
+      inputSchema: z.object({
+        q: nonEmptyString.describe("Search query"),
+        type: z
+          .enum([
+            "all",
+            "tasks",
+            "projects",
+            "workspaces",
+            "comments",
+            "activities",
+          ])
+          .optional()
+          .describe("Limit results to one entity type (default: all)"),
+        workspaceId: optionalNonEmptyString.describe("Scope to a workspace"),
+        projectId: optionalNonEmptyString.describe("Scope to a project"),
+        limit: z
+          .number()
+          .int()
+          .min(1)
+          .max(50)
+          .optional()
+          .describe("Max results (1–50, default 20)"),
+      }),
+    },
+    async (args) => {
+      const qs = new URLSearchParams({ q: args.q });
+      if (args.type !== undefined) qs.set("type", args.type);
+      if (args.workspaceId !== undefined)
+        qs.set("workspaceId", args.workspaceId);
+      if (args.projectId !== undefined) qs.set("projectId", args.projectId);
+      if (args.limit !== undefined) qs.set("limit", String(args.limit));
+      return run(() =>
+        client.json(`/api/search?${qs.toString()}`, { method: "GET" }),
+      );
+    },
+  );
+
+  // ── Wiki ────────────────────────────────────────────────────────────────────
+
+  server.registerTool(
+    "list_wiki_pages",
+    {
+      description:
+        "List all wiki pages for a project. Returns summaries (id, title, isLocked, archivedAt) — use get_wiki_page to read full content.",
+      inputSchema: z.object({
+        projectId: nonEmptyString.describe("Project ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/wiki/project/${encodeURIComponent(args.projectId)}`, {
+          method: "GET",
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "get_wiki_page",
+    {
+      description:
+        "Get a single wiki page by ID, including its full HTML content in the contentHtml field.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Wiki page ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/wiki/${encodeURIComponent(args.id)}`, {
+          method: "GET",
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "create_wiki_page",
+    {
+      description:
+        "Create a new wiki page in a project. Content can be added afterward with update_wiki_page.",
+      inputSchema: z.object({
+        projectId: nonEmptyString.describe("Project ID"),
+        title: nonEmptyString.describe("Page title"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json("/api/wiki/", {
+          method: "POST",
+          body: JSON.stringify({
+            projectId: args.projectId,
+            title: args.title,
+          }),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "update_wiki_page",
+    {
+      description:
+        "Update a wiki page's title and/or content. Provide content as Markdown — it will be converted to HTML automatically. At least one of title or content should be provided.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Wiki page ID"),
+        title: optionalNonEmptyString.describe("New title"),
+        content: z
+          .string()
+          .optional()
+          .describe("New content in Markdown format"),
+      }),
+    },
+    async (args) => {
+      const body: Record<string, unknown> = { contentJson: null };
+      if (args.title !== undefined) body.title = args.title;
+      if (args.content !== undefined) {
+        body.contentHtml = await markdownToSafeHtml(args.content);
+      }
+      return run(() =>
+        client.json(`/api/wiki/${encodeURIComponent(args.id)}`, {
+          method: "PATCH",
+          body: JSON.stringify(body),
+        }),
+      );
+    },
+  );
+
+  server.registerTool(
+    "archive_wiki_page",
+    {
+      description:
+        "Archive a wiki page so it no longer appears in page listings.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Wiki page ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/wiki/${encodeURIComponent(args.id)}/archive`, {
+          method: "POST",
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "delete_wiki_page",
+    {
+      description:
+        "Permanently delete a wiki page. This tool automatically archives the page first (as required by the API), then deletes it. If the delete step fails, the archive is rolled back.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Wiki page ID"),
+      }),
+    },
+    async (args) => {
+      const id = encodeURIComponent(args.id);
+      return run(async () => {
+        await client.json(`/api/wiki/${id}/archive`, { method: "POST" });
+        try {
+          return await client.json(`/api/wiki/${id}`, { method: "DELETE" });
+        } catch (deleteErr) {
+          // Roll back: unarchive so the page is back in its original state
+          try {
+            await client.json(`/api/wiki/${id}/archive`, { method: "DELETE" });
+          } catch {
+            // Rollback failed — page stays archived; surface original error
+          }
+          throw deleteErr;
+        }
+      });
+    },
+  );
+
+  // ── Milestones ──────────────────────────────────────────────────────────────
+
+  server.registerTool(
+    "list_milestones",
+    {
+      description:
+        "List all milestones for a project, ordered by target date. Each milestone includes totalTasks and completedTasks counts.",
+      inputSchema: z.object({
+        projectId: nonEmptyString.describe("Project ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(
+          `/api/milestone/project/${encodeURIComponent(args.projectId)}`,
+          {
+            method: "GET",
+          },
+        ),
+      ),
+  );
+
+  server.registerTool(
+    "get_milestone_tasks",
+    {
+      description: "List all tasks assigned to a milestone.",
+      inputSchema: z.object({
+        milestoneId: nonEmptyString.describe("Milestone ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(
+          `/api/milestone/${encodeURIComponent(args.milestoneId)}/tasks`,
+          { method: "GET" },
+        ),
+      ),
+  );
+
+  server.registerTool(
+    "create_milestone",
+    {
+      description: "Create a new milestone for a project.",
+      inputSchema: z.object({
+        projectId: nonEmptyString.describe("Project ID"),
+        title: nonEmptyString.describe("Milestone title"),
+        targetDate: isoDateTimeSchema.describe(
+          "Target date (ISO 8601, e.g. 2026-06-30T00:00:00Z)",
+        ),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json("/api/milestone/", {
+          method: "POST",
+          body: JSON.stringify({
+            projectId: args.projectId,
+            title: args.title,
+            targetDate: args.targetDate,
+          }),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "update_milestone",
+    {
+      description:
+        "Update a milestone's title and/or target date. Only provided fields are changed.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Milestone ID"),
+        title: optionalNonEmptyString.describe("New title"),
+        targetDate: optionalIsoDateTimeSchema.describe(
+          "New target date (ISO 8601)",
+        ),
+      }),
+    },
+    async (args) => {
+      const { id, ...patch } = args;
+      const body: Record<string, string> = {};
+      if (patch.title !== undefined) body.title = patch.title;
+      if (patch.targetDate !== undefined) body.targetDate = patch.targetDate;
+      return run(() =>
+        client.json(`/api/milestone/${encodeURIComponent(id)}`, {
+          method: "PUT",
+          body: JSON.stringify(body),
+        }),
+      );
+    },
+  );
+
+  server.registerTool(
+    "delete_milestone",
+    {
+      description:
+        "Delete a milestone. Tasks previously assigned to it will have their milestone cleared.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Milestone ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/milestone/${encodeURIComponent(args.id)}`, {
+          method: "DELETE",
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "assign_task_milestone",
+    {
+      description:
+        "Assign a task to a milestone, or unassign it by passing null. The milestone must belong to the same project as the task.",
+      inputSchema: z.object({
+        taskId: nonEmptyString.describe("Task ID to assign"),
+        milestoneId: nonEmptyString
+          .nullable()
+          .describe("Milestone ID to assign to, or null to unassign"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/task/milestone/${encodeURIComponent(args.taskId)}`, {
+          method: "PUT",
+          body: JSON.stringify({ milestoneId: args.milestoneId }),
         }),
       ),
   );
