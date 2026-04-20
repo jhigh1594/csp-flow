@@ -230,6 +230,10 @@ input:-webkit-autofill:active {
   *::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
+
+  .dark [data-sidebar="sidebar"] {
+    background: linear-gradient(to bottom, #021E2D 0%, #027D9F 68%, #19873E 100%);
+  }
 }
 
 @layer components {
