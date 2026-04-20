@@ -172,7 +172,7 @@ export default function ProjectLayout({
                   variant={resolvedView === "backlog" ? "secondary" : "ghost"}
                   size="xs"
                   onClick={handleNavigateToBacklog}
-                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-[#000000] hover:text-[#000000]"
+                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-foreground hover:text-foreground"
                 >
                   <SquircleDashed className="size-3.5" />
                   Backlog
@@ -181,7 +181,7 @@ export default function ProjectLayout({
                   variant={resolvedView === "board" ? "secondary" : "ghost"}
                   size="xs"
                   onClick={handleNavigateToBoard}
-                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-[#000000] hover:text-[#000000]"
+                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-foreground hover:text-foreground"
                 >
                   <SquareKanban className="size-3.5" />
                   Tasks
@@ -190,7 +190,7 @@ export default function ProjectLayout({
                   variant={resolvedView === "gantt" ? "secondary" : "ghost"}
                   size="xs"
                   onClick={handleNavigateToGantt}
-                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-[#000000] hover:text-[#000000]"
+                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-foreground hover:text-foreground"
                 >
                   <CalendarDays className="size-3.5" />
                   Timeline
@@ -199,7 +199,7 @@ export default function ProjectLayout({
                   variant={resolvedView === "wiki" ? "secondary" : "ghost"}
                   size="xs"
                   onClick={handleNavigateToWiki}
-                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-[#000000] hover:text-[#000000]"
+                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-foreground hover:text-foreground"
                 >
                   <FileText className="size-3.5" />
                   Wiki
@@ -210,7 +210,7 @@ export default function ProjectLayout({
                   }
                   size="xs"
                   onClick={handleNavigateToMilestones}
-                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-[#000000] hover:text-[#000000]"
+                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-foreground hover:text-foreground"
                 >
                   <Diamond className="size-3.5" />
                   Milestones
