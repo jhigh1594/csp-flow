@@ -4,6 +4,7 @@ import db from "../../../database";
 import {
   columnTable,
   integrationTable,
+  projectTable,
   taskTable,
 } from "../../../database/schema";
 
@@ -46,7 +47,7 @@ export async function updateTaskStatus(
 
   const column = await db.query.columnTable.findFirst({
     where: and(
-      eq(columnTable.projectId, task.projectId),
+      eq(columnTable.teamId, task.teamId),
       eq(columnTable.slug, newStatus),
     ),
   });
@@ -55,7 +56,7 @@ export async function updateTaskStatus(
     columnId = column.id;
   } else if (!NON_COLUMN_STATUSES.has(newStatus)) {
     console.warn(
-      `[GitHub] Skipping status update for task ${taskId}: column "${newStatus}" not found in project ${task.projectId}`,
+      `[GitHub] Skipping status update for task ${taskId}: column "${newStatus}" not found in team ${task.teamId}`,
     );
     return { applied: false };
   }
@@ -77,7 +78,7 @@ export async function updateTaskStatus(
 }
 
 export async function isTaskInFinalState(task: {
-  projectId: string;
+  teamId: string;
   status: string;
   columnId: string | null;
 }): Promise<boolean> {
@@ -85,7 +86,7 @@ export async function isTaskInFinalState(task: {
     const columnById = await db.query.columnTable.findFirst({
       where: and(
         eq(columnTable.id, task.columnId),
-        eq(columnTable.projectId, task.projectId),
+        eq(columnTable.teamId, task.teamId),
       ),
     });
 
@@ -96,7 +97,7 @@ export async function isTaskInFinalState(task: {
 
   const columnByStatus = await db.query.columnTable.findFirst({
     where: and(
-      eq(columnTable.projectId, task.projectId),
+      eq(columnTable.teamId, task.teamId),
       eq(columnTable.slug, task.status),
     ),
   });

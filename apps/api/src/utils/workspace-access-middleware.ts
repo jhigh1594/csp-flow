@@ -120,12 +120,12 @@ async function lookupWorkspaceId(
       case "task": {
         const [task] = await db
           .select({
-            workspaceId: schema.projectTable.workspaceId,
+            workspaceId: schema.teamTable.workspaceId,
           })
           .from(schema.taskTable)
           .innerJoin(
-            schema.projectTable,
-            eq(schema.taskTable.projectId, schema.projectTable.id),
+            schema.teamTable,
+            eq(schema.taskTable.teamId, schema.teamTable.id),
           )
           .where(eq(schema.taskTable.id, id))
           .limit(1);
@@ -144,7 +144,7 @@ async function lookupWorkspaceId(
       case "timeEntry": {
         const [timeEntry] = await db
           .select({
-            workspaceId: schema.projectTable.workspaceId,
+            workspaceId: schema.teamTable.workspaceId,
           })
           .from(schema.timeEntryTable)
           .innerJoin(
@@ -152,8 +152,8 @@ async function lookupWorkspaceId(
             eq(schema.timeEntryTable.taskId, schema.taskTable.id),
           )
           .innerJoin(
-            schema.projectTable,
-            eq(schema.taskTable.projectId, schema.projectTable.id),
+            schema.teamTable,
+            eq(schema.taskTable.teamId, schema.teamTable.id),
           )
           .where(eq(schema.timeEntryTable.id, id))
           .limit(1);
@@ -163,7 +163,7 @@ async function lookupWorkspaceId(
       case "activity": {
         const [activity] = await db
           .select({
-            workspaceId: schema.projectTable.workspaceId,
+            workspaceId: schema.teamTable.workspaceId,
           })
           .from(schema.activityTable)
           .innerJoin(
@@ -171,8 +171,8 @@ async function lookupWorkspaceId(
             eq(schema.activityTable.taskId, schema.taskTable.id),
           )
           .innerJoin(
-            schema.projectTable,
-            eq(schema.taskTable.projectId, schema.projectTable.id),
+            schema.teamTable,
+            eq(schema.taskTable.teamId, schema.teamTable.id),
           )
           .where(eq(schema.activityTable.id, id))
           .limit(1);
@@ -182,7 +182,7 @@ async function lookupWorkspaceId(
       case "comment": {
         const [comment] = await db
           .select({
-            workspaceId: schema.projectTable.workspaceId,
+            workspaceId: schema.teamTable.workspaceId,
           })
           .from(schema.commentTable)
           .innerJoin(
@@ -190,8 +190,8 @@ async function lookupWorkspaceId(
             eq(schema.commentTable.taskId, schema.taskTable.id),
           )
           .innerJoin(
-            schema.projectTable,
-            eq(schema.taskTable.projectId, schema.projectTable.id),
+            schema.teamTable,
+            eq(schema.taskTable.teamId, schema.teamTable.id),
           )
           .where(eq(schema.commentTable.id, id))
           .limit(1);
@@ -201,12 +201,12 @@ async function lookupWorkspaceId(
       case "column": {
         const [column] = await db
           .select({
-            workspaceId: schema.projectTable.workspaceId,
+            workspaceId: schema.teamTable.workspaceId,
           })
           .from(schema.columnTable)
           .innerJoin(
-            schema.projectTable,
-            eq(schema.columnTable.projectId, schema.projectTable.id),
+            schema.teamTable,
+            eq(schema.columnTable.teamId, schema.teamTable.id),
           )
           .where(eq(schema.columnTable.id, id))
           .limit(1);

@@ -1,7 +1,7 @@
 import { and, eq, max } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
-import { columnTable, taskTable, userTable } from "../../database/schema";
+import { columnTable, projectTable, taskTable, userTable } from "../../database/schema";
 import { publishEvent } from "../../events";
 import { assertValidTaskStatus } from "../validate-task-fields";
 import getNextTaskNumber from "./get-next-task-number";
@@ -25,21 +25,30 @@ async function createTask({
   description?: string;
   priority?: string;
 }) {
+  const project = await db.query.projectTable.findFirst({
+    where: eq(projectTable.id, projectId),
+  });
+
+  if (!project) {
+    throw new HTTPException(404, { message: "Project not found" });
+  }
+
+  const teamId = project.teamId;
   const resolvedStatus = status || "to-do";
   const resolvedPriority = priority || "no-priority";
 
-  await assertValidTaskStatus(resolvedStatus, projectId);
+  await assertValidTaskStatus(resolvedStatus, teamId);
 
   const [assignee] = await db
     .select({ name: userTable.name })
     .from(userTable)
     .where(eq(userTable.id, userId ?? ""));
 
-  const nextTaskNumber = await getNextTaskNumber(projectId);
+  const nextTaskNumber = await getNextTaskNumber(teamId);
 
   const column = await db.query.columnTable.findFirst({
     where: and(
-      eq(columnTable.projectId, projectId),
+      eq(columnTable.teamId, teamId),
       eq(columnTable.slug, resolvedStatus),
     ),
   });
@@ -49,7 +58,7 @@ async function createTask({
     .from(taskTable)
     .where(
       and(
-        eq(taskTable.projectId, projectId),
+        eq(taskTable.teamId, teamId),
         column?.id
           ? eq(taskTable.columnId, column.id)
           : eq(taskTable.status, resolvedStatus),
@@ -61,6 +70,7 @@ async function createTask({
   const [createdTask] = await db
     .insert(taskTable)
     .values({
+      teamId,
       projectId,
       userId: userId || null,
       title: title || "",

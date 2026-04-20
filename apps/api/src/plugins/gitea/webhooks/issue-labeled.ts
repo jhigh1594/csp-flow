@@ -206,11 +206,12 @@ export async function handleGiteaIssueLabeled(payload: IssueLabeledPayload) {
           },
         });
 
-        if (task?.project?.workspaceId) {
+        const taskProjectWorkspaceId = task?.project?.workspaceId;
+        if (task && taskProjectWorkspaceId) {
           const existingLabel = await db.query.labelTable.findFirst({
             where: (table, { and, eq: e }) =>
               and(
-                e(table.workspaceId, task.project.workspaceId),
+                e(table.workspaceId, taskProjectWorkspaceId),
                 e(table.name, addedLabel.name),
                 e(table.taskId, task.id),
               ),
@@ -226,7 +227,7 @@ export async function handleGiteaIssueLabeled(payload: IssueLabeledPayload) {
                 name: addedLabel.name,
                 color,
                 taskId: task.id,
-                workspaceId: task.project.workspaceId,
+                workspaceId: taskProjectWorkspaceId,
               })
               .onConflictDoNothing({
                 target: [labelTable.taskId, labelTable.name],

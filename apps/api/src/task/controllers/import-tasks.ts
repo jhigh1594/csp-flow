@@ -31,9 +31,10 @@ async function importTasks(projectId: string, tasksToImport: ImportTask[]) {
     });
   }
 
-  const nextTaskNumber = await getNextTaskNumber(projectId);
+  const teamId = project.teamId;
+  const nextTaskNumber = await getNextTaskNumber(teamId);
   let taskNumber = nextTaskNumber;
-  const validStatuses = await getValidTaskStatuses(projectId);
+  const validStatuses = await getValidTaskStatuses(teamId);
 
   const results = [];
 
@@ -50,7 +51,7 @@ async function importTasks(projectId: string, tasksToImport: ImportTask[]) {
 
       const column = await db.query.columnTable.findFirst({
         where: and(
-          eq(columnTable.projectId, projectId),
+          eq(columnTable.teamId, teamId),
           eq(columnTable.slug, status),
         ),
       });
@@ -58,6 +59,7 @@ async function importTasks(projectId: string, tasksToImport: ImportTask[]) {
       const [createdTask] = await db
         .insert(taskTable)
         .values({
+          teamId,
           projectId,
           userId: taskData.userId || null,
           title: taskData.title,

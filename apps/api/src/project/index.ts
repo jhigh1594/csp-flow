@@ -70,15 +70,16 @@ const project = new Hono<{
       v.object({
         name: v.string(),
         workspaceId: v.string(),
+        teamId: v.string(),
         icon: v.string(),
         slug: v.string(),
       }),
     ),
     workspaceAccess.fromBody(),
     async (c) => {
-      const { name, icon, slug } = c.req.valid("json");
+      const { name, icon, slug, teamId } = c.req.valid("json");
       const workspaceId = c.get("workspaceId");
-      const newProject = await createProjectCtrl(workspaceId, name, icon, slug);
+      const newProject = await createProjectCtrl(workspaceId, name, icon, slug, teamId);
       return c.json(newProject);
     },
   )

@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
-import { columnTable } from "../../database/schema";
+import { columnTable, projectTable } from "../../database/schema";
 import { VIRTUAL_STATUSES } from "../../task/validate-task-fields";
 
 function toSlug(name: string): string {
@@ -25,6 +25,15 @@ async function createColumn({
   color?: string;
   isFinal?: boolean;
 }) {
+  const project = await db.query.projectTable.findFirst({
+    where: eq(projectTable.id, projectId),
+  });
+
+  if (!project) {
+    throw new HTTPException(404, { message: "Project not found" });
+  }
+
+  const teamId = project.teamId;
   const slug = toSlug(name);
 
   if (!slug) {
@@ -43,12 +52,12 @@ async function createColumn({
     .select({ id: columnTable.id })
     .from(columnTable)
     .where(
-      sql`${columnTable.projectId} = ${projectId} AND ${columnTable.slug} = ${slug}`,
+      sql`${columnTable.teamId} = ${teamId} AND ${columnTable.slug} = ${slug}`,
     );
 
   if (existing.length > 0) {
     throw new HTTPException(409, {
-      message: `Column with slug "${slug}" already exists in this project`,
+      message: `Column with slug "${slug}" already exists in this team`,
     });
   }
 
@@ -57,14 +66,14 @@ async function createColumn({
       maxPosition: sql<number>`COALESCE(MAX(${columnTable.position}), -1)`,
     })
     .from(columnTable)
-    .where(eq(columnTable.projectId, projectId));
+    .where(eq(columnTable.teamId, teamId));
 
   const position = (maxPos?.maxPosition ?? -1) + 1;
 
   const [created] = await db
     .insert(columnTable)
     .values({
-      projectId,
+      teamId,
       name,
       slug,
       position,

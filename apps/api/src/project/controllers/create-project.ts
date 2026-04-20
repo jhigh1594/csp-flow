@@ -6,11 +6,13 @@ async function createProject(
   name: string,
   icon: string,
   slug: string,
+  teamId: string,
 ) {
   const [createdProject] = await db
     .insert(projectTable)
     .values({
       workspaceId,
+      teamId,
       name,
       icon,
       slug,
