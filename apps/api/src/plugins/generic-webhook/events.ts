@@ -41,8 +41,9 @@ function isEnabled(
 
 async function getTaskData(
   taskId: string,
-  projectId: string,
+  projectId: string | null,
 ): Promise<GenericWebhookTaskData | null> {
+  if (!projectId) return null;
   const [taskRow] = await db
     .select({
       id: taskTable.id,
@@ -96,9 +97,10 @@ async function getActor(userId: string | null): Promise<{
 }
 
 async function persistWebhookHealth(
-  projectId: string,
+  projectId: string | null,
   update: (config: GenericWebhookConfig) => GenericWebhookConfig,
 ): Promise<void> {
+  if (!projectId) return;
   try {
     const integration = await db.query.integrationTable.findFirst({
       where: and(
@@ -134,7 +136,7 @@ async function sendEvent(
   config: GenericWebhookConfig,
   eventName: string,
   taskId: string,
-  projectId: string,
+  projectId: string | null,
   userId: string | null,
   data: Record<string, unknown>,
 ): Promise<void> {
@@ -145,7 +147,7 @@ async function sendEvent(
   const attempt = {
     eventName,
     taskId,
-    projectId,
+    projectId: task.projectId,
     webhookUrl: config.webhookUrl,
   };
 

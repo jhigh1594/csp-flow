@@ -12,6 +12,7 @@ export const labelSchema = v.object({
 export const projectSchema = v.object({
   id: v.string(),
   workspaceId: v.string(),
+  teamId: v.nullable(v.string()),
   slug: v.string(),
   icon: v.nullable(v.string()),
   name: v.string(),
