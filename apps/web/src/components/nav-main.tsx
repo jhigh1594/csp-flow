@@ -44,6 +44,14 @@ export function NavMain() {
       badge: null,
     },
     {
+      title: "Program Tracker",
+      url: `/dashboard/workspace/${workspace.id}/program`,
+      isActive: window.location.pathname.startsWith(
+        `/dashboard/workspace/${workspace.id}/program`,
+      ),
+      badge: null,
+    },
+    {
       title: t("navigation:sidebar.invitations"),
       url: "/dashboard/invitations",
       isActive: window.location.pathname === "/dashboard/invitations",

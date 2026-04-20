@@ -931,4 +931,119 @@ export function registerMcpTools(
         }),
       ),
   );
+
+  server.registerTool(
+    "program_list_teams",
+    {
+      description:
+        "List all program teams in a workspace with their latest health status, open risk count, and next milestone date.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/program/${encodeURIComponent(args.workspaceId)}/teams`),
+      ),
+  );
+
+  server.registerTool(
+    "program_get_team_status",
+    {
+      description:
+        "Get full workstream data for a program team: current week status, lifecycle milestone dates, risks, and roadmap releases.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+        teamId: nonEmptyString.describe("Team ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(
+          `/api/program/${encodeURIComponent(args.workspaceId)}/teams/${encodeURIComponent(args.teamId)}/status`,
+        ),
+      ),
+  );
+
+  server.registerTool(
+    "program_upsert_team_status",
+    {
+      description:
+        "Save (or update) the weekly status for a program team. Sets the health (green/amber/red), accomplishments, next week focus, and leadership asks for the current week.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+        teamId: nonEmptyString.describe("Team ID"),
+        health: z.enum(["green", "amber", "red"]).describe("RAG health status"),
+        accomplishments: z
+          .string()
+          .optional()
+          .describe("What the team accomplished this week"),
+        nextWeekFocus: z
+          .string()
+          .optional()
+          .describe("What the team will focus on next week"),
+        leadershipAsks: z
+          .string()
+          .optional()
+          .describe("Escalations or asks for leadership"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(
+          `/api/program/${encodeURIComponent(args.workspaceId)}/teams/${encodeURIComponent(args.teamId)}/status`,
+          {
+            method: "PUT",
+            body: JSON.stringify({
+              health: args.health,
+              accomplishments: args.accomplishments ?? null,
+              nextWeekFocus: args.nextWeekFocus ?? null,
+              leadershipAsks: args.leadershipAsks ?? null,
+            }),
+          },
+        ),
+      ),
+  );
+
+  server.registerTool(
+    "program_get_roadmap",
+    {
+      description:
+        "Get all roadmap releases across all program teams in a workspace, sorted by fiscal year and quarter.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/program/${encodeURIComponent(args.workspaceId)}/roadmap`),
+      ),
+  );
+
+  server.registerTool(
+    "program_get_week_diff",
+    {
+      description:
+        "Get a week-over-week diff for all program teams in a workspace. Shows RAG changes, text updates, demand date changes, risk status changes, and roadmap moves between two weeks.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+        from: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/)
+          .describe("Earlier week start date (YYYY-MM-DD)"),
+        to: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/)
+          .describe("Later week start date (YYYY-MM-DD)"),
+      }),
+    },
+    async (args) => {
+      const qs = new URLSearchParams({ from: args.from, to: args.to });
+      return run(() =>
+        client.json(
+          `/api/program/${encodeURIComponent(args.workspaceId)}/snapshots/diff?${qs.toString()}`,
+        ),
+      );
+    },
+  );
 }
