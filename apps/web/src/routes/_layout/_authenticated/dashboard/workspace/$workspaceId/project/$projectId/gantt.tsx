@@ -390,15 +390,9 @@ function RouteComponent() {
   const effectiveZoom: ZoomLevel = isMobile ? "day" : zoom;
   const mobileColWidth = isMobile ? 3.125 : undefined;
 
-  const milestoneDates = useMemo(
-    () => milestones.map((m) => parseISO(m.targetDate)),
-    [milestones],
-  );
-
   const timeline = useMemo(
-    () =>
-      buildTimeline(parsedTasks, effectiveZoom, mobileColWidth, milestoneDates),
-    [parsedTasks, effectiveZoom, mobileColWidth, milestoneDates],
+    () => buildTimeline(parsedTasks, effectiveZoom, mobileColWidth),
+    [parsedTasks, effectiveZoom, mobileColWidth],
   );
 
   useLayoutEffect(() => {

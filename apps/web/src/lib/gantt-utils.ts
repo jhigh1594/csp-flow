@@ -1,7 +1,5 @@
 import {
-  addDays,
   addMonths,
-  addWeeks,
   differenceInCalendarDays,
   differenceInCalendarMonths,
   differenceInCalendarWeeks,
@@ -43,7 +41,6 @@ export function buildTimeline(
   tasks: ScheduledTask[],
   zoom: ZoomLevel,
   columnWidthRemOverride?: number,
-  extraDates?: Date[],
 ): GanttTimeline | null {
   if (tasks.length === 0) return null;
 
@@ -51,42 +48,28 @@ export function buildTimeline(
     (cur, t) => (t.scheduleStart < cur ? t.scheduleStart : cur),
     tasks[0].scheduleStart,
   );
-  let latest = tasks.reduce(
-    (cur, t) => (t.scheduleEnd > cur ? t.scheduleEnd : cur),
-    tasks[0].scheduleEnd,
-  );
 
-  // Always extend to today so the current date is visible
-  const today = new Date();
-  if (today > latest) latest = today;
-
-  if (extraDates) {
-    for (const d of extraDates) {
-      if (d > latest) latest = d;
-    }
-  }
-
+  const now = new Date();
   let rangeStart: Date;
   let days: Date[];
 
   if (zoom === "day") {
-    const weekStart = startOfWeek(earliest, { weekStartsOn: 1 });
-    const weekEnd = endOfWeek(latest, { weekStartsOn: 1 });
-    rangeStart = subDays(weekStart, 7);
-    const rangeEnd = addDays(weekEnd, 28);
+    rangeStart = subDays(startOfWeek(earliest, { weekStartsOn: 1 }), 7);
+    const rangeEnd = endOfMonth(addMonths(now, 24));
     days = eachDayOfInterval({ start: rangeStart, end: rangeEnd });
   } else if (zoom === "week") {
-    const ws = startOfWeek(earliest, { weekStartsOn: 1 });
-    const we = endOfWeek(latest, { weekStartsOn: 1 });
-    rangeStart = startOfWeek(subWeeks(ws, 2), { weekStartsOn: 1 });
-    const rangeEnd = endOfWeek(addWeeks(we, 6), { weekStartsOn: 1 });
+    rangeStart = startOfWeek(
+      subWeeks(startOfWeek(earliest, { weekStartsOn: 1 }), 2),
+      { weekStartsOn: 1 },
+    );
+    const rangeEnd = endOfWeek(addMonths(now, 36), { weekStartsOn: 1 });
     days = eachWeekOfInterval(
       { start: rangeStart, end: rangeEnd },
       { weekStartsOn: 1 },
     );
   } else {
     rangeStart = startOfMonth(subMonths(earliest, 1));
-    const rangeEnd = endOfMonth(addMonths(latest, 3));
+    const rangeEnd = endOfMonth(addMonths(now, 60));
     days = eachMonthOfInterval({ start: rangeStart, end: rangeEnd });
   }
 
