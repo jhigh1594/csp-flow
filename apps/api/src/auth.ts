@@ -4,6 +4,7 @@ import {
   sendOtpEmail,
   sendWorkspaceInvitationEmail,
 } from "@kaneo/email";
+import { createId } from "@paralleldrive/cuid2";
 import bcrypt from "bcrypt";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -75,6 +76,12 @@ if (process.env.AUTH_SECRET && process.env.AUTH_SECRET.length < 32) {
     "AUTH_SECRET is less than 32 characters, please generate a new one.",
   );
   process.exit(1);
+}
+
+function deriveTeamIdentifier(name: string): string {
+  const alpha = name.replace(/[^a-zA-Z]/g, "");
+  const candidate = alpha.slice(0, 3).toUpperCase();
+  return candidate.length >= 2 ? candidate : "TEAM";
 }
 
 async function getUserLocale(email: string) {
@@ -274,6 +281,56 @@ export const auth = betterAuth({
             ownerEmail: user.name,
             ownerId: user.id,
           });
+
+          try {
+            const teamId = createId();
+            const now = new Date();
+
+            await db.insert(schema.teamTable).values({
+              id: teamId,
+              name: "Engineering",
+              identifier: deriveTeamIdentifier(organization.name),
+              workspaceId: organization.id,
+              createdAt: now,
+              updatedAt: now,
+            });
+
+            const defaultColumns = [
+              { slug: "todo", name: "Todo", position: 0, isFinal: false },
+              {
+                slug: "in-progress",
+                name: "In Progress",
+                position: 1,
+                isFinal: false,
+              },
+              {
+                slug: "in-review",
+                name: "In Review",
+                position: 2,
+                isFinal: false,
+              },
+              { slug: "done", name: "Done", position: 3, isFinal: true },
+            ];
+
+            for (const col of defaultColumns) {
+              await db.insert(schema.columnTable).values({
+                id: createId(),
+                teamId,
+                name: col.name,
+                slug: col.slug,
+                position: col.position,
+                isFinal: col.isFinal,
+                createdAt: now,
+                updatedAt: now,
+              });
+            }
+          } catch (err) {
+            console.error(
+              "[afterCreateOrganization] Failed to create default team/columns for workspace",
+              organization.id,
+              err,
+            );
+          }
         },
       },
       async sendInvitationEmail(data) {

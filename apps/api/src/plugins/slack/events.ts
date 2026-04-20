@@ -57,9 +57,10 @@ function truncate(value: string, maxLength: number): string {
 
 async function getSlackEventData(
   taskId: string,
-  projectId: string,
+  projectId: string | null,
   userId: string | null,
 ): Promise<SlackEventData | null> {
+  if (!projectId) return null;
   const [taskRow] = await db
     .select({
       title: taskTable.title,

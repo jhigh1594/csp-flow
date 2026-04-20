@@ -79,7 +79,7 @@ async function processReminder(
     title: string;
     userId: string | null;
     dueDate: Date | null;
-    projectId: string;
+    projectId: string | null;
   },
   reminderType: ReminderType,
   notificationType: "due_date_reminder" | "task_overdue",

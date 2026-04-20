@@ -314,7 +314,7 @@ const task = new Hono<{
         dueDate: v.optional(v.string()),
         priority: v.picklist(VALID_PRIORITIES),
         status: v.string(),
-        projectId: v.string(),
+        projectId: v.nullable(v.string()),
         position: v.number(),
         userId: v.optional(v.string()),
       }),
@@ -812,7 +812,7 @@ const task = new Hono<{
           workspaceId: workspaceTable.id,
         })
         .from(taskTable)
-        .innerJoin(projectTable, eq(taskTable.projectId, projectTable.id))
+        .leftJoin(projectTable, eq(taskTable.projectId, projectTable.id))
         .innerJoin(
           workspaceTable,
           eq(projectTable.workspaceId, workspaceTable.id),
@@ -822,6 +822,12 @@ const task = new Hono<{
 
       if (!taskContext) {
         throw new HTTPException(404, { message: "Task not found" });
+      }
+
+      if (!taskContext.projectId) {
+        throw new HTTPException(400, {
+          message: "Image uploads require a task associated with a project",
+        });
       }
 
       try {
@@ -896,7 +902,7 @@ const task = new Hono<{
           workspaceId: workspaceTable.id,
         })
         .from(taskTable)
-        .innerJoin(projectTable, eq(taskTable.projectId, projectTable.id))
+        .leftJoin(projectTable, eq(taskTable.projectId, projectTable.id))
         .innerJoin(
           workspaceTable,
           eq(projectTable.workspaceId, workspaceTable.id),
@@ -906,6 +912,12 @@ const task = new Hono<{
 
       if (!taskContext) {
         throw new HTTPException(404, { message: "Task not found" });
+      }
+
+      if (!taskContext.projectId) {
+        throw new HTTPException(400, {
+          message: "Image uploads require a task associated with a project",
+        });
       }
 
       const normalizedKey = key.trim();
@@ -963,6 +975,12 @@ const task = new Hono<{
             .returning({
               id: assetTable.id,
             });
+
+      if (!asset) {
+        throw new HTTPException(500, {
+          message: "Failed to save asset record",
+        });
+      }
 
       return c.json({
         id: asset.id,

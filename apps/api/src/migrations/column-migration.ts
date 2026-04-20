@@ -5,6 +5,7 @@ import {
   integrationTable,
   projectTable,
   taskTable,
+  teamTable,
   workflowRuleTable,
 } from "../database/schema";
 
@@ -24,30 +25,30 @@ const EVENT_MAPPING: Record<string, string> = {
 export async function migrateColumns() {
   console.log("🔄 Starting column migration...");
 
-  const projects = await db.select().from(projectTable);
+  const teams = await db.select().from(teamTable);
 
-  if (projects.length === 0) {
-    console.log("No projects found, skipping column migration");
+  if (teams.length === 0) {
+    console.log("No teams found, skipping column migration");
     return;
   }
 
-  for (const project of projects) {
-    const projectColumns = await db
+  for (const team of teams) {
+    const teamColumns = await db
       .select({
         id: columnTable.id,
         slug: columnTable.slug,
       })
       .from(columnTable)
-      .where(eq(columnTable.projectId, project.id));
+      .where(eq(columnTable.teamId, team.id));
 
     const columnMap = new Map<string, string>(
-      projectColumns.map((column) => [column.slug, column.id]),
+      teamColumns.map((column) => [column.slug, column.id]),
     );
 
-    // Only seed missing default slugs for legacy projects that have no columns yet.
-    // If the project already has columns, missing slugs are intentional (user removed them);
+    // Only seed missing default slugs for legacy teams that have no columns yet.
+    // If the team already has columns, missing slugs are intentional (user removed them);
     // re-inserting on every startup would undo deletions after each API restart.
-    if (projectColumns.length === 0) {
+    if (teamColumns.length === 0) {
       for (const defaultColumn of DEFAULT_COLUMNS) {
         if (columnMap.has(defaultColumn.slug)) {
           continue;
@@ -56,7 +57,7 @@ export async function migrateColumns() {
         const [inserted] = await db
           .insert(columnTable)
           .values({
-            projectId: project.id,
+            teamId: team.id,
             name: defaultColumn.name,
             slug: defaultColumn.slug,
             position: defaultColumn.position,
@@ -75,77 +76,83 @@ export async function migrateColumns() {
         .update(taskTable)
         .set({ columnId })
         .where(
-          sql`${taskTable.projectId} = ${project.id}
+          sql`${taskTable.teamId} = ${team.id}
               AND ${taskTable.status} = ${slug}
               AND ${taskTable.columnId} IS DISTINCT FROM ${columnId}`,
         );
     }
 
-    const integrations = await db.query.integrationTable.findMany({
-      where: eq(integrationTable.projectId, project.id),
-    });
+    // Migrate workflow rules for all projects in this team
+    const teamProjects = await db
+      .select({ id: projectTable.id })
+      .from(projectTable)
+      .where(eq(projectTable.teamId, team.id));
 
-    for (const integration of integrations) {
-      if (
-        (integration.type !== "github" && integration.type !== "gitea") ||
-        !integration.isActive
-      ) {
-        continue;
-      }
+    for (const project of teamProjects) {
+      const integrations = await db.query.integrationTable.findMany({
+        where: eq(integrationTable.projectId, project.id),
+      });
 
-      const forgeType = integration.type as "github" | "gitea";
-
-      try {
-        const config = JSON.parse(integration.config);
-        const transitions = config.statusTransitions || {};
-
-        for (const [configKey, eventType] of Object.entries(EVENT_MAPPING)) {
-          const targetSlug = transitions[configKey];
-          if (!targetSlug) continue;
-
-          const targetColumnId = columnMap.get(targetSlug);
-          if (!targetColumnId) continue;
-
-          await ensureMigrationWorkflowRule(
-            project.id,
-            forgeType,
-            eventType as string,
-            targetColumnId,
-          );
+      for (const integration of integrations) {
+        if (
+          (integration.type !== "github" && integration.type !== "gitea") ||
+          !integration.isActive
+        ) {
+          continue;
         }
 
-        // Add default rules for issue events
-        const todoColumnId = columnMap.get("to-do");
-        const doneColumnId = columnMap.get("done");
+        const forgeType = integration.type as "github" | "gitea";
 
-        if (todoColumnId) {
-          await ensureMigrationWorkflowRule(
-            project.id,
-            forgeType,
-            "issue_opened",
-            todoColumnId,
+        try {
+          const config = JSON.parse(integration.config);
+          const transitions = config.statusTransitions || {};
+
+          for (const [configKey, eventType] of Object.entries(EVENT_MAPPING)) {
+            const targetSlug = transitions[configKey];
+            if (!targetSlug) continue;
+
+            const targetColumnId = columnMap.get(targetSlug);
+            if (!targetColumnId) continue;
+
+            await ensureMigrationWorkflowRule(
+              project.id,
+              forgeType,
+              eventType as string,
+              targetColumnId,
+            );
+          }
+
+          // Add default rules for issue events
+          const todoColumnId = columnMap.get("to-do");
+          const doneColumnId = columnMap.get("done");
+
+          if (todoColumnId) {
+            await ensureMigrationWorkflowRule(
+              project.id,
+              forgeType,
+              "issue_opened",
+              todoColumnId,
+            );
+          }
+
+          if (doneColumnId) {
+            await ensureMigrationWorkflowRule(
+              project.id,
+              forgeType,
+              "issue_closed",
+              doneColumnId,
+            );
+          }
+        } catch {
+          console.error(
+            `Failed to migrate workflow rules for integration ${integration.id}`,
           );
         }
-
-        if (doneColumnId) {
-          await ensureMigrationWorkflowRule(
-            project.id,
-            forgeType,
-            "issue_closed",
-            doneColumnId,
-          );
-        }
-      } catch {
-        console.error(
-          `Failed to migrate workflow rules for integration ${integration.id}`,
-        );
       }
     }
   }
 
-  console.log(
-    `✅ Column migration complete! Migrated ${projects.length} projects`,
-  );
+  console.log(`✅ Column migration complete! Migrated ${teams.length} teams`);
 }
 
 async function ensureMigrationWorkflowRule(

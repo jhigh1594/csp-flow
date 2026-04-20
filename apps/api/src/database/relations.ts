@@ -102,6 +102,10 @@ export const projectTableRelations = relations(
       fields: [projectTable.workspaceId],
       references: [workspaceTable.id],
     }),
+    team: one(teamTable, {
+      fields: [projectTable.teamId],
+      references: [teamTable.id],
+    }),
     tasks: many(taskTable),
     assets: many(assetTable),
     columns: many(columnTable),
@@ -137,9 +141,9 @@ export const wikiPageTableRelations = relations(wikiPageTable, ({ one }) => ({
 }));
 
 export const columnTableRelations = relations(columnTable, ({ one, many }) => ({
-  project: one(projectTable, {
-    fields: [columnTable.projectId],
-    references: [projectTable.id],
+  team: one(teamTable, {
+    fields: [columnTable.teamId],
+    references: [teamTable.id],
   }),
   tasks: many(taskTable),
   workflowRules: many(workflowRuleTable),
@@ -160,6 +164,10 @@ export const workflowRuleTableRelations = relations(
 );
 
 export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
+  team: one(teamTable, {
+    fields: [taskTable.teamId],
+    references: [teamTable.id],
+  }),
   project: one(projectTable, {
     fields: [taskTable.projectId],
     references: [projectTable.id],
@@ -313,6 +321,9 @@ export const teamTableRelations = relations(teamTable, ({ one, many }) => ({
     references: [workspaceTable.id],
   }),
   teamMembers: many(teamMemberTable),
+  columns: many(columnTable),
+  tasks: many(taskTable),
+  projects: many(projectTable),
 }));
 
 export const teamMemberTableRelations = relations(

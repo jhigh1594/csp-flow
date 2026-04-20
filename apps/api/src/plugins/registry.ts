@@ -172,6 +172,10 @@ function createContext(integration: {
 export async function broadcastTaskCreated(
   event: TaskCreatedEvent,
 ): Promise<void> {
+  if (!event.projectId) {
+    console.info("Skipping plugin dispatch for team-level task (no project)");
+    return;
+  }
   const integrations = await getActiveIntegrations(event.projectId);
 
   for (const integration of integrations) {
@@ -191,6 +195,10 @@ export async function broadcastTaskCreated(
 export async function broadcastTaskStatusChanged(
   event: TaskStatusChangedEvent,
 ): Promise<void> {
+  if (!event.projectId) {
+    console.info("Skipping plugin dispatch for team-level task (no project)");
+    return;
+  }
   const integrations = await getActiveIntegrations(event.projectId);
 
   for (const integration of integrations) {
@@ -213,6 +221,10 @@ export async function broadcastTaskStatusChanged(
 export async function broadcastTaskPriorityChanged(
   event: TaskPriorityChangedEvent,
 ): Promise<void> {
+  if (!event.projectId) {
+    console.info("Skipping plugin dispatch for team-level task (no project)");
+    return;
+  }
   const integrations = await getActiveIntegrations(event.projectId);
 
   for (const integration of integrations) {
@@ -235,6 +247,10 @@ export async function broadcastTaskPriorityChanged(
 export async function broadcastTaskTitleChanged(
   event: TaskTitleChangedEvent,
 ): Promise<void> {
+  if (!event.projectId) {
+    console.info("Skipping plugin dispatch for team-level task (no project)");
+    return;
+  }
   const integrations = await getActiveIntegrations(event.projectId);
 
   for (const integration of integrations) {
@@ -257,6 +273,10 @@ export async function broadcastTaskTitleChanged(
 export async function broadcastTaskDescriptionChanged(
   event: TaskDescriptionChangedEvent,
 ): Promise<void> {
+  if (!event.projectId) {
+    console.info("Skipping plugin dispatch for team-level task (no project)");
+    return;
+  }
   const integrations = await getActiveIntegrations(event.projectId);
 
   for (const integration of integrations) {
@@ -279,6 +299,10 @@ export async function broadcastTaskDescriptionChanged(
 export async function broadcastTaskCommentCreated(
   event: TaskCommentCreatedEvent,
 ): Promise<void> {
+  if (!event.projectId) {
+    console.info("Skipping plugin dispatch for team-level task (no project)");
+    return;
+  }
   const integrations = await getActiveIntegrations(event.projectId);
 
   for (const integration of integrations) {

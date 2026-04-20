@@ -220,7 +220,7 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
   const projectColumns = await db
     .select()
     .from(columnTable)
-    .where(eq(columnTable.projectId, projectId))
+    .where(eq(columnTable.teamId, project.teamId))
     .orderBy(asc(columnTable.position));
 
   const columns = projectColumns.map((column) => ({

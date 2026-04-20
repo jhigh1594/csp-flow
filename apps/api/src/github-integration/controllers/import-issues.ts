@@ -236,9 +236,18 @@ async function importSingleIssue(
     return "updated";
   }
 
-  const nextTaskNumber = await getNextTaskNumber(projectId);
+  const project = await db.query.projectTable.findFirst({
+    where: eq(projectTable.id, projectId),
+  });
+
+  if (!project) {
+    throw new HTTPException(404, { message: "Project not found" });
+  }
+
+  const nextTaskNumber = await getNextTaskNumber(project.teamId);
 
   const taskValues: typeof taskTable.$inferInsert = {
+    teamId: project.teamId,
     projectId,
     userId: null,
     title: issue.title,

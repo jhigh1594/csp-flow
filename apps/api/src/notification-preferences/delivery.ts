@@ -6,6 +6,7 @@ import {
   notificationTable,
   projectTable,
   taskTable,
+  teamTable,
   userNotificationPreferenceTable,
   userNotificationWorkspaceRuleTable,
   userTable,
@@ -165,36 +166,66 @@ async function resolveNotificationContext(notification: {
   }
 
   if (notification.resourceType === "task") {
-    const [task] = await db
+    const [taskRow] = await db
       .select({
         taskId: taskTable.id,
         taskTitle: taskTable.title,
-        projectId: projectTable.id,
-        projectName: projectTable.name,
-        workspaceId: workspaceTable.id,
-        workspaceName: workspaceTable.name,
+        projectId: taskTable.projectId,
+        workspaceId: teamTable.workspaceId,
       })
       .from(taskTable)
-      .innerJoin(projectTable, eq(taskTable.projectId, projectTable.id))
+      .innerJoin(teamTable, eq(taskTable.teamId, teamTable.id))
+      .where(eq(taskTable.id, notification.resourceId))
+      .limit(1);
+
+    if (!taskRow) {
+      return null;
+    }
+
+    // Team-level tasks (null projectId) are not yet supported for project-scoped
+    // notification subscriptions. Skip delivery silently per plan scope boundary.
+    if (!taskRow.projectId) {
+      console.info(
+        "Notification delivery skipped: team-level task has no project context",
+        {
+          notificationId: notification.resourceId,
+          resourceType: notification.resourceType,
+          reason: "team-level task notification delivery not yet implemented",
+        },
+      );
+      return null;
+    }
+
+    const [project] = await db
+      .select({
+        projectId: projectTable.id,
+        projectName: projectTable.name,
+        workspaceName: workspaceTable.name,
+      })
+      .from(projectTable)
       .innerJoin(
         workspaceTable,
         eq(projectTable.workspaceId, workspaceTable.id),
       )
-      .where(eq(taskTable.id, notification.resourceId))
+      .where(eq(projectTable.id, taskRow.projectId))
       .limit(1);
 
-    if (!task) {
+    if (!project) {
       return null;
     }
 
     return {
-      workspaceId: task.workspaceId,
-      workspaceName: task.workspaceName,
-      projectId: task.projectId,
-      projectName: task.projectName,
-      taskId: task.taskId,
-      taskTitle: task.taskTitle,
-      taskUrl: buildTaskUrl(task.workspaceId, task.projectId, task.taskId),
+      workspaceId: taskRow.workspaceId,
+      workspaceName: project.workspaceName,
+      projectId: project.projectId,
+      projectName: project.projectName,
+      taskId: taskRow.taskId,
+      taskTitle: taskRow.taskTitle,
+      taskUrl: buildTaskUrl(
+        taskRow.workspaceId,
+        project.projectId,
+        taskRow.taskId,
+      ),
     };
   }
 

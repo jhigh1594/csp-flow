@@ -31,7 +31,7 @@ type Task = {
   assigneeId: string | null;
   assigneeName: string | null;
   assigneeImage?: string | null;
-  projectId: string;
+  projectId: string | null;
   milestoneId: string | null;
   columnId?: string | null;
   roadmapGroup?: string | null;

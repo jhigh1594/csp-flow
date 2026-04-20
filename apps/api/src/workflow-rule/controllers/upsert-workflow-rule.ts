@@ -1,7 +1,11 @@
 import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
-import { columnTable, workflowRuleTable } from "../../database/schema";
+import {
+  columnTable,
+  projectTable,
+  workflowRuleTable,
+} from "../../database/schema";
 
 async function upsertWorkflowRule({
   projectId,
@@ -14,16 +18,24 @@ async function upsertWorkflowRule({
   eventType: string;
   columnId: string;
 }) {
+  const project = await db.query.projectTable.findFirst({
+    where: eq(projectTable.id, projectId),
+  });
+
+  if (!project) {
+    throw new HTTPException(404, { message: "Project not found" });
+  }
+
   const targetColumn = await db.query.columnTable.findFirst({
     where: and(
       eq(columnTable.id, columnId),
-      eq(columnTable.projectId, projectId),
+      eq(columnTable.teamId, project.teamId),
     ),
   });
 
   if (!targetColumn) {
     throw new HTTPException(400, {
-      message: "Column does not belong to the provided project",
+      message: "Column does not belong to the provided project's team",
     });
   }
 

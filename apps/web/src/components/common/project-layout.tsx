@@ -230,6 +230,7 @@ export default function ProjectLayout({
       <CreateProjectModal
         open={isCreateProjectModalOpen}
         onClose={() => setIsCreateProjectModalOpen(false)}
+        teamId={project?.teamId}
       />
     </Layout>
   );

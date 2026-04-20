@@ -97,6 +97,10 @@ export async function handleGiteaIssueReopened(payload: IssueReopenedPayload) {
         }
       }
 
+      if (!task.projectId) {
+        continue;
+      }
+
       const targetStatus = await resolveTargetStatus(
         task.projectId,
         "issue_reopened",

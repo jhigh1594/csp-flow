@@ -248,11 +248,12 @@ async function importSingleIssue(
     const [result] = await tx
       .select({ maxNumber: max(taskTable.number) })
       .from(taskTable)
-      .where(eq(taskTable.projectId, projectId));
+      .where(eq(taskTable.teamId, lockedProject.teamId));
 
     const nextNumber = (result?.maxNumber ?? 0) + 1;
 
     const taskValues: typeof taskTable.$inferInsert = {
+      teamId: lockedProject.teamId,
       projectId,
       userId: null,
       title: issue.title,

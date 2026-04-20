@@ -20,7 +20,7 @@ function isSameProjectMove(
 }
 
 async function resolveDestinationStatus(
-  destinationProjectId: string,
+  destinationTeamId: string,
   currentStatus: string,
   requestedStatus?: string,
 ) {
@@ -31,7 +31,7 @@ async function resolveDestinationStatus(
       position: columnTable.position,
     })
     .from(columnTable)
-    .where(eq(columnTable.projectId, destinationProjectId))
+    .where(eq(columnTable.teamId, destinationTeamId))
     .orderBy(asc(columnTable.position));
 
   if (destinationColumns.length === 0) {
@@ -54,12 +54,14 @@ async function resolveDestinationStatus(
     (column) => column.slug === currentStatus,
   );
 
-  return requestedColumn ?? matchingCurrentColumn ?? destinationColumns[0];
+  // destinationColumns is non-empty (checked above), so this is always defined
+  // biome-ignore lint/style/noNonNullAssertion: length checked above
+  return (requestedColumn ?? matchingCurrentColumn ?? destinationColumns[0])!;
 }
 
 async function getNextTaskPosition(
   dbOrTx: DbOrTx,
-  projectId: string,
+  teamId: string,
   status: string,
   columnId: string,
 ) {
@@ -68,7 +70,7 @@ async function getNextTaskPosition(
     .from(taskTable)
     .where(
       and(
-        eq(taskTable.projectId, projectId),
+        eq(taskTable.teamId, teamId),
         eq(taskTable.status, status),
         eq(taskTable.columnId, columnId),
       ),
@@ -98,45 +100,56 @@ async function moveTask({
     });
   }
 
-  if (isSameProjectMove(existingTask.projectId, destinationProjectId)) {
+  if (isSameProjectMove(existingTask.projectId ?? "", destinationProjectId)) {
     throw new HTTPException(400, {
       message: "Task is already in that project",
     });
   }
 
   const [sourceProject, destinationProject] = await Promise.all([
-    db.query.projectTable.findFirst({
-      where: eq(projectTable.id, existingTask.projectId),
-    }),
+    existingTask.projectId
+      ? db.query.projectTable.findFirst({
+          where: eq(projectTable.id, existingTask.projectId),
+        })
+      : Promise.resolve(null),
     db.query.projectTable.findFirst({
       where: eq(projectTable.id, destinationProjectId),
     }),
   ]);
 
-  if (!sourceProject || !destinationProject) {
+  if (!destinationProject) {
     throw new HTTPException(404, {
       message: "Project not found",
     });
   }
 
-  if (sourceProject.workspaceId !== destinationProject.workspaceId) {
+  if (destinationProject.teamId !== existingTask.teamId) {
+    throw new HTTPException(400, {
+      message: "Tasks can only be moved within the same team",
+    });
+  }
+
+  if (
+    sourceProject &&
+    sourceProject.workspaceId !== destinationProject.workspaceId
+  ) {
     throw new HTTPException(400, {
       message: "Tasks can only be moved within the same workspace",
     });
   }
 
   const resolvedColumn = await resolveDestinationStatus(
-    destinationProjectId,
+    destinationProject.teamId,
     existingTask.status,
     destinationStatus,
   );
 
   const movedTask = await db.transaction(async (tx) => {
     const [nextTaskNumber, nextPosition] = await Promise.all([
-      getNextTaskNumber(destinationProjectId, tx),
+      getNextTaskNumber(destinationProject.teamId, tx),
       getNextTaskPosition(
         tx,
-        destinationProjectId,
+        destinationProject.teamId,
         resolvedColumn.slug,
         resolvedColumn.id,
       ),
@@ -172,10 +185,10 @@ async function moveTask({
     taskId,
     type: "task",
     userId,
-    content: `Moved task from ${sourceProject.name} to ${destinationProject.name}`,
+    content: `Moved task from ${sourceProject?.name ?? existingTask.projectId ?? "unknown"} to ${destinationProject.name}`,
     eventData: {
-      fromProjectId: sourceProject.id,
-      fromProjectName: sourceProject.name,
+      fromProjectId: sourceProject?.id ?? existingTask.projectId,
+      fromProjectName: sourceProject?.name ?? null,
       toProjectId: destinationProject.id,
       toProjectName: destinationProject.name,
       oldStatus: existingTask.status,
@@ -185,7 +198,7 @@ async function moveTask({
 
   return {
     task: movedTask,
-    sourceProjectId: sourceProject.id,
+    sourceProjectId: sourceProject?.id ?? existingTask.projectId,
     destinationProjectId: destinationProject.id,
   };
 }

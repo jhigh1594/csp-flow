@@ -21,13 +21,11 @@ export function assertValidPriority(priority: string): void {
   }
 }
 
-export async function getValidTaskStatuses(
-  projectId: string,
-): Promise<string[]> {
+export async function getValidTaskStatuses(teamId: string): Promise<string[]> {
   const columns = await db
     .select({ slug: columnTable.slug })
     .from(columnTable)
-    .where(eq(columnTable.projectId, projectId))
+    .where(eq(columnTable.teamId, teamId))
     .orderBy(asc(columnTable.position));
 
   return [...columns.map((c) => c.slug), ...VIRTUAL_STATUSES];
@@ -35,9 +33,9 @@ export async function getValidTaskStatuses(
 
 export async function assertValidTaskStatus(
   status: string,
-  projectId: string,
+  teamId: string,
 ): Promise<void> {
-  const validStatuses = await getValidTaskStatuses(projectId);
+  const validStatuses = await getValidTaskStatuses(teamId);
 
   if (!validStatuses.includes(status)) {
     throw new HTTPException(400, {

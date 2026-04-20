@@ -110,6 +110,8 @@ async function migrateTaskLinks() {
 
     if (!url || !owner || !repo || !issueNumber) continue;
 
+    if (!task.projectId) continue;
+
     const integration = await db.query.integrationTable.findFirst({
       where: and(
         eq(integrationTable.projectId, task.projectId),

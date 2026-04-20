@@ -11,7 +11,7 @@ export function useUpdateTaskMilestone() {
     }: {
       taskId: string;
       milestoneId: string | null;
-      projectId: string;
+      projectId: string | null;
     }) => updateTaskMilestone(taskId, milestoneId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

@@ -99,9 +99,10 @@ function getTaskUrl(
 
 async function getTelegramEventData(
   taskId: string,
-  projectId: string,
+  projectId: string | null,
   userId: string | null,
 ): Promise<TelegramEventData | null> {
+  if (!projectId) return null;
   const taskPromise = db
     .select({
       title: taskTable.title,
@@ -200,7 +201,7 @@ async function runTelegramHandler(
   context: PluginContext,
   event: {
     taskId: string;
-    projectId: string;
+    projectId: string | null;
     userId: string | null;
   },
   featureKey: TelegramEventKey,
