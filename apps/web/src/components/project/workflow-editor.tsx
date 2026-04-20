@@ -7,7 +7,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useUpsertWorkflowRule } from "@/hooks/mutations/workflow-rule/use-upsert-workflow-rule";
-import { useGetColumns } from "@/hooks/queries/column/use-get-columns";
+import useGetTeamColumns from "@/hooks/queries/team/use-get-team-columns";
 import { useGetWorkflowRules } from "@/hooks/queries/workflow-rule/use-get-workflow-rules";
 import { toast } from "@/lib/toast";
 
@@ -21,11 +21,12 @@ const GITHUB_EVENT_TYPES = [
 
 type WorkflowEditorProps = {
   projectId: string;
+  teamId: string;
 };
 
-export default function WorkflowEditor({ projectId }: WorkflowEditorProps) {
+export default function WorkflowEditor({ projectId, teamId }: WorkflowEditorProps) {
   const { t } = useTranslation();
-  const { data: columns, isLoading: columnsLoading } = useGetColumns(projectId);
+  const { data: columns, isLoading: columnsLoading } = useGetTeamColumns({ teamId });
   const { data: rules, isLoading: rulesLoading } =
     useGetWorkflowRules(projectId);
   const { mutateAsync: upsertRule } = useUpsertWorkflowRule();
