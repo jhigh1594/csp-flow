@@ -1,4 +1,4 @@
-import { and, eq, lt, sql } from "drizzle-orm";
+import { and, eq, lt } from "drizzle-orm";
 import db from "../../database";
 import {
   demandTable,
