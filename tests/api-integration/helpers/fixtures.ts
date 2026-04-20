@@ -1,10 +1,24 @@
 import { randomUUID } from "node:crypto";
+import { createId } from "@paralleldrive/cuid2";
 import db, { schema } from "../../../apps/api/src/database";
-import { DEFAULT_PROJECT_COLUMNS } from "../../../apps/api/src/project/controllers/create-project";
+
+const DEFAULT_COLUMNS = [
+  { name: "To Do", slug: "to-do", position: 0, isFinal: false },
+  { name: "In Progress", slug: "in-progress", position: 1, isFinal: false },
+  { name: "In Review", slug: "in-review", position: 2, isFinal: false },
+  { name: "Done", slug: "done", position: 3, isFinal: true },
+];
 
 export type SeededMemberContext = {
   user: typeof schema.userTable.$inferSelect;
   workspace: typeof schema.workspaceTable.$inferSelect;
+  team: typeof schema.teamTable.$inferSelect;
+  columns: {
+    todo: typeof schema.columnTable.$inferSelect;
+    inProgress: typeof schema.columnTable.$inferSelect;
+    inReview: typeof schema.columnTable.$inferSelect;
+    done: typeof schema.columnTable.$inferSelect;
+  };
 };
 
 export async function createWorkspaceMember(
@@ -44,41 +58,32 @@ export async function createWorkspaceMember(
     joinedAt: new Date(),
   });
 
-  return { user, workspace };
-}
-
-export async function createProjectFixture({
-  workspaceId,
-  name = "Integration Project",
-  icon = "Folder",
-  slug = `project-${randomUUID()}`,
-}: {
-  workspaceId: string;
-  name?: string;
-  icon?: string;
-  slug?: string;
-}) {
-  const [project] = await db
-    .insert(schema.projectTable)
+  const now = new Date();
+  const [team] = await db
+    .insert(schema.teamTable)
     .values({
-      workspaceId,
-      name,
-      icon,
-      slug,
+      id: createId(),
+      name: "Engineering",
+      identifier: "ENG",
+      workspaceId: workspace.id,
+      createdAt: now,
+      updatedAt: now,
     })
     .returning();
 
   const insertedColumns: (typeof schema.columnTable.$inferSelect)[] = [];
-
-  for (const col of DEFAULT_PROJECT_COLUMNS) {
+  for (const col of DEFAULT_COLUMNS) {
     const [inserted] = await db
       .insert(schema.columnTable)
       .values({
-        projectId: project.id,
+        id: createId(),
+        teamId: team.id,
         name: col.name,
         slug: col.slug,
         position: col.position,
         isFinal: col.isFinal,
+        createdAt: now,
+        updatedAt: now,
       })
       .returning();
     if (inserted) {
@@ -96,16 +101,40 @@ export async function createProjectFixture({
   const done = columnsBySlug.get("done");
 
   if (!todo || !inProgress || !inReview || !done) {
-    throw new Error("Failed to seed default project columns");
+    throw new Error("Failed to seed default team columns");
   }
 
   return {
-    project,
-    columns: {
-      todo,
-      inProgress,
-      inReview,
-      done,
-    },
+    user,
+    workspace,
+    team,
+    columns: { todo, inProgress, inReview, done },
   };
+}
+
+export async function createProjectFixture({
+  workspaceId,
+  teamId,
+  name = "Integration Project",
+  icon = "Folder",
+  slug = `project-${randomUUID()}`,
+}: {
+  workspaceId: string;
+  teamId: string;
+  name?: string;
+  icon?: string;
+  slug?: string;
+}) {
+  const [project] = await db
+    .insert(schema.projectTable)
+    .values({
+      workspaceId,
+      teamId,
+      name,
+      icon,
+      slug,
+    })
+    .returning();
+
+  return { project };
 }
