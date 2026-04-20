@@ -310,6 +310,7 @@ export const taskTable = pgTable(
       onDelete: "set null",
       onUpdate: "cascade",
     }),
+    roadmapGroup: text("roadmap_group").default("later"),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { mode: "date" })
       .defaultNow()
@@ -320,6 +321,7 @@ export const taskTable = pgTable(
     index("task_projectId_idx").on(table.projectId),
     index("task_dueDate_idx").on(table.dueDate),
     index("task_milestoneId_idx").on(table.milestoneId),
+    index("task_roadmapGroup_idx").on(table.roadmapGroup),
     unique("task_project_number_unique").on(table.projectId, table.number),
   ],
 );

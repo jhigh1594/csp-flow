@@ -34,6 +34,7 @@ type Task = {
   projectId: string;
   milestoneId: string | null;
   columnId?: string | null;
+  roadmapGroup?: string | null;
   labels?: TaskLabel[];
   externalLinks?: TaskExternalLink[];
 };
