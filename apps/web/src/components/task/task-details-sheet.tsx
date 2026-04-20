@@ -111,7 +111,7 @@ export default function TaskDetailsSheet({
             taskId={currentTaskId}
             projectId={projectId}
             workspaceId={workspaceId}
-            className="w-full bg-sidebar border-b border-border flex flex-col gap-0 overflow-y-auto shrink-0"
+            className="w-full bg-background border-b border-border flex flex-col gap-0 overflow-y-auto shrink-0"
             compact={true}
           />
 
