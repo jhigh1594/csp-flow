@@ -232,7 +232,7 @@ input:-webkit-autofill:active {
   }
 
   [data-sidebar="sidebar"] {
-    background: linear-gradient(to bottom, #F0F7F3 0%, #C6E7D5 68%, #81C99B 100%);
+    background: linear-gradient(to bottom, #021E2D 0%, #027D9F 68%, #19873E 100%);
   }
 
   .dark [data-sidebar="sidebar"] {
