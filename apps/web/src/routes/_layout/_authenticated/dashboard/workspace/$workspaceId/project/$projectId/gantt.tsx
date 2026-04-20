@@ -286,7 +286,7 @@ function RouteComponent() {
         columnId: g,
         columnName: ROADMAP_LABELS[g],
         icon: Layers,
-        tasks: grouped.get(g)!,
+        tasks: grouped.get(g) ?? [],
       }));
     }
 
@@ -307,7 +307,7 @@ function RouteComponent() {
             .replace(/-/g, " ")
             .replace(/\b\w/g, (c) => c.toUpperCase()),
           icon: Flag,
-          tasks: grouped.get(p)!,
+          tasks: grouped.get(p) ?? [],
         }));
     }
 
