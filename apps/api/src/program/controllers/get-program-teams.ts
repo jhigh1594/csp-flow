@@ -1,4 +1,4 @@
-import { and, count, eq, sql } from "drizzle-orm";
+import { and, count, eq, inArray } from "drizzle-orm";
 import db from "../../database";
 import {
   demandTable,
@@ -6,6 +6,7 @@ import {
   teamTable,
   weeklyStatusTable,
 } from "../../database/schema";
+import { getCurrentWeekStart } from "../utils/week";
 
 const DEMAND_DATE_KEYS = [
   "businessPartnershipDate",
@@ -22,14 +23,7 @@ type DemandRow = typeof demandTable.$inferSelect;
 
 async function getProgramTeams(workspaceId: string) {
   const today = new Date().toISOString().split("T")[0] as string;
-
-  // Current ISO week Monday
-  const now = new Date();
-  const day = now.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diff);
-  const weekStart = monday.toISOString().split("T")[0] as string;
+  const weekStart = getCurrentWeekStart();
 
   // Get all teams for workspace
   const teams = await db
@@ -65,7 +59,7 @@ async function getProgramTeams(workspaceId: string) {
 
   const statusByTeam = new Map(statuses.map((s) => [s.teamId, s]));
 
-  // Get open risk counts per team using sql array
+  // Get open risk counts per team
   const riskCounts = await db
     .select({
       teamId: riskTable.teamId,
@@ -74,7 +68,7 @@ async function getProgramTeams(workspaceId: string) {
     .from(riskTable)
     .where(
       and(
-        sql`${riskTable.teamId} = ANY(ARRAY[${sql.join(teamIds.map((id) => sql`${id}`), sql`, `)}]::text[])`,
+        inArray(riskTable.teamId, teamIds),
         eq(riskTable.status, "open"),
       ),
     )
@@ -88,9 +82,7 @@ async function getProgramTeams(workspaceId: string) {
   const demands = await db
     .select()
     .from(demandTable)
-    .where(
-      sql`${demandTable.teamId} = ANY(ARRAY[${sql.join(teamIds.map((id) => sql`${id}`), sql`, `)}]::text[])`,
-    );
+    .where(inArray(demandTable.teamId, teamIds));
 
   // Compute next milestone demand date per team
   const nextMilestoneDateByTeam = new Map<string, string | null>();

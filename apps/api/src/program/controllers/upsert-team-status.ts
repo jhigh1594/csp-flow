@@ -7,21 +7,7 @@ import {
   weeklyStatusSnapshotTable,
   weeklyStatusTable,
 } from "../../database/schema";
-
-function getCurrentWeekStart(): string {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diff);
-  return (monday.toISOString().split("T")[0]) as string;
-}
-
-function subtractWeeks(dateStr: string, weeks: number): string {
-  const d = new Date(dateStr);
-  d.setDate(d.getDate() - weeks * 7);
-  return (d.toISOString().split("T")[0]) as string;
-}
+import { getCurrentWeekStart, subtractWeeks } from "../utils/week";
 
 async function upsertTeamStatus({
   teamId,

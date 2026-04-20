@@ -12,8 +12,9 @@ function useDeleteDemand() {
   return useMutation({
     mutationFn: ({ workspaceId, teamId, demandId }: DeleteDemandVariables) =>
       deleteDemand({ workspaceId, teamId, demandId }),
-    onSuccess: (_, { teamId }) => {
+    onSuccess: (_, { teamId, workspaceId }) => {
       queryClient.invalidateQueries({ queryKey: ["program-team-status", teamId] });
+      queryClient.invalidateQueries({ queryKey: ["program-teams", workspaceId] });
     },
   });
 }

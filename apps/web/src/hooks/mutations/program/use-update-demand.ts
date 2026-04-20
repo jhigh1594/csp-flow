@@ -20,8 +20,9 @@ type UpdateDemandVariables = {
 function useUpdateDemand() {
   return useMutation({
     mutationFn: (variables: UpdateDemandVariables) => updateDemand(variables),
-    onSuccess: (_, { teamId }) => {
+    onSuccess: (_, { teamId, workspaceId }) => {
       queryClient.invalidateQueries({ queryKey: ["program-team-status", teamId] });
+      queryClient.invalidateQueries({ queryKey: ["program-teams", workspaceId] });
     },
   });
 }

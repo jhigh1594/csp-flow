@@ -6,15 +6,7 @@ import {
   roadmapReleaseTable,
   weeklyStatusTable,
 } from "../../database/schema";
-
-function getCurrentWeekStart(): string {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diff);
-  return (monday.toISOString().split("T")[0]) as string;
-}
+import { getCurrentWeekStart } from "../utils/week";
 
 async function getTeamStatus(teamId: string) {
   const weekStart = getCurrentWeekStart();

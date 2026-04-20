@@ -42,7 +42,7 @@ type TeamDiff = {
 };
 
 function formatWeekLabel(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-US", {
+  return new Date(`${dateStr}T00:00:00`).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
   });
@@ -141,6 +141,7 @@ function RoadmapDiffRow({ diff }: { diff: RoadmapDiff }) {
 
 function TeamDiffSection({ team }: { team: TeamDiff }) {
   const hasContent =
+    !!team.ragChange ||
     team.textUpdated ||
     (team.demandDiffs && team.demandDiffs.length > 0) ||
     (team.riskDiffs && team.riskDiffs.length > 0) ||

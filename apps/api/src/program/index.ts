@@ -146,7 +146,7 @@ const program = new Hono<{
       const { teamId } = c.req.valid("param");
       const body = c.req.valid("json");
       const demand = await createDemand({ teamId, ...body });
-      return c.json(demand);
+      return c.json(demand, 201);
     },
   )
   .patch(
@@ -255,7 +255,7 @@ const program = new Hono<{
       const { teamId } = c.req.valid("param");
       const body = c.req.valid("json");
       const risk = await createRisk({ teamId, ...body });
-      return c.json(risk);
+      return c.json(risk, 201);
     },
   )
   .patch(
@@ -354,7 +354,7 @@ const program = new Hono<{
       const { teamId } = c.req.valid("param");
       const body = c.req.valid("json");
       const release = await createRelease({ teamId, ...body });
-      return c.json(release);
+      return c.json(release, 201);
     },
   )
   .patch(
@@ -471,8 +471,8 @@ const program = new Hono<{
     validator(
       "query",
       v.object({
-        from: v.string(),
-        to: v.string(),
+        from: v.pipe(v.string(), v.regex(/^\d{4}-\d{2}-\d{2}$/)),
+        to: v.pipe(v.string(), v.regex(/^\d{4}-\d{2}-\d{2}$/)),
       }),
     ),
     workspaceAccess.fromParam("workspaceId"),

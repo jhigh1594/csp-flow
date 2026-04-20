@@ -54,88 +54,99 @@ const DEMAND_DATE_KEYS: (keyof SnapshotDemand)[] = [
   "adoptionDate",
 ];
 
+type DemandDiffItem = {
+  type: "added" | "removed" | "changed";
+  name: string;
+  dateChanges?: Record<string, { from: string | null; to: string | null }>;
+};
+
+type RiskDiffItem = {
+  type: "new" | "statusChanged" | "closed";
+  description: string;
+  from?: string;
+  to?: string;
+};
+
+type RoadmapDiffItem = {
+  type: "added" | "removed" | "moved";
+  name: string;
+  from?: string;
+  to?: string;
+};
+
 function diffDemands(
   fromDemands: SnapshotDemand[],
   toDemands: SnapshotDemand[],
-) {
-  const fromMap = new Map(fromDemands.map((d) => [d.name, d]));
-  const toMap = new Map(toDemands.map((d) => [d.name, d]));
+): DemandDiffItem[] {
+  const fromMap = new Map(fromDemands.map((d) => [d.id, d]));
+  const toMap = new Map(toDemands.map((d) => [d.id, d]));
 
-  const added: string[] = [];
-  const removed: string[] = [];
-  const changed: { name: string; dateShifts: Record<string, { from: string | null; to: string | null }> }[] = [];
+  const result: DemandDiffItem[] = [];
 
-  for (const [name, toDemand] of toMap) {
-    if (!fromMap.has(name)) {
-      added.push(name);
+  for (const [id, toDemand] of toMap) {
+    if (!fromMap.has(id)) {
+      result.push({ type: "added", name: toDemand.name });
     } else {
-      const fromDemand = fromMap.get(name)!;
-      const dateShifts: Record<string, { from: string | null; to: string | null }> = {};
+      const fromDemand = fromMap.get(id)!;
+      const dateChanges: Record<string, { from: string | null; to: string | null }> = {};
       for (const key of DEMAND_DATE_KEYS) {
         const fromVal = (fromDemand[key] as string | null | undefined) ?? null;
         const toVal = (toDemand[key] as string | null | undefined) ?? null;
         if (fromVal !== toVal) {
-          dateShifts[key] = { from: fromVal, to: toVal };
+          dateChanges[key] = { from: fromVal, to: toVal };
         }
       }
-      if (Object.keys(dateShifts).length > 0) {
-        changed.push({ name, dateShifts });
+      if (Object.keys(dateChanges).length > 0) {
+        result.push({ type: "changed", name: toDemand.name, dateChanges });
       }
     }
   }
 
-  for (const [name] of fromMap) {
-    if (!toMap.has(name)) {
-      removed.push(name);
+  for (const [id, fromDemand] of fromMap) {
+    if (!toMap.has(id)) {
+      result.push({ type: "removed", name: fromDemand.name });
     }
   }
 
-  return { added, removed, changed };
+  return result;
 }
 
-function diffRisks(fromRisks: SnapshotRisk[], toRisks: SnapshotRisk[]) {
+function diffRisks(fromRisks: SnapshotRisk[], toRisks: SnapshotRisk[]): RiskDiffItem[] {
   const fromMap = new Map(fromRisks.map((r) => [r.id, r]));
   const toMap = new Map(toRisks.map((r) => [r.id, r]));
 
-  const newRisks: string[] = [];
-  const statusChanged: { description: string; from: string; to: string }[] = [];
-  const closed: string[] = [];
+  const result: RiskDiffItem[] = [];
 
   for (const [id, toRisk] of toMap) {
     if (!fromMap.has(id)) {
-      newRisks.push(toRisk.description);
+      result.push({ type: "new", description: toRisk.description });
     } else {
       const fromRisk = fromMap.get(id)!;
       if (fromRisk.status !== toRisk.status) {
-        statusChanged.push({
-          description: toRisk.description,
-          from: fromRisk.status,
-          to: toRisk.status,
-        });
         if (toRisk.status === "closed") {
-          closed.push(toRisk.description);
+          result.push({ type: "closed", description: toRisk.description, from: fromRisk.status, to: toRisk.status });
+        } else {
+          result.push({ type: "statusChanged", description: toRisk.description, from: fromRisk.status, to: toRisk.status });
         }
       }
     }
   }
 
-  return { new: newRisks, statusChanged, closed };
+  return result;
 }
 
 function diffReleases(
   fromReleases: SnapshotRelease[],
   toReleases: SnapshotRelease[],
-) {
+): RoadmapDiffItem[] {
   const fromMap = new Map(fromReleases.map((r) => [r.id, r]));
   const toMap = new Map(toReleases.map((r) => [r.id, r]));
 
-  const added: string[] = [];
-  const removed: string[] = [];
-  const moved: { name: string; from: { quarter: string; month: number; fiscalYear: number }; to: { quarter: string; month: number; fiscalYear: number } }[] = [];
+  const result: RoadmapDiffItem[] = [];
 
   for (const [id, toRelease] of toMap) {
     if (!fromMap.has(id)) {
-      added.push(toRelease.name);
+      result.push({ type: "added", name: toRelease.name });
     } else {
       const fromRelease = fromMap.get(id)!;
       if (
@@ -143,18 +154,11 @@ function diffReleases(
         fromRelease.month !== toRelease.month ||
         fromRelease.fiscalYear !== toRelease.fiscalYear
       ) {
-        moved.push({
+        result.push({
+          type: "moved",
           name: toRelease.name,
-          from: {
-            quarter: fromRelease.quarter,
-            month: fromRelease.month,
-            fiscalYear: fromRelease.fiscalYear,
-          },
-          to: {
-            quarter: toRelease.quarter,
-            month: toRelease.month,
-            fiscalYear: toRelease.fiscalYear,
-          },
+          from: `${fromRelease.quarter.toUpperCase()} ${fromRelease.fiscalYear}`,
+          to: `${toRelease.quarter.toUpperCase()} ${toRelease.fiscalYear}`,
         });
       }
     }
@@ -162,11 +166,11 @@ function diffReleases(
 
   for (const [id, fromRelease] of fromMap) {
     if (!toMap.has(id)) {
-      removed.push(fromRelease.name);
+      result.push({ type: "removed", name: fromRelease.name });
     }
   }
 
-  return { added, removed, moved };
+  return result;
 }
 
 async function getSnapshotDiff({
