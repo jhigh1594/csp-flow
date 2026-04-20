@@ -11,6 +11,13 @@ import { useState } from "react";
 import { toast } from "sonner";
 import CreateProjectModal from "@/components/shared/modals/create-project-modal";
 import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
+import {
   Collapsible,
   CollapsiblePanel,
   CollapsibleTrigger,
@@ -23,7 +30,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -267,40 +273,61 @@ export function NavTeams() {
       </SidebarGroup>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>New team</DialogTitle>
+        <DialogContent className="max-w-md" showCloseButton={false}>
+          <DialogHeader className="px-3 pt-4 pb-1 gap-1.5">
+            <DialogTitle className="sr-only">New team</DialogTitle>
+            <Breadcrumb>
+              <BreadcrumbList className="gap-1 text-xs">
+                <BreadcrumbItem className="text-muted-foreground font-medium tracking-wide">
+                  {workspace.name?.toUpperCase()}
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="[&>svg]:size-3.5" />
+                <BreadcrumbItem className="text-foreground font-medium">
+                  New team
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
           </DialogHeader>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="team-name">Team name</Label>
-            <Input
-              id="team-name"
-              placeholder="e.g. Engineering"
-              value={teamName}
-              onChange={(e) => setTeamName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleCreate();
-              }}
-              autoFocus
-            />
-          </div>
-          <DialogFooter>
-            <button
-              type="button"
-              onClick={() => setDialogOpen(false)}
-              className="inline-flex h-8 items-center rounded-md border px-3 text-sm hover:bg-muted"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleCreate}
-              disabled={!teamName.trim() || isPending}
-              className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            >
-              {isPending ? "Creating…" : "Create team"}
-            </button>
-          </DialogFooter>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleCreate();
+            }}
+            className="space-y-4"
+          >
+            <div className="px-3 pt-2">
+              <Input
+                unstyled
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+                autoFocus
+                placeholder="e.g. Engineering"
+                className="w-full [&_[data-slot=input]]:h-auto [&_[data-slot=input]]:px-0 [&_[data-slot=input]]:py-2 [&_[data-slot=input]]:text-2xl [&_[data-slot=input]]:leading-tight [&_[data-slot=input]]:font-semibold [&_[data-slot=input]]:tracking-tight [&_[data-slot=input]]:text-foreground [&_[data-slot=input]]:placeholder:text-muted-foreground [&_[data-slot=input]]:outline-none"
+                required
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                onClick={() => setDialogOpen(false)}
+                variant="outline"
+                size="sm"
+                className="border-border text-foreground hover:bg-accent"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={!teamName.trim() || isPending}
+                size="sm"
+                className="disabled:opacity-50"
+              >
+                {isPending ? "Creating…" : "Create team"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </>

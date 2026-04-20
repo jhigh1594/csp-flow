@@ -50,4 +50,5 @@ yarn-error.log*
 .reference/
 
 # Claude Code worktrees
-.claude/worktrees/.worktrees/
+.claude/worktrees/
+.worktrees/

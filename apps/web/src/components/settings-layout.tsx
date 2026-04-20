@@ -29,6 +29,8 @@ type SettingsLayoutProps = {
   icon?: ReactNode;
   backPath?: string;
   backLabel?: string;
+  parentLabel?: string;
+  parentPath?: string;
   children: ReactNode;
   className?: string;
 };
@@ -38,12 +40,17 @@ export function SettingsLayout({
   description,
   backPath,
   backLabel,
+  parentLabel,
+  parentPath,
   children,
   className,
 }: SettingsLayoutProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const resolvedBackLabel = backLabel ?? t("navigation:settingsLayout.back");
+  const resolvedParentLabel =
+    parentLabel ?? t("navigation:page.settingsTitle");
+  const resolvedParentPath = parentPath ?? "/dashboard/settings";
 
   const handleBack = () => {
     if (backPath) {
@@ -83,9 +90,9 @@ export function SettingsLayout({
             <Breadcrumb className="flex items-center gap-1 text-xs w-full">
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="/dashboard/settings">
+                  <BreadcrumbLink href={resolvedParentPath}>
                     <h1 className="text-xs text-card-foreground">
-                      {t("navigation:page.settingsTitle")}
+                      {resolvedParentLabel}
                     </h1>
                   </BreadcrumbLink>
                 </BreadcrumbItem>

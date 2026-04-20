@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowDown,
   ArrowUp,
@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { SettingsLayout } from "@/components/settings-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -248,20 +249,16 @@ function WorkflowTab({ teamId }: { teamId: string }) {
 
 function TeamSettingsPage() {
   const { workspaceId, teamId } = Route.useParams();
+  const issuesPath = `/dashboard/workspace/${workspaceId}/team/${teamId}/issues`;
 
   return (
-    <div className="flex flex-col gap-4 p-6 bg-background w-full h-full overflow-auto">
-      <div className="flex flex-col gap-1">
-        <Link
-          to="/dashboard/workspace/$workspaceId/team/$teamId/issues"
-          params={{ workspaceId, teamId }}
-          className="text-xs text-muted-foreground hover:text-foreground"
-        >
-          ← Back to issues
-        </Link>
-        <h1 className="text-2xl font-semibold">Team Settings</h1>
-      </div>
-
+    <SettingsLayout
+      title="Team Settings"
+      parentLabel="Issues"
+      parentPath={issuesPath}
+      backPath={issuesPath}
+      backLabel="Back to Issues"
+    >
       <Tabs defaultValue="workflow" className="w-full">
         <TabsList className="bg-muted gap-2 mb-4">
           <TabsTrigger
@@ -288,6 +285,6 @@ function TeamSettingsPage() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+    </SettingsLayout>
   );
 }

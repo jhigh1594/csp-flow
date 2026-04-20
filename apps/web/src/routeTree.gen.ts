@@ -47,6 +47,7 @@ import { Route as LayoutAuthenticatedDashboardSettingsProjectsProjectIdWorkflowR
 import { Route as LayoutAuthenticatedDashboardSettingsProjectsProjectIdVisibilityRouteImport } from './routes/_layout/_authenticated/dashboard/settings/projects/$projectId/visibility'
 import { Route as LayoutAuthenticatedDashboardSettingsProjectsProjectIdIntegrationsRouteImport } from './routes/_layout/_authenticated/dashboard/settings/projects/$projectId/integrations'
 import { Route as LayoutAuthenticatedDashboardSettingsProjectsProjectIdGeneralRouteImport } from './routes/_layout/_authenticated/dashboard/settings/projects/$projectId/general'
+import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdSettingsRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/settings'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdMembersRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/members'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdProjectsIndexRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/projects/index'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdIssuesIndexRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/issues/index'
@@ -276,6 +277,15 @@ const LayoutAuthenticatedDashboardSettingsProjectsProjectIdGeneralRoute =
       getParentRoute: () => LayoutAuthenticatedDashboardSettingsProjectsRoute,
     } as any,
   )
+const LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdSettingsRoute =
+  LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdSettingsRouteImport.update(
+    {
+      id: '/team/$teamId/settings',
+      path: '/team/$teamId/settings',
+      getParentRoute: () =>
+        LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRoute,
+    } as any,
+  )
 const LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdMembersRoute =
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdMembersRouteImport.update(
     {
@@ -378,6 +388,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/projects/$projectId/visibility': typeof LayoutAuthenticatedDashboardSettingsProjectsProjectIdVisibilityRoute
   '/dashboard/settings/projects/$projectId/workflow': typeof LayoutAuthenticatedDashboardSettingsProjectsProjectIdWorkflowRoute
   '/dashboard/workspace/$workspaceId/team/$teamId/members': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdMembersRoute
+  '/dashboard/workspace/$workspaceId/team/$teamId/settings': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdSettingsRoute
   '/dashboard/workspace/$workspaceId/team/$teamId/issues/': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdIssuesIndexRoute
   '/dashboard/workspace/$workspaceId/team/$teamId/projects/': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdProjectsIndexRoute
   '/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/backlog': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdProjectProjectIdBacklogRoute
@@ -420,6 +431,7 @@ export interface FileRoutesByTo {
   '/dashboard/settings/projects/$projectId/visibility': typeof LayoutAuthenticatedDashboardSettingsProjectsProjectIdVisibilityRoute
   '/dashboard/settings/projects/$projectId/workflow': typeof LayoutAuthenticatedDashboardSettingsProjectsProjectIdWorkflowRoute
   '/dashboard/workspace/$workspaceId/team/$teamId/members': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdMembersRoute
+  '/dashboard/workspace/$workspaceId/team/$teamId/settings': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdSettingsRoute
   '/dashboard/workspace/$workspaceId/team/$teamId/issues': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdIssuesIndexRoute
   '/dashboard/workspace/$workspaceId/team/$teamId/projects': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdProjectsIndexRoute
   '/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/backlog': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdProjectProjectIdBacklogRoute
@@ -468,6 +480,7 @@ export interface FileRoutesById {
   '/_layout/_authenticated/dashboard/settings/projects/$projectId/visibility': typeof LayoutAuthenticatedDashboardSettingsProjectsProjectIdVisibilityRoute
   '/_layout/_authenticated/dashboard/settings/projects/$projectId/workflow': typeof LayoutAuthenticatedDashboardSettingsProjectsProjectIdWorkflowRoute
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/members': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdMembersRoute
+  '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/settings': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdSettingsRoute
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/issues/': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdIssuesIndexRoute
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/projects/': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdProjectsIndexRoute
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/backlog': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdProjectProjectIdBacklogRoute
@@ -515,6 +528,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/projects/$projectId/visibility'
     | '/dashboard/settings/projects/$projectId/workflow'
     | '/dashboard/workspace/$workspaceId/team/$teamId/members'
+    | '/dashboard/workspace/$workspaceId/team/$teamId/settings'
     | '/dashboard/workspace/$workspaceId/team/$teamId/issues/'
     | '/dashboard/workspace/$workspaceId/team/$teamId/projects/'
     | '/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/backlog'
@@ -557,6 +571,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/projects/$projectId/visibility'
     | '/dashboard/settings/projects/$projectId/workflow'
     | '/dashboard/workspace/$workspaceId/team/$teamId/members'
+    | '/dashboard/workspace/$workspaceId/team/$teamId/settings'
     | '/dashboard/workspace/$workspaceId/team/$teamId/issues'
     | '/dashboard/workspace/$workspaceId/team/$teamId/projects'
     | '/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/backlog'
@@ -604,6 +619,7 @@ export interface FileRouteTypes {
     | '/_layout/_authenticated/dashboard/settings/projects/$projectId/visibility'
     | '/_layout/_authenticated/dashboard/settings/projects/$projectId/workflow'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/members'
+    | '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/settings'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/issues/'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/projects/'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/backlog'
@@ -890,6 +906,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAuthenticatedDashboardSettingsProjectsProjectIdGeneralRouteImport
       parentRoute: typeof LayoutAuthenticatedDashboardSettingsProjectsRoute
     }
+    '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/settings': {
+      id: '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/settings'
+      path: '/team/$teamId/settings'
+      fullPath: '/dashboard/workspace/$workspaceId/team/$teamId/settings'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdSettingsRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRoute
+    }
     '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/members': {
       id: '/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/members'
       path: '/team/$teamId/members'
@@ -1031,6 +1054,7 @@ interface LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRouteChildren {
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdSearchRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdSearchRoute
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdIndexRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdIndexRoute
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdMembersRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdMembersRoute
+  LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdSettingsRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdSettingsRoute
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdIssuesIndexRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdIssuesIndexRoute
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdProjectsIndexRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdProjectsIndexRoute
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdProjectProjectIdBacklogRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdProjectProjectIdBacklogRoute
@@ -1049,6 +1073,8 @@ const LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRouteChildren: LayoutAuthe
       LayoutAuthenticatedDashboardWorkspaceWorkspaceIdIndexRoute,
     LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdMembersRoute:
       LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdMembersRoute,
+    LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdSettingsRoute:
+      LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdSettingsRoute,
     LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdIssuesIndexRoute:
       LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdIssuesIndexRoute,
     LayoutAuthenticatedDashboardWorkspaceWorkspaceIdTeamTeamIdProjectsIndexRoute:
