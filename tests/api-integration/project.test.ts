@@ -22,6 +22,7 @@ describe("API integration: project creation", () => {
       },
       body: JSON.stringify({
         workspaceId: "workspace-missing",
+        teamId: "team-missing",
         name: "Unauthorized Project",
         icon: "Folder",
         slug: "unauthorized-project",
@@ -32,7 +33,7 @@ describe("API integration: project creation", () => {
     await expect(response.text()).resolves.toBe("Unauthorized");
   });
 
-  it("creates a project for a workspace member and seeds default columns", async () => {
+  it("creates a project for a workspace member", async () => {
     const member = await createWorkspaceMember();
     mockAuthenticatedSession(member.user);
     const { app } = createApp();
@@ -44,6 +45,7 @@ describe("API integration: project creation", () => {
       },
       body: JSON.stringify({
         workspaceId: member.workspace.id,
+        teamId: member.team.id,
         name: "Roadmap",
         icon: "FolderKanban",
         slug: "roadmap",
@@ -56,6 +58,7 @@ describe("API integration: project creation", () => {
 
     expect(payload).toMatchObject({
       workspaceId: member.workspace.id,
+      teamId: member.team.id,
       name: "Roadmap",
       icon: "FolderKanban",
       slug: "roadmap",
@@ -68,12 +71,13 @@ describe("API integration: project creation", () => {
     expect(persistedProject).toMatchObject({
       id: payload.id,
       workspaceId: member.workspace.id,
+      teamId: member.team.id,
       name: "Roadmap",
       slug: "roadmap",
     });
 
     const columns = await db.query.columnTable.findMany({
-      where: eq(schema.columnTable.projectId, payload.id),
+      where: eq(schema.columnTable.teamId, member.team.id),
       orderBy: (column, { asc }) => [asc(column.position)],
     });
 
@@ -83,12 +87,6 @@ describe("API integration: project creation", () => {
       "in-progress",
       "in-review",
       "done",
-    ]);
-    expect(columns.map((column) => column.isFinal)).toEqual([
-      false,
-      false,
-      false,
-      true,
     ]);
   });
 
@@ -116,6 +114,7 @@ describe("API integration: project creation", () => {
       },
       body: JSON.stringify({
         workspaceId: member.workspace.id,
+        teamId: member.team.id,
         name: "Forbidden Project",
         icon: "Folder",
         slug: "forbidden-project",

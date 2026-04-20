@@ -65,6 +65,7 @@ process.env.KANEO_API_URL = "http://localhost:1337";
 process.env.KANEO_CLIENT_URL = "http://localhost:5173";
 process.env.DISABLE_GUEST_ACCESS = "false";
 process.env.DISABLE_REGISTRATION = "false";
+process.env.ALLOWED_EMAIL_DOMAIN = "";
 process.env.DISABLE_PASSWORD_REGISTRATION = "false";
 process.env.DEMO_MODE = "false";
 process.env.SMTP_HOST = "";

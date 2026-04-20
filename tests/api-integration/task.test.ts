@@ -19,6 +19,7 @@ describe("API integration: task creation", () => {
     const member = await createWorkspaceMember();
     const { project } = await createProjectFixture({
       workspaceId: member.workspace.id,
+      teamId: member.team.id,
     });
 
     mockAnonymousSession();
@@ -43,19 +44,21 @@ describe("API integration: task creation", () => {
 
   it("creates a task with the matching column, assignee, and next number", async () => {
     const member = await createWorkspaceMember();
-    const { project, columns } = await createProjectFixture({
+    const { project } = await createProjectFixture({
       workspaceId: member.workspace.id,
+      teamId: member.team.id,
       name: "Delivery",
       slug: "delivery",
     });
 
     await db.insert(schema.taskTable).values({
+      teamId: member.team.id,
       projectId: project.id,
       userId: member.user.id,
       title: "Existing task",
       description: "Already there",
       status: "to-do",
-      columnId: columns.todo.id,
+      columnId: member.columns.todo.id,
       priority: "medium",
       number: 1,
       position: 1,
@@ -111,7 +114,7 @@ describe("API integration: task creation", () => {
     expect(persistedTask).toMatchObject({
       id: payload.id,
       projectId: project.id,
-      columnId: columns.todo.id,
+      columnId: member.columns.todo.id,
       userId: member.user.id,
       title: "Ship integration flow",
       priority: "high",
@@ -126,6 +129,7 @@ describe("API integration: task creation", () => {
     const outsiderId = `user-${randomUUID()}`;
     const { project } = await createProjectFixture({
       workspaceId: member.workspace.id,
+      teamId: member.team.id,
     });
 
     const [outsider] = await db
@@ -171,8 +175,9 @@ describe("API integration: task creation", () => {
 
   it("creates an unassigned task with parsed dates when optional fields are provided", async () => {
     const member = await createWorkspaceMember();
-    const { project, columns } = await createProjectFixture({
+    const { project } = await createProjectFixture({
       workspaceId: member.workspace.id,
+      teamId: member.team.id,
     });
 
     mockAuthenticatedSession(member.user);
@@ -205,7 +210,7 @@ describe("API integration: task creation", () => {
 
     expect(payload).toMatchObject({
       userId: null,
-      columnId: columns.inProgress.id,
+      columnId: member.columns.inProgress.id,
       startDate: "2026-04-01T09:00:00.000Z",
       dueDate: "2026-04-05T17:00:00.000Z",
     });
@@ -218,7 +223,7 @@ describe("API integration: task creation", () => {
     expect(persistedTask).toMatchObject({
       id: payload.id,
       userId: null,
-      columnId: columns.inProgress.id,
+      columnId: member.columns.inProgress.id,
       status: "in-progress",
     });
     expect(persistedTask?.startDate?.toISOString()).toBe(
@@ -233,6 +238,7 @@ describe("API integration: task creation", () => {
     const member = await createWorkspaceMember();
     const { project } = await createProjectFixture({
       workspaceId: member.workspace.id,
+      teamId: member.team.id,
     });
 
     mockAuthenticatedSession(member.user);

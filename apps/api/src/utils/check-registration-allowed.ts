@@ -16,27 +16,26 @@ type RegistrationCheckResult = {
   };
 };
 
-const ALLOWED_DOMAIN = process.env.ALLOWED_EMAIL_DOMAIN || "servicenow.com";
 const ANONYMOUS_DOMAIN = "kaneo.app";
-
-function isAllowedDomain(email: string): boolean {
-  return email.toLowerCase().endsWith(`@${ALLOWED_DOMAIN}`);
-}
 
 export async function checkRegistrationAllowed(
   email?: string,
   invitationId?: string,
 ): Promise<RegistrationCheckResult> {
   const isRegistrationDisabled = process.env.DISABLE_REGISTRATION === "true";
+  const rawAllowedDomain = process.env.ALLOWED_EMAIL_DOMAIN;
+  const allowedDomain =
+    rawAllowedDomain === undefined ? "servicenow.com" : rawAllowedDomain;
 
   if (
+    allowedDomain &&
     email &&
     !email.endsWith(`@${ANONYMOUS_DOMAIN}`) &&
-    !isAllowedDomain(email)
+    !email.toLowerCase().endsWith(`@${allowedDomain}`)
   ) {
     return {
       allowed: false,
-      reason: `Registration is restricted to @${ALLOWED_DOMAIN} email addresses.`,
+      reason: `Registration is restricted to @${allowedDomain} email addresses.`,
     };
   }
 
