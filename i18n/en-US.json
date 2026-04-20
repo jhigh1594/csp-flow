@@ -429,7 +429,7 @@
 			"selectViewMode": "Select a view mode",
 			"board": "Board",
 			"list": "List",
-			"gantt": "Gantt",
+			"gantt": "Timeline",
 			"sidebarDefault": "Sidebar Default",
 			"sidebarDefaultDescription": "Keep sidebar expanded on startup",
 			"displayOptions": "Display options",
@@ -1539,8 +1539,8 @@
 			}
 		},
 		"gantt": {
-			"pageTitle": "{{name}} — Gantt",
-			"title": "Gantt Timeline",
+			"pageTitle": "{{name}} — Timeline",
+			"title": "Timeline",
 			"searchPlaceholder": "Search scheduled tickets...",
 			"hideTasks": "Hide tasks",
 			"showTasks": "Show tasks",

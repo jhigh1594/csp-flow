@@ -646,7 +646,7 @@ function RouteComponent() {
                       <div
                         key={day.toISOString()}
                         className={cn(
-                          "border-r border-border/70 px-0.5 py-2 text-center sm:px-1",
+                          "px-0.5 py-2 text-center sm:px-1",
                           timeline.granularity === "day" &&
                             isWeekend(day) &&
                             "bg-muted/25",
@@ -688,7 +688,7 @@ function RouteComponent() {
                     <div
                       key={`bg-line-${day.toISOString()}`}
                       className={cn(
-                        "h-full min-h-0 border-r border-border/60",
+                        "h-full min-h-0",
                         timeline.granularity === "day" &&
                           isWeekend(day) &&
                           "bg-muted/25",

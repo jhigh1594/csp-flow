@@ -100,7 +100,7 @@ export default function MobileProjectNav({
                 )}
               >
                 <CalendarDays className="size-3.5" />
-                Gantt
+                Timeline
               </button>
               <button
                 type="button"

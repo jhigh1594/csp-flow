@@ -193,7 +193,7 @@ export default function ProjectLayout({
                   className="h-6 gap-1.5 rounded-md px-2 text-xs text-[#000000] hover:text-[#000000]"
                 >
                   <CalendarDays className="size-3.5" />
-                  Gantt
+                  Timeline
                 </Button>
                 <Button
                   variant={resolvedView === "wiki" ? "secondary" : "ghost"}
