@@ -56,6 +56,10 @@ export function buildTimeline(
     tasks[0].scheduleEnd,
   );
 
+  // Always extend to today so the current date is visible
+  const today = new Date();
+  if (today > latest) latest = today;
+
   if (extraDates) {
     for (const d of extraDates) {
       if (d > latest) latest = d;
