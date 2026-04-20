@@ -48,3 +48,6 @@ yarn-error.log*
 
 # Reference repos
 .reference/
+
+# Claude Code worktrees
+.claude/worktrees/
