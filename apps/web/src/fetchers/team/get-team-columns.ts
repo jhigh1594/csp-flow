@@ -1,11 +1,6 @@
 import { client } from "@kaneo/libs";
-import type { InferRequestType } from "hono/client";
 
-export type GetTeamColumnsRequest = InferRequestType<
-  (typeof client)["teams"][":teamId"]["columns"]["$get"]
->["param"];
-
-async function getTeamColumns({ teamId }: GetTeamColumnsRequest) {
+async function getTeamColumns({ teamId }: { teamId: string }) {
   const response = await client.teams[":teamId"].columns.$get({
     param: { teamId },
   });

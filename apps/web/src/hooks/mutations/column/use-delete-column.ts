@@ -5,9 +5,12 @@ export function useDeleteColumn() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id }: { id: string; projectId: string }) => deleteColumn(id),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ refetchType: "all" });
+    mutationFn: ({ id }: { id: string; teamId: string }) => deleteColumn(id),
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: ["team-columns", variables.teamId],
+        refetchType: "all",
+      });
     },
   });
 }

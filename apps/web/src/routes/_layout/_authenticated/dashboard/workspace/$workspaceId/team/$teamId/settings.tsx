@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import ColumnEditor from "@/components/project/column-editor";
 import { SettingsLayout } from "@/components/settings-layout";
-import TeamColumnEditor from "@/components/team/team-column-editor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute(
@@ -13,15 +13,15 @@ export const Route = createFileRoute(
 function TeamSettingsPage() {
   const { workspaceId, teamId } = Route.useParams();
   const { t } = useTranslation();
-  const issuesPath = `/dashboard/workspace/${workspaceId}/team/${teamId}/issues`;
+  const teamPath = `/dashboard/workspace/${workspaceId}/team/${teamId}/issues`;
 
   return (
     <SettingsLayout
-      title="Team Settings"
-      parentLabel="Issues"
-      parentPath={issuesPath}
-      backPath={issuesPath}
-      backLabel="Back to Issues"
+      title="Settings"
+      parentLabel="Team"
+      parentPath={teamPath}
+      backPath={teamPath}
+      backLabel="Back to Team"
     >
       <Tabs defaultValue="workflow" className="w-full">
         <TabsList className="bg-muted gap-2 mb-4">
@@ -49,7 +49,7 @@ function TeamSettingsPage() {
                 {t("settings:projectWorkflow.columnsDescription")}
               </p>
             </div>
-            <TeamColumnEditor teamId={teamId} />
+            <ColumnEditor teamId={teamId} />
           </div>
         </TabsContent>
 

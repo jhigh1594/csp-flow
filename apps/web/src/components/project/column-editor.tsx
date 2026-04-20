@@ -8,16 +8,16 @@ import { useCreateColumn } from "@/hooks/mutations/column/use-create-column";
 import { useDeleteColumn } from "@/hooks/mutations/column/use-delete-column";
 import { useReorderColumns } from "@/hooks/mutations/column/use-reorder-columns";
 import { useUpdateColumn } from "@/hooks/mutations/column/use-update-column";
-import { useGetColumns } from "@/hooks/queries/column/use-get-columns";
+import useGetTeamColumns from "@/hooks/queries/team/use-get-team-columns";
 import { toast } from "@/lib/toast";
 
 type ColumnEditorProps = {
-  projectId: string;
+  teamId: string;
 };
 
-export default function ColumnEditor({ projectId }: ColumnEditorProps) {
+export default function ColumnEditor({ teamId }: ColumnEditorProps) {
   const { t } = useTranslation();
-  const { data: columns, isLoading } = useGetColumns(projectId);
+  const { data: columns, isLoading } = useGetTeamColumns({ teamId });
   const { mutateAsync: createColumn } = useCreateColumn();
   const { mutateAsync: updateColumn } = useUpdateColumn();
   const { mutateAsync: deleteColumn } = useDeleteColumn();
@@ -29,7 +29,7 @@ export default function ColumnEditor({ projectId }: ColumnEditorProps) {
     if (!newColumnName.trim()) return;
     try {
       await createColumn({
-        projectId,
+        teamId,
         data: { name: newColumnName.trim() },
       });
       setNewColumnName("");
@@ -43,9 +43,10 @@ export default function ColumnEditor({ projectId }: ColumnEditorProps) {
     }
   };
 
-  const handleRename = async (id: string, name: string) => {
+  const handleRename = async (id: string, name: string, currentName: string) => {
+    if (name === currentName) return;
     try {
-      await updateColumn({ id, projectId, data: { name } });
+      await updateColumn({ id, teamId, data: { name } });
       toast.success(t("settings:columnEditor.toastRenamed"));
     } catch (error) {
       toast.error(
@@ -58,7 +59,7 @@ export default function ColumnEditor({ projectId }: ColumnEditorProps) {
 
   const handleToggleFinal = async (id: string, isFinal: boolean) => {
     try {
-      await updateColumn({ id, projectId, data: { isFinal } });
+      await updateColumn({ id, teamId, data: { isFinal } });
       toast.success(
         isFinal
           ? t("settings:columnEditor.toastFinalOn")
@@ -75,7 +76,7 @@ export default function ColumnEditor({ projectId }: ColumnEditorProps) {
 
   const handleDelete = async (id: string) => {
     try {
-      await deleteColumn({ id, projectId });
+      await deleteColumn({ id, teamId });
       toast.success(t("settings:columnEditor.toastDeleted"));
     } catch (error) {
       toast.error(
@@ -99,7 +100,7 @@ export default function ColumnEditor({ projectId }: ColumnEditorProps) {
     reordered.splice(index, 0, removed);
 
     const updates = reordered.map((col, i) => ({ id: col.id, position: i }));
-    reorderColumns({ projectId, columns: updates });
+    reorderColumns({ teamId, columns: updates });
     setDraggedIndex(index);
   };
 
@@ -135,7 +136,7 @@ export default function ColumnEditor({ projectId }: ColumnEditorProps) {
               className="h-8 text-sm flex-1"
               onBlur={(e) => {
                 if (e.target.value !== col.name) {
-                  handleRename(col.id, e.target.value);
+                  handleRename(col.id, e.target.value, col.name);
                 }
               }}
               onKeyDown={(e) => {

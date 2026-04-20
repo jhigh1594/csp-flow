@@ -6,14 +6,17 @@ export function useReorderColumns() {
 
   return useMutation({
     mutationFn: ({
-      projectId,
+      teamId,
       columns,
     }: {
-      projectId: string;
+      teamId: string;
       columns: Array<{ id: string; position: number }>;
-    }) => reorderColumns(projectId, columns),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ refetchType: "all" });
+    }) => reorderColumns(teamId, columns),
+    onSuccess: async (_, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: ["team-columns", variables.teamId],
+        refetchType: "all",
+      });
     },
   });
 }
