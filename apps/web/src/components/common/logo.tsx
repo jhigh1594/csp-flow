@@ -19,7 +19,7 @@ export function Logo({ className = "" }: LogoProps) {
       <img
         src="/servicenow-logo.png"
         alt="ServiceNow"
-        className="h-6 w-auto dark:brightness-0 dark:invert"
+        className="h-6 w-auto dark:invert dark:mix-blend-screen"
       />
     </Link>
   );
