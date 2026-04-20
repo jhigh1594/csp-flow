@@ -1,10 +1,11 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
 import { demandTable } from "../../database/schema";
 
 async function updateDemand({
   demandId,
+  teamId,
   name,
   businessPartnershipDate,
   discoveryDate,
@@ -16,6 +17,7 @@ async function updateDemand({
   adoptionDate,
 }: {
   demandId: string;
+  teamId: string;
   name?: string;
   businessPartnershipDate?: string | null;
   discoveryDate?: string | null;
@@ -59,7 +61,7 @@ async function updateDemand({
   const [demand] = await db
     .update(demandTable)
     .set(updateValues)
-    .where(eq(demandTable.id, demandId))
+    .where(and(eq(demandTable.id, demandId), eq(demandTable.teamId, teamId)))
     .returning();
 
   if (!demand) {

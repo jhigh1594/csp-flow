@@ -1,12 +1,12 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
 import { roadmapReleaseTable } from "../../database/schema";
 
-async function deleteRelease(releaseId: string) {
+async function deleteRelease(releaseId: string, teamId: string) {
   const [deleted] = await db
     .delete(roadmapReleaseTable)
-    .where(eq(roadmapReleaseTable.id, releaseId))
+    .where(and(eq(roadmapReleaseTable.id, releaseId), eq(roadmapReleaseTable.teamId, teamId)))
     .returning({ id: roadmapReleaseTable.id });
 
   if (!deleted) {

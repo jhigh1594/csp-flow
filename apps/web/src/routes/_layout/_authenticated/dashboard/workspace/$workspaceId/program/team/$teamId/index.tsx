@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import WorkspaceLayout from "@/components/common/workspace-layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import useCreateRelease from "@/hooks/mutations/program/use-create-release";
 import useCreateRisk from "@/hooks/mutations/program/use-create-risk";
 import useDeleteDemand from "@/hooks/mutations/program/use-delete-demand";
 import useDeleteRelease from "@/hooks/mutations/program/use-delete-release";
+import useDeleteRisk from "@/hooks/mutations/program/use-delete-risk";
 import useUpdateDemand from "@/hooks/mutations/program/use-update-demand";
 import useUpdateRelease from "@/hooks/mutations/program/use-update-release";
 import useUpdateRisk from "@/hooks/mutations/program/use-update-risk";
@@ -121,6 +122,7 @@ function RouteComponent() {
   const { mutate: deleteDemand } = useDeleteDemand();
   const { mutate: createRisk } = useCreateRisk();
   const { mutate: updateRisk } = useUpdateRisk();
+  const { mutate: deleteRisk } = useDeleteRisk();
   const { mutate: createRelease } = useCreateRelease();
   const { mutate: updateRelease } = useUpdateRelease();
   const { mutate: deleteRelease } = useDeleteRelease();
@@ -131,15 +133,20 @@ function RouteComponent() {
   const [nextWeekFocus, setNextWeekFocus] = useState("");
   const [leadershipAsks, setLeadershipAsks] = useState("");
 
-  // Sync form state when data loads
+  // Track which team+week we've already initialized from to prevent
+  // re-syncing form state on every background refetch (which discards edits)
+  const initializedForRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (data?.status) {
-      setHealth((data.status.health as Health) ?? "green");
-      setAccomplishments(data.status.accomplishments ?? "");
-      setNextWeekFocus(data.status.nextWeekFocus ?? "");
-      setLeadershipAsks(data.status.leadershipAsks ?? "");
-    }
-  }, [data?.status]);
+    if (!data?.status) return;
+    const key = `${teamId}-${data.status.weekStart}`;
+    if (initializedForRef.current === key) return;
+    initializedForRef.current = key;
+    setHealth((data.status.health as Health) ?? "green");
+    setAccomplishments(data.status.accomplishments ?? "");
+    setNextWeekFocus(data.status.nextWeekFocus ?? "");
+    setLeadershipAsks(data.status.leadershipAsks ?? "");
+  }, [data?.status, teamId]);
 
   // Local demand edits (keyed by demandId)
   const [demandEdits, setDemandEdits] = useState<
@@ -239,6 +246,10 @@ function RouteComponent() {
 
   function handleAddRisk() {
     createRisk({ workspaceId, teamId, description: "New Risk" });
+  }
+
+  function handleDeleteRisk(riskId: string) {
+    deleteRisk({ workspaceId, teamId, riskId });
   }
 
   function handleUpdateRisk(riskId: string) {
@@ -640,13 +651,23 @@ function RouteComponent() {
                             />
                           </TableCell>
                           <TableCell>
-                            <Button
-                              size="xs"
-                              variant="outline"
-                              onClick={() => handleUpdateRisk(risk.id)}
-                            >
-                              Update
-                            </Button>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                size="xs"
+                                variant="outline"
+                                onClick={() => handleUpdateRisk(risk.id)}
+                              >
+                                Update
+                              </Button>
+                              <Button
+                                size="icon-xs"
+                                variant="ghost"
+                                onClick={() => handleDeleteRisk(risk.id)}
+                                className="text-muted-foreground hover:text-destructive"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))

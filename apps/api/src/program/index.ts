@@ -7,6 +7,7 @@ import createRelease from "./controllers/create-release";
 import createRisk from "./controllers/create-risk";
 import deleteDemand from "./controllers/delete-demand";
 import deleteRelease from "./controllers/delete-release";
+import deleteRisk from "./controllers/delete-risk";
 import getProgramTeams from "./controllers/get-program-teams";
 import getRoadmap from "./controllers/get-roadmap";
 import getSnapshotDiff from "./controllers/get-snapshot-diff";
@@ -143,9 +144,9 @@ const program = new Hono<{
     ),
     workspaceAccess.fromParam("workspaceId"),
     async (c) => {
-      const { teamId } = c.req.valid("param");
+      const { teamId, workspaceId } = c.req.valid("param");
       const body = c.req.valid("json");
-      const demand = await createDemand({ teamId, ...body });
+      const demand = await createDemand({ teamId, workspaceId, ...body });
       return c.json(demand, 201);
     },
   )
@@ -188,9 +189,9 @@ const program = new Hono<{
     ),
     workspaceAccess.fromParam("workspaceId"),
     async (c) => {
-      const { demandId } = c.req.valid("param");
+      const { demandId, teamId } = c.req.valid("param");
       const body = c.req.valid("json");
-      const demand = await updateDemand({ demandId, ...body });
+      const demand = await updateDemand({ demandId, teamId, ...body });
       return c.json(demand);
     },
   )
@@ -219,8 +220,8 @@ const program = new Hono<{
     ),
     workspaceAccess.fromParam("workspaceId"),
     async (c) => {
-      const { demandId } = c.req.valid("param");
-      const result = await deleteDemand(demandId);
+      const { demandId, teamId } = c.req.valid("param");
+      const result = await deleteDemand(demandId, teamId);
       return c.json(result);
     },
   )
@@ -252,9 +253,9 @@ const program = new Hono<{
     ),
     workspaceAccess.fromParam("workspaceId"),
     async (c) => {
-      const { teamId } = c.req.valid("param");
+      const { teamId, workspaceId } = c.req.valid("param");
       const body = c.req.valid("json");
-      const risk = await createRisk({ teamId, ...body });
+      const risk = await createRisk({ teamId, workspaceId, ...body });
       return c.json(risk, 201);
     },
   )
@@ -293,10 +294,40 @@ const program = new Hono<{
     ),
     workspaceAccess.fromParam("workspaceId"),
     async (c) => {
-      const { riskId } = c.req.valid("param");
+      const { riskId, teamId } = c.req.valid("param");
       const body = c.req.valid("json");
-      const risk = await updateRisk({ riskId, ...body });
+      const risk = await updateRisk({ riskId, teamId, ...body });
       return c.json(risk);
+    },
+  )
+  .delete(
+    "/:workspaceId/teams/:teamId/risks/:riskId",
+    describeRoute({
+      operationId: "deleteRisk",
+      tags: ["Program"],
+      description: "Delete a risk",
+      responses: {
+        200: {
+          description: "Success",
+          content: {
+            "application/json": { schema: resolver(v.any()) },
+          },
+        },
+      },
+    }),
+    validator(
+      "param",
+      v.object({
+        workspaceId: v.string(),
+        teamId: v.string(),
+        riskId: v.string(),
+      }),
+    ),
+    workspaceAccess.fromParam("workspaceId"),
+    async (c) => {
+      const { riskId, teamId } = c.req.valid("param");
+      const result = await deleteRisk(riskId, teamId);
+      return c.json(result);
     },
   )
   .get(
@@ -351,9 +382,9 @@ const program = new Hono<{
     ),
     workspaceAccess.fromParam("workspaceId"),
     async (c) => {
-      const { teamId } = c.req.valid("param");
+      const { teamId, workspaceId } = c.req.valid("param");
       const body = c.req.valid("json");
-      const release = await createRelease({ teamId, ...body });
+      const release = await createRelease({ teamId, workspaceId, ...body });
       return c.json(release, 201);
     },
   )
@@ -393,9 +424,9 @@ const program = new Hono<{
     ),
     workspaceAccess.fromParam("workspaceId"),
     async (c) => {
-      const { releaseId } = c.req.valid("param");
+      const { releaseId, teamId } = c.req.valid("param");
       const body = c.req.valid("json");
-      const release = await updateRelease({ releaseId, ...body });
+      const release = await updateRelease({ releaseId, teamId, ...body });
       return c.json(release);
     },
   )
@@ -424,8 +455,8 @@ const program = new Hono<{
     ),
     workspaceAccess.fromParam("workspaceId"),
     async (c) => {
-      const { releaseId } = c.req.valid("param");
-      const result = await deleteRelease(releaseId);
+      const { releaseId, teamId } = c.req.valid("param");
+      const result = await deleteRelease(releaseId, teamId);
       return c.json(result);
     },
   )

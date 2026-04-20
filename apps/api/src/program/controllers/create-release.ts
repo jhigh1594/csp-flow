@@ -1,8 +1,10 @@
 import db from "../../database";
 import { roadmapReleaseTable } from "../../database/schema";
+import { requireTeamInWorkspace } from "../utils/ownership";
 
 async function createRelease({
   teamId,
+  workspaceId,
   name,
   quarter,
   month,
@@ -11,6 +13,7 @@ async function createRelease({
   description,
 }: {
   teamId: string;
+  workspaceId: string;
   name: string;
   quarter: string;
   month: number;
@@ -18,6 +21,8 @@ async function createRelease({
   personas?: string[] | null;
   description?: string | null;
 }) {
+  await requireTeamInWorkspace(teamId, workspaceId);
+
   const [release] = await db
     .insert(roadmapReleaseTable)
     .values({

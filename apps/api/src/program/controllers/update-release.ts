@@ -1,10 +1,11 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
 import { roadmapReleaseTable } from "../../database/schema";
 
 async function updateRelease({
   releaseId,
+  teamId,
   name,
   quarter,
   month,
@@ -13,6 +14,7 @@ async function updateRelease({
   description,
 }: {
   releaseId: string;
+  teamId: string;
   name?: string;
   quarter?: string;
   month?: number;
@@ -44,7 +46,7 @@ async function updateRelease({
   const [release] = await db
     .update(roadmapReleaseTable)
     .set(updateValues)
-    .where(eq(roadmapReleaseTable.id, releaseId))
+    .where(and(eq(roadmapReleaseTable.id, releaseId), eq(roadmapReleaseTable.teamId, teamId)))
     .returning();
 
   if (!release) {

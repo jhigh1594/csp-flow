@@ -7,6 +7,7 @@ import {
   weeklyStatusSnapshotTable,
   weeklyStatusTable,
 } from "../../database/schema";
+import { requireTeamInWorkspace } from "../utils/ownership";
 import { getCurrentWeekStart, subtractWeeks } from "../utils/week";
 
 async function upsertTeamStatus({
@@ -24,6 +25,8 @@ async function upsertTeamStatus({
   nextWeekFocus?: string | null;
   leadershipAsks?: string | null;
 }) {
+  await requireTeamInWorkspace(teamId, workspaceId);
+
   const weekStart = getCurrentWeekStart();
 
   const [status] = await db
@@ -96,12 +99,10 @@ async function upsertTeamStatus({
       releases,
     };
 
-    await db.insert(weeklyStatusSnapshotTable).values({
-      teamId,
-      workspaceId,
-      weekStart,
-      snapshot,
-    });
+    await db
+      .insert(weeklyStatusSnapshotTable)
+      .values({ teamId, workspaceId, weekStart, snapshot })
+      .onConflictDoNothing();
   }
 
   // Delete snapshots older than 4 weeks

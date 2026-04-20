@@ -1,10 +1,11 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
 import { riskTable } from "../../database/schema";
 
 async function updateRisk({
   riskId,
+  teamId,
   description,
   impact,
   status,
@@ -12,6 +13,7 @@ async function updateRisk({
   dueDate,
 }: {
   riskId: string;
+  teamId: string;
   description?: string;
   impact?: string;
   status?: string;
@@ -39,7 +41,7 @@ async function updateRisk({
   const [risk] = await db
     .update(riskTable)
     .set(updateValues)
-    .where(eq(riskTable.id, riskId))
+    .where(and(eq(riskTable.id, riskId), eq(riskTable.teamId, teamId)))
     .returning();
 
   if (!risk) {

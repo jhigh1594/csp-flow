@@ -1071,6 +1071,7 @@ export const weeklyStatusSnapshotTable = pgTable(
   },
   (table) => [
     index("weekly_status_snapshot_teamId_idx").on(table.teamId),
+    index("weekly_status_snapshot_workspaceId_idx").on(table.workspaceId),
     unique("weekly_status_snapshot_team_week_unique").on(table.teamId, table.weekStart),
   ],
 );

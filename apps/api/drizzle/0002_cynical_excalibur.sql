@@ -1,0 +1,1 @@
+CREATE INDEX "weekly_status_snapshot_workspaceId_idx" ON "weekly_status_snapshot" USING btree ("workspace_id");
