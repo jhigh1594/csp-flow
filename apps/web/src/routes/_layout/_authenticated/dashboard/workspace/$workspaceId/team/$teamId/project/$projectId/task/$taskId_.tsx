@@ -15,7 +15,7 @@ import useGetTask from "@/hooks/queries/task/use-get-task";
 import { getSharedShikiHighlighter } from "@/lib/shiki-highlighter";
 
 export const Route = createFileRoute(
-  "/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId_",
+  "/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/task/$taskId_",
 )({
   component: RouteComponent,
 });

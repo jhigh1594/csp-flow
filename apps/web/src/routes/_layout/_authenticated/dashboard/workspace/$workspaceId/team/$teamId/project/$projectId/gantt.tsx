@@ -75,7 +75,7 @@ type GanttSearchParams = {
 };
 
 export const Route = createFileRoute(
-  "/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/gantt",
+  "/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/gantt",
 )({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>): GanttSearchParams => ({

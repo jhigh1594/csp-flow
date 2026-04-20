@@ -26,7 +26,7 @@ type BoardSearchParams = {
 };
 
 export const Route = createFileRoute(
-  "/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/board",
+  "/_layout/_authenticated/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/board",
 )({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>): BoardSearchParams => ({
@@ -76,7 +76,7 @@ function BoardSkeleton() {
 
 function RouteComponent() {
   const { t } = useTranslation();
-  const { projectId, workspaceId } = Route.useParams();
+  const { projectId, workspaceId, teamId } = Route.useParams();
   const { taskId } = Route.useSearch();
   const navigate = useNavigate();
   const { data } = useGetTasks(projectId);
@@ -111,13 +111,13 @@ function RouteComponent() {
         [shortcuts.view.list]: () => setViewMode("list"),
         [shortcuts.view.gantt]: () =>
           navigate({
-            to: "/dashboard/workspace/$workspaceId/project/$projectId/gantt",
-            params: { workspaceId, projectId },
+            to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/gantt",
+            params: { workspaceId, teamId, projectId },
           }),
         [shortcuts.view.backlog]: () =>
           navigate({
-            to: "/dashboard/workspace/$workspaceId/project/$projectId/backlog",
-            params: { workspaceId, projectId },
+            to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/backlog",
+            params: { workspaceId, teamId, projectId },
           }),
       },
     },
