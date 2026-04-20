@@ -31,6 +31,8 @@ import invitation from "./invitation";
 import label from "./label";
 import mcpRoutes, { mcpWellKnownRoutes } from "./mcp";
 import { migrateColumns } from "./migrations/column-migration";
+import { ensureMigrationBaseline } from "./migrations/ensure-migration-baseline";
+import { runTeamCentricMigration } from "./migrations/team-centric-migration";
 import milestone from "./milestone";
 import notification from "./notification";
 import notificationPreferences from "./notification-preferences";
@@ -538,6 +540,7 @@ export async function runStartupTasks() {
   await migrateWorkspaceUserEmail();
   await migrateSessionColumn();
   await migrateApiKeyReferenceId();
+  await ensureMigrationBaseline();
 
   console.log("🔄 Migrating database...");
   await migrate(db, {
@@ -547,6 +550,7 @@ export async function runStartupTasks() {
 
   await migrateNotificationPreferencesSchema();
   await migrateGitHubIntegration();
+  await runTeamCentricMigration();
   await migrateColumns();
 
   initializePlugins();
