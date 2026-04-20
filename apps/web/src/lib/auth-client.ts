@@ -37,6 +37,9 @@ export const authClient = createAuthClient({
         admin,
         owner,
       },
+      teams: {
+        enabled: true,
+      },
     }),
     genericOAuthClient(),
     deviceAuthorizationClient(),
