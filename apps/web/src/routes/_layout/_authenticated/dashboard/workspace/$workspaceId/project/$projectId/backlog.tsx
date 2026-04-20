@@ -563,11 +563,13 @@ function RouteComponent() {
                         onCheckedChange={(checked) =>
                           updateFilter("priority", checked ? priority : null)
                         }
-                        className="h-8 rounded-md text-sm [&_svg]:text-sidebar-foreground"
+                        className="h-8 rounded-md text-sm"
                       >
-                        {getPriorityIcon(priority)}
-                        <span className="capitalize">
-                          {getPriorityLabel(priority)}
+                        <span className="flex items-center gap-1.5">
+                          {getPriorityIcon(priority)}
+                          <span className="capitalize">
+                            {getPriorityLabel(priority)}
+                          </span>
                         </span>
                       </DropdownMenuCheckboxItem>
                     ))}

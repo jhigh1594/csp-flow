@@ -814,7 +814,7 @@ function RouteComponent() {
                                               {project?.slug}-{task.number}
                                             </span>
                                           </div>
-                                          <p className="w-full line-clamp-1 text-xs font-medium leading-tight text-foreground">
+                                          <p className="w-full line-clamp-1 text-sm font-medium leading-tight text-foreground">
                                             {task.title}
                                           </p>
                                           <p className="w-full truncate text-[11px] leading-tight text-muted-foreground">
