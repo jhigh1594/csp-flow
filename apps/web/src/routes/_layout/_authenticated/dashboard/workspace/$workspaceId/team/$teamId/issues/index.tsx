@@ -109,11 +109,11 @@ function BoardView({
     for (const issue of issues) {
       const colId = issue.columnId;
       if (colId && map.has(colId)) {
-        map.get(colId)!.push(issue);
+        map.get(colId)?.push(issue);
       } else {
         // Put unassigned-column tasks in first column if available
         if (columns.length > 0) {
-          map.get(columns[0].id)!.push(issue);
+          map.get(columns[0].id)?.push(issue);
         }
       }
     }
@@ -283,7 +283,7 @@ function ListView({
       if (!map.has(key)) {
         map.set(key, []);
       }
-      map.get(key)!.push(issue);
+      map.get(key)?.push(issue);
     }
 
     const result: ProjectGroup[] = [];
@@ -293,7 +293,7 @@ function ListView({
       result.push({
         projectId: null,
         projectName: "No Project",
-        issues: map.get(null)!,
+        issues: map.get(null) ?? [],
       });
     }
 
