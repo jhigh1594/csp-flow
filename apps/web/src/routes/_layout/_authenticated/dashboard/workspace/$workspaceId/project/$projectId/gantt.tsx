@@ -279,7 +279,7 @@ function RouteComponent() {
       for (const task of filteredTasks) {
         const key = task.roadmapGroup ?? "later";
         if (!grouped.has(key)) grouped.set(key, []);
-        grouped.get(key)!.push(task);
+        grouped.get(key)?.push(task);
       }
 
       return ROADMAP_GROUPS.filter((g) => grouped.has(g)).map((g) => ({
@@ -296,7 +296,7 @@ function RouteComponent() {
       for (const task of filteredTasks) {
         const key = task.priority ?? "no-priority";
         if (!grouped.has(key)) grouped.set(key, []);
-        grouped.get(key)!.push(task);
+        grouped.get(key)?.push(task);
       }
 
       return priorityOrder
@@ -316,7 +316,7 @@ function RouteComponent() {
       for (const task of filteredTasks) {
         const key = task.assigneeName ?? "Unassigned";
         if (!grouped.has(key)) grouped.set(key, []);
-        grouped.get(key)!.push(task);
+        grouped.get(key)?.push(task);
       }
 
       return Array.from(grouped.entries()).map(([name, tasks]) => ({
