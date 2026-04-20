@@ -95,7 +95,7 @@ function ChannelCard({
 }) {
   return (
     <div
-      className="space-y-4 rounded-md border border-border bg-sidebar p-4"
+      className="space-y-4 rounded-md border border-border bg-card p-4"
       data-channel={channel}
     >
       <div className="flex items-start justify-between gap-4">
@@ -217,7 +217,7 @@ function WorkspaceRuleCard({
   };
 
   return (
-    <div className="space-y-4 border border-border rounded-md bg-sidebar p-4">
+    <div className="space-y-4 border border-border rounded-md bg-card p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 space-y-1">
           <p className="text-sm font-medium">{workspace.name}</p>

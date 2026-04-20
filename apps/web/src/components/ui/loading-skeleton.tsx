@@ -6,7 +6,7 @@ type LoadingSkeletonProps = {
 
 export function LoadingSkeleton({ className }: LoadingSkeletonProps) {
   return (
-    <div className={cn("flex w-full h-svh bg-sidebar", className)}>
+    <div className={cn("flex w-full h-svh bg-background", className)}>
       <div className="w-64 bg-sidebar border-r border-border flex flex-col">
         <div className="p-3 border-b border-border">
           <div className="flex items-center gap-2">

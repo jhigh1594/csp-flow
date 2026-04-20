@@ -226,7 +226,7 @@ function TaskRow({ task, projectSlug }: TaskRowProps) {
                             e.stopPropagation();
                             window.open(pullRequests[0].url, "_blank");
                           }}
-                          className="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-border bg-sidebar text-[10px] font-medium text-muted-foreground"
+                          className="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-border bg-muted text-[10px] font-medium text-muted-foreground"
                         >
                           {getPRInfo(pullRequests[0]).icon}
                           <span>#{pullRequests[0].externalId}</span>
@@ -272,7 +272,7 @@ function TaskRow({ task, projectSlug }: TaskRowProps) {
                             <button
                               type="button"
                               onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-border bg-sidebar text-[10px] font-medium text-muted-foreground"
+                              className="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-border bg-muted text-[10px] font-medium text-muted-foreground"
                             >
                               <GitPullRequest
                                 className={`h-3 w-3 ${iconColor}`}

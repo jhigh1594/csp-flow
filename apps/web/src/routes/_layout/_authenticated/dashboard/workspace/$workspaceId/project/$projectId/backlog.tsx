@@ -366,7 +366,7 @@ function RouteComponent() {
                   variant="ghost"
                   size="xs"
                   onClick={() => setIsTaskModalOpen(true)}
-                  className="h-6 px-2 text-xs text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  className="h-6 px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
                 >
                   <Plus className="h-3 w-3 mr-1" />
                   {t("tasks:backlog.plan")}
@@ -376,7 +376,7 @@ function RouteComponent() {
                   variant="ghost"
                   size="xs"
                   onClick={handleMoveAllPlannedToTodo}
-                  className="h-6 px-2 text-xs text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  className="h-6 px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
                   title={t("tasks:backlog.moveAllTooltip")}
                 >
                   <ArrowRight className="h-3 w-3 mr-1" />

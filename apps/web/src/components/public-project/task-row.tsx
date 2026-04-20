@@ -85,7 +85,7 @@ export function PublicTaskRow({
         )}
 
         {task.priority && (
-          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-border bg-sidebar text-[10px] font-medium text-muted-foreground">
+          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded border border-border bg-muted text-[10px] font-medium text-muted-foreground">
             {getPriorityIcon(task.priority)}
           </div>
         )}

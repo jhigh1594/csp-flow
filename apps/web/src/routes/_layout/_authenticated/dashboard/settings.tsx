@@ -46,7 +46,7 @@ function SettingsLayout() {
   return (
     <>
       <PageTitle title={t("navigation:page.settingsTitle")} />
-      <div className="flex flex-col gap-4 p-4 bg-sidebar w-full h-full">
+      <div className="flex flex-col gap-4 p-4 bg-background w-full h-full">
         <div className="flex flex-col gap-4 bg-card h-full border border-border rounded-md p-4 relative overflow-hidden">
           <div>
             <Button
@@ -68,7 +68,7 @@ function SettingsLayout() {
             </h1>
 
             <Tabs value={activeTab} className="w-[400px] pt-2">
-              <TabsList className="bg-sidebar gap-2">
+              <TabsList className="bg-muted gap-2">
                 <TabsTrigger
                   className="[&[data-state=active]]:border [&[data-state=active]]:border-border [&[data-state=active]]:rounded-md [&[data-state=active]]:bg-card"
                   value="account"

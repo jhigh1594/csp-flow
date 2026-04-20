@@ -272,7 +272,7 @@ function RouteComponent() {
             </p>
           </div>
 
-          <div className="space-y-4 border border-border rounded-md p-4 bg-sidebar">
+          <div className="space-y-4 border border-border rounded-md p-4 bg-card">
             <Form {...workspaceForm}>
               <form className="space-y-4">
                 <FormField
@@ -349,7 +349,7 @@ function RouteComponent() {
             </p>
           </div>
 
-          <div className="space-y-4 border border-border rounded-md p-4 bg-sidebar">
+          <div className="space-y-4 border border-border rounded-md p-4 bg-card">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <p className="text-sm font-medium">
