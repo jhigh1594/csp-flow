@@ -6,11 +6,13 @@ export const Route = createFileRoute(
   "/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/wiki/",
 )({
   loader: ({ context: { queryClient }, params: { projectId } }) =>
-    queryClient.ensureQueryData({
-      queryKey: ["wiki-pages", projectId],
-      queryFn: () => getWikiPages(projectId),
-      staleTime: 30_000,
-    }),
+    queryClient
+      .ensureQueryData({
+        queryKey: ["wiki-pages", projectId],
+        queryFn: () => getWikiPages(projectId),
+        staleTime: 30_000,
+      })
+      .catch(() => undefined),
   component: WikiListRoute,
 });
 
