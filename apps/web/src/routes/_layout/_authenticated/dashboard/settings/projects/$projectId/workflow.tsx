@@ -44,7 +44,7 @@ function RouteComponent() {
               {t("settings:projectWorkflow.columnsDescription")}
             </p>
           </div>
-          <ColumnEditor teamId={teamId} />
+          {teamId && <ColumnEditor teamId={teamId} />}
         </div>
 
         <div className="space-y-6">

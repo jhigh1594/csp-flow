@@ -26,7 +26,7 @@ export default function ColumnEditor({ teamId }: ColumnEditorProps) {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const handleCreate = async () => {
-    if (!newColumnName.trim()) return;
+    if (!newColumnName.trim() || !teamId) return;
     try {
       await createColumn({
         teamId,
