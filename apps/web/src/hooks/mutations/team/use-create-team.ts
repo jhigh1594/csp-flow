@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth-client";
+import createTeam from "@/fetchers/team/create-team";
 import queryClient from "@/query-client";
 
 type CreateTeamVariables = {
@@ -9,14 +9,8 @@ type CreateTeamVariables = {
 
 function useCreateTeam() {
   return useMutation({
-    mutationFn: async ({ workspaceId, name }: CreateTeamVariables) => {
-      const { data, error } = await authClient.organization.createTeam({
-        name,
-        organizationId: workspaceId,
-      });
-      if (error) throw new Error(error.message || "Failed to create team");
-      return data;
-    },
+    mutationFn: ({ workspaceId, name }: CreateTeamVariables) =>
+      createTeam({ workspaceId, name }),
     onSuccess: (_, { workspaceId }) => {
       queryClient.invalidateQueries({ queryKey: ["teams", workspaceId] });
     },
