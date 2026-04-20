@@ -314,7 +314,7 @@ const task = new Hono<{
         dueDate: v.optional(v.string()),
         priority: v.picklist(VALID_PRIORITIES),
         status: v.string(),
-        projectId: v.string(),
+        projectId: v.nullable(v.string()),
         position: v.number(),
         userId: v.optional(v.string()),
       }),

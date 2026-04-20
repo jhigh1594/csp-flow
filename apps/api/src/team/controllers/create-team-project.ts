@@ -1,6 +1,6 @@
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
-import { projectTable, teamTable } from "../../database/schema";
+import { projectTable } from "../../database/schema";
 
 function toSlug(name: string): string {
   return name

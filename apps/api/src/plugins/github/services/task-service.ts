@@ -4,7 +4,6 @@ import db from "../../../database";
 import {
   columnTable,
   integrationTable,
-  projectTable,
   taskTable,
 } from "../../../database/schema";
 

@@ -10,7 +10,7 @@ async function updateTask(
   status: string,
   startDate: Date | undefined,
   dueDate: Date | undefined,
-  projectId: string,
+  projectId: string | null,
   description: string,
   priority: string,
   position: number,

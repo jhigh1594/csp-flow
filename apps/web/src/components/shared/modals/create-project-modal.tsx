@@ -26,6 +26,7 @@ import {
 import icons from "@/constants/project-icons";
 import useCreateProject from "@/hooks/mutations/project/use-create-project";
 import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
+import useGetTeams from "@/hooks/queries/team/use-get-teams";
 import { cn } from "@/lib/cn";
 import generateProjectSlug from "@/lib/generate-project-id";
 import { toast } from "@/lib/toast";
@@ -33,9 +34,10 @@ import { toast } from "@/lib/toast";
 type CreateProjectModalProps = {
   open: boolean;
   onClose: () => void;
+  teamId?: string;
 };
 
-function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
+function CreateProjectModal({ open, onClose, teamId }: CreateProjectModalProps) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -44,10 +46,13 @@ function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
   const [iconSearch, setIconSearch] = useState("");
   const queryClient = useQueryClient();
   const { data: workspace } = useActiveWorkspace();
+  const { data: teams } = useGetTeams({ workspaceId: workspace?.id ?? "" });
+  const resolvedTeamId = teamId ?? teams?.[0]?.id ?? "";
   const { mutateAsync } = useCreateProject({
     name,
     slug,
     workspaceId: workspace?.id ?? "",
+    teamId: resolvedTeamId,
     icon: selectedIcon,
   });
   const SelectedIcon =
@@ -76,9 +81,10 @@ function CreateProjectModal({ open, onClose }: CreateProjectModalProps) {
       await queryClient.invalidateQueries({ queryKey: ["projects"] });
 
       navigate({
-        to: "/dashboard/workspace/$workspaceId/project/$projectId/board",
+        to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/board",
         params: {
           workspaceId: workspace?.id ?? "",
+          teamId: resolvedTeamId,
           projectId: id,
         },
       });
