@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/tooltip";
 import { shortcuts } from "@/constants/shortcuts";
 import useGetProject from "@/hooks/queries/project/use-get-project";
-import { cn } from "@/lib/cn";
 
 type ProjectLayoutProps = {
   projectId: string;
@@ -173,10 +172,7 @@ export default function ProjectLayout({
                   variant={resolvedView === "backlog" ? "secondary" : "ghost"}
                   size="xs"
                   onClick={handleNavigateToBacklog}
-                  className={cn(
-                    "h-6 gap-1.5 rounded-md px-2 text-xs",
-                    resolvedView !== "backlog" && "text-muted-foreground",
-                  )}
+                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-[#000000] hover:text-[#000000]"
                 >
                   <SquircleDashed className="size-3.5" />
                   Backlog
@@ -185,10 +181,7 @@ export default function ProjectLayout({
                   variant={resolvedView === "board" ? "secondary" : "ghost"}
                   size="xs"
                   onClick={handleNavigateToBoard}
-                  className={cn(
-                    "h-6 gap-1.5 rounded-md px-2 text-xs",
-                    resolvedView !== "board" && "text-muted-foreground",
-                  )}
+                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-[#000000] hover:text-[#000000]"
                 >
                   <SquareKanban className="size-3.5" />
                   Tasks
@@ -197,10 +190,7 @@ export default function ProjectLayout({
                   variant={resolvedView === "gantt" ? "secondary" : "ghost"}
                   size="xs"
                   onClick={handleNavigateToGantt}
-                  className={cn(
-                    "h-6 gap-1.5 rounded-md px-2 text-xs",
-                    resolvedView !== "gantt" && "text-muted-foreground",
-                  )}
+                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-[#000000] hover:text-[#000000]"
                 >
                   <CalendarDays className="size-3.5" />
                   Gantt
@@ -209,10 +199,7 @@ export default function ProjectLayout({
                   variant={resolvedView === "wiki" ? "secondary" : "ghost"}
                   size="xs"
                   onClick={handleNavigateToWiki}
-                  className={cn(
-                    "h-6 gap-1.5 rounded-md px-2 text-xs",
-                    resolvedView !== "wiki" && "text-muted-foreground",
-                  )}
+                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-[#000000] hover:text-[#000000]"
                 >
                   <FileText className="size-3.5" />
                   Wiki
@@ -223,10 +210,7 @@ export default function ProjectLayout({
                   }
                   size="xs"
                   onClick={handleNavigateToMilestones}
-                  className={cn(
-                    "h-6 gap-1.5 rounded-md px-2 text-xs",
-                    resolvedView !== "milestones" && "text-muted-foreground",
-                  )}
+                  className="h-6 gap-1.5 rounded-md px-2 text-xs text-[#000000] hover:text-[#000000]"
                 >
                   <Diamond className="size-3.5" />
                   Milestones
