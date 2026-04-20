@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import CreateProjectModal from "@/components/shared/modals/create-project-modal";
 import {
   Collapsible,
   CollapsiblePanel,
@@ -84,6 +85,7 @@ type TeamSectionProps = {
 function TeamSection({ team, workspaceId }: TeamSectionProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [showProjects, setShowProjects] = useState(false);
+  const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const identifier =
     typeof team.identifier === "string"
       ? team.identifier
@@ -146,7 +148,16 @@ function TeamSection({ team, workspaceId }: TeamSectionProps) {
                   >
                     <FolderOpen className="h-3.5 w-3.5 text-sidebar-foreground/60" />
                     <span>Projects</span>
-                    <ChevronRight className="proj-chevron ml-auto h-3 w-3 text-sidebar-foreground/60 transition-transform duration-200" />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCreateProjectOpen(true);
+                      }}
+                      className="ml-auto flex h-4 w-4 items-center justify-center rounded hover:bg-sidebar-accent text-sidebar-foreground/60 hover:text-sidebar-accent-foreground"
+                    >
+                      <Plus className="h-3 w-3" />
+                    </button>
                   </CollapsibleTrigger>
                 </SidebarMenuItem>
                 <CollapsiblePanel>
@@ -160,6 +171,12 @@ function TeamSection({ team, workspaceId }: TeamSectionProps) {
                   </SidebarMenu>
                 </CollapsiblePanel>
               </Collapsible>
+
+              <CreateProjectModal
+                open={createProjectOpen}
+                onClose={() => setCreateProjectOpen(false)}
+                teamId={team.id}
+              />
 
               <SidebarMenuItem>
                 <SidebarMenuButton
