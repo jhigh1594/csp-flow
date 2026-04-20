@@ -116,33 +116,33 @@ input:-webkit-autofill:active {
 
   /* Core palette — ServiceNow brand colors */
   --accent: #5DB37E;
-  --accent-foreground: #042E43;
+  --accent-foreground: #000000;
   --background: #FFFFFF;
   --border: #C8DFD2;
   --card: #FFFFFF;
-  --card-foreground: #042E43;
+  --card-foreground: #000000;
   --destructive: #E5534B;
   --destructive-foreground: #FFFFFF;
-  --foreground: #042E43;
+  --foreground: #000000;
   --info: #3B82C4;
   --info-foreground: #FFFFFF;
   --input: #C8DFD2;
   --muted: #F0F7F3;
   --muted-foreground: #5A7A6A;
   --popover: #FFFFFF;
-  --popover-foreground: #042E43;
+  --popover-foreground: #000000;
   --primary: #19873E;
   --primary-foreground: #FFFFFF;
   --ring: #5DB37E;
   --secondary: #E5F3EC;
-  --secondary-foreground: #042E43;
+  --secondary-foreground: #000000;
   --success: #19873E;
   --success-foreground: #FFFFFF;
   --warning: #C9802D;
   --warning-foreground: #FFFFFF;
   --chart-1: #19873E;
   --chart-2: #5DB37E;
-  --chart-3: #042E43;
+  --chart-3: #000000;
   --chart-4: #8FD4AA;
   --chart-5: #0A5C7A;
   --sidebar: #021E2D;
@@ -154,7 +154,7 @@ input:-webkit-autofill:active {
   --sidebar-border: #1A4E65;
   --sidebar-ring: #2DB55D;
   --code: #F0F7F3;
-  --code-foreground: #042E43;
+  --code-foreground: #000000;
   --code-highlight: #E5F3EC;
 }
 
@@ -164,22 +164,22 @@ input:-webkit-autofill:active {
   --background: #042E43;
   --border: #1A4E65;
   --card: #073A53;
-  --card-foreground: #E8F5ED;
+  --card-foreground: #FFFFFF;
   --destructive: #E5534B;
   --destructive-foreground: #FFFFFF;
-  --foreground: #E8F5ED;
+  --foreground: #FFFFFF;
   --info: #5A9BD5;
   --info-foreground: #042E43;
   --input: #1A4E65;
   --muted: #0A3A52;
-  --muted-foreground: #7FBFA0;
+  --muted-foreground: #FFFFFF;
   --popover: #073A53;
-  --popover-foreground: #E8F5ED;
+  --popover-foreground: #FFFFFF;
   --primary: #2DB55D;
   --primary-foreground: #042E43;
   --ring: #2DB55D;
   --secondary: #0F4A65;
-  --secondary-foreground: #E8F5ED;
+  --secondary-foreground: #FFFFFF;
   --success: #2DB55D;
   --success-foreground: #042E43;
   --warning: #D4943A;
@@ -188,17 +188,17 @@ input:-webkit-autofill:active {
   --chart-2: #19873E;
   --chart-3: #8FD4AA;
   --chart-4: #0A5C7A;
-  --chart-5: #E8F5ED;
+  --chart-5: #FFFFFF;
   --sidebar: #021E2D;
-  --sidebar-foreground: #E8F5ED;
+  --sidebar-foreground: #FFFFFF;
   --sidebar-primary: #2DB55D;
   --sidebar-primary-foreground: #042E43;
   --sidebar-accent: #0F4A65;
-  --sidebar-accent-foreground: #E8F5ED;
+  --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: #1A4E65;
   --sidebar-ring: #2DB55D;
   --code: #0A3A52;
-  --code-foreground: #E8F5ED;
+  --code-foreground: #FFFFFF;
   --code-highlight: #0F4A65;
 }
 
