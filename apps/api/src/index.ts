@@ -44,6 +44,7 @@ import slackIntegration from "./slack-integration";
 import { getPrivateObject } from "./storage/s3";
 import task from "./task";
 import taskRelation from "./task-relation";
+import team from "./team";
 import telegramIntegration from "./telegram-integration";
 import timeEntry from "./time-entry";
 import {
@@ -479,6 +480,7 @@ export function createApp() {
   const workflowRuleApi = api.route("/workflow-rule", workflowRule);
   const invitationApi = api.route("/invitation", invitation);
   const workspaceApi = api.route("/workspace", workspace);
+  const teamApi = api.route("/teams", team);
   const milestoneApi = api.route("/milestone", milestone);
   const wikiApi = api.route("/wiki", wiki);
 
@@ -518,6 +520,7 @@ export function createApp() {
     slackIntegrationApi,
     taskApi,
     taskRelationApi,
+    teamApi,
     telegramIntegrationApi,
     timeEntryApi,
     wikiApi,
@@ -596,6 +599,7 @@ const {
   slackIntegrationApi,
   taskApi,
   taskRelationApi,
+  teamApi,
   telegramIntegrationApi,
   timeEntryApi,
   wikiApi,
@@ -631,6 +635,7 @@ export type AppType =
   | typeof slackIntegrationApi
   | typeof telegramIntegrationApi
   | typeof taskRelationApi
+  | typeof teamApi
   | typeof externalLinkApi
   | typeof wikiApi
   | typeof workflowRuleApi

@@ -143,6 +143,7 @@ export const teamTable = pgTable(
   {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
+    identifier: text("identifier").notNull(),
     workspaceId: text("workspace_id")
       .notNull()
       .references(() => workspaceTable.id, { onDelete: "cascade" }),
@@ -151,7 +152,13 @@ export const teamTable = pgTable(
       () => /* @__PURE__ */ new Date(),
     ),
   },
-  (table) => [index("team_workspaceId_idx").on(table.workspaceId)],
+  (table) => [
+    index("team_workspaceId_idx").on(table.workspaceId),
+    unique("team_workspace_identifier_unique").on(
+      table.workspaceId,
+      table.identifier,
+    ),
+  ],
 );
 
 export const teamMemberTable = pgTable(
@@ -209,6 +216,12 @@ export const projectTable = pgTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
+    teamId: text("team_id")
+      .notNull()
+      .references(() => teamTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     slug: text("slug").notNull(),
     icon: text("icon").default("Layout"),
     name: text("name").notNull(),
@@ -219,6 +232,7 @@ export const projectTable = pgTable(
   },
   (table) => [
     unique("project_workspace_id_id_unique").on(table.workspaceId, table.id),
+    index("project_teamId_idx").on(table.teamId),
   ],
 );
 
@@ -228,9 +242,9 @@ export const columnTable = pgTable(
     id: text("id")
       .$defaultFn(() => createId())
       .primaryKey(),
-    projectId: text("project_id")
+    teamId: text("team_id")
       .notNull()
-      .references(() => projectTable.id, {
+      .references(() => teamTable.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
@@ -246,7 +260,10 @@ export const columnTable = pgTable(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (table) => [index("column_projectId_idx").on(table.projectId)],
+  (table) => [
+    index("column_teamId_idx").on(table.teamId),
+    unique("column_team_slug_unique").on(table.teamId, table.slug),
+  ],
 );
 
 export const workflowRuleTable = pgTable(
@@ -284,12 +301,16 @@ export const taskTable = pgTable(
     id: text("id")
       .$defaultFn(() => createId())
       .primaryKey(),
-    projectId: text("project_id")
+    teamId: text("team_id")
       .notNull()
-      .references(() => projectTable.id, {
+      .references(() => teamTable.id, {
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
+    projectId: text("project_id").references(() => projectTable.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
     position: integer("position").default(0),
     number: integer("number").default(1),
     userId: text("assignee_id").references(() => userTable.id, {
@@ -318,11 +339,12 @@ export const taskTable = pgTable(
       .notNull(),
   },
   (table) => [
+    index("task_teamId_idx").on(table.teamId),
     index("task_projectId_idx").on(table.projectId),
     index("task_dueDate_idx").on(table.dueDate),
     index("task_milestoneId_idx").on(table.milestoneId),
     index("task_roadmapGroup_idx").on(table.roadmapGroup),
-    unique("task_project_number_unique").on(table.projectId, table.number),
+    unique("task_team_number_unique").on(table.teamId, table.number),
   ],
 );
 

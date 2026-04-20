@@ -6,7 +6,7 @@ export type PluginContext = {
 
 export type TaskCreatedEvent = {
   taskId: string;
-  projectId: string;
+  projectId: string | null;
   userId: string;
   title: string;
   description: string | null;
@@ -17,7 +17,7 @@ export type TaskCreatedEvent = {
 
 export type TaskStatusChangedEvent = {
   taskId: string;
-  projectId: string;
+  projectId: string | null;
   userId: string | null;
   oldStatus: string;
   newStatus: string;
@@ -26,7 +26,7 @@ export type TaskStatusChangedEvent = {
 
 export type TaskPriorityChangedEvent = {
   taskId: string;
-  projectId: string;
+  projectId: string | null;
   userId: string | null;
   oldPriority: string;
   newPriority: string;
@@ -35,7 +35,7 @@ export type TaskPriorityChangedEvent = {
 
 export type TaskTitleChangedEvent = {
   taskId: string;
-  projectId: string;
+  projectId: string | null;
   userId: string | null;
   oldTitle: string;
   newTitle: string;
@@ -43,7 +43,7 @@ export type TaskTitleChangedEvent = {
 
 export type TaskDescriptionChangedEvent = {
   taskId: string;
-  projectId: string;
+  projectId: string | null;
   userId: string | null;
   oldDescription: string | null;
   newDescription: string | null;
@@ -51,7 +51,7 @@ export type TaskDescriptionChangedEvent = {
 
 export type TaskCommentCreatedEvent = {
   taskId: string;
-  projectId: string;
+  projectId: string | null;
   userId: string;
   comment: string;
 };

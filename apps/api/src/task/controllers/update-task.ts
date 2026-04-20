@@ -10,7 +10,7 @@ async function updateTask(
   status: string,
   startDate: Date | undefined,
   dueDate: Date | undefined,
-  projectId: string,
+  projectId: string | null,
   description: string,
   priority: string,
   position: number,
@@ -27,11 +27,11 @@ async function updateTask(
     });
   }
 
-  await assertValidTaskStatus(status, projectId);
+  await assertValidTaskStatus(status, existingTask.teamId);
 
   const column = await db.query.columnTable.findFirst({
     where: and(
-      eq(columnTable.projectId, projectId),
+      eq(columnTable.teamId, existingTask.teamId),
       eq(columnTable.slug, status),
     ),
   });

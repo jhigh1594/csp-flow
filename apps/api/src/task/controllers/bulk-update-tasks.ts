@@ -4,8 +4,8 @@ import db from "../../database";
 import {
   columnTable,
   labelTable,
-  projectTable,
   taskTable,
+  teamTable,
   workspaceUserTable,
 } from "../../database/schema";
 import {
@@ -36,11 +36,11 @@ async function bulkUpdateTasks({
   const tasks = await db
     .select({
       id: taskTable.id,
-      projectId: taskTable.projectId,
-      workspaceId: projectTable.workspaceId,
+      teamId: taskTable.teamId,
+      workspaceId: teamTable.workspaceId,
     })
     .from(taskTable)
-    .innerJoin(projectTable, eq(taskTable.projectId, projectTable.id))
+    .innerJoin(teamTable, eq(taskTable.teamId, teamTable.id))
     .where(inArray(taskTable.id, taskIds));
 
   if (tasks.length === 0) {
@@ -90,28 +90,28 @@ async function bulkUpdateTasks({
       if (!value) {
         throw new HTTPException(400, { message: "Status value is required" });
       }
-      const projectIds = [...new Set(tasks.map((t) => t.projectId))];
+      const teamIds = [...new Set(tasks.map((t) => t.teamId))];
 
-      for (const projectId of projectIds) {
-        await assertValidTaskStatus(value, projectId);
+      for (const teamId of teamIds) {
+        await assertValidTaskStatus(value, teamId);
 
         const column = await db.query.columnTable.findFirst({
           where: and(
-            eq(columnTable.projectId, projectId),
+            eq(columnTable.teamId, teamId),
             eq(columnTable.slug, value),
           ),
         });
 
-        const projectTaskIds = tasks
-          .filter((t) => t.projectId === projectId)
+        const teamTaskIds = tasks
+          .filter((t) => t.teamId === teamId)
           .map((t) => t.id);
 
         const result = await db
           .update(taskTable)
           .set({ status: value, columnId: column?.id ?? null })
-          .where(inArray(taskTable.id, projectTaskIds));
+          .where(inArray(taskTable.id, teamTaskIds));
 
-        updatedCount += result.rowCount ?? projectTaskIds.length;
+        updatedCount += result.rowCount ?? teamTaskIds.length;
       }
       break;
     }

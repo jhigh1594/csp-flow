@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import PageTitle from "@/components/page-title";
 import ColumnEditor from "@/components/project/column-editor";
 import WorkflowEditor from "@/components/project/workflow-editor";
+import useGetProject from "@/hooks/queries/project/use-get-project";
+import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
 
 export const Route = createFileRoute(
   "/_layout/_authenticated/dashboard/settings/projects/$projectId/workflow",
@@ -13,6 +15,12 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const { t } = useTranslation();
   const { projectId } = Route.useParams();
+  const { data: workspace } = useActiveWorkspace();
+  const { data: project } = useGetProject({
+    id: projectId,
+    workspaceId: workspace?.id || "",
+  });
+  const teamId = project?.teamId ?? "";
 
   return (
     <>
@@ -48,7 +56,7 @@ function RouteComponent() {
               {t("settings:projectWorkflow.automationDescription")}
             </p>
           </div>
-          <WorkflowEditor projectId={projectId} />
+          <WorkflowEditor projectId={projectId} teamId={teamId} />
         </div>
       </div>
     </>

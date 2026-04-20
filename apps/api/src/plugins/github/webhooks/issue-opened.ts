@@ -68,7 +68,16 @@ export async function handleIssueOpened(payload: IssueOpenedPayload) {
       continue;
     }
 
-    const nextTaskNumber = await getNextTaskNumber(projectId);
+    const project = await db.query.projectTable.findFirst({
+      where: eq(projectTable.id, projectId),
+    });
+
+    if (!project) {
+      console.error(`Project ${projectId} not found for GitHub issue`);
+      continue;
+    }
+
+    const nextTaskNumber = await getNextTaskNumber(project.teamId);
 
     const resolvedStatus = await resolveTargetStatus(
       projectId,
@@ -79,12 +88,13 @@ export async function handleIssueOpened(payload: IssueOpenedPayload) {
     const targetStatus = resolvedStatus;
     const targetColumn = await db.query.columnTable.findFirst({
       where: and(
-        eq(columnTable.projectId, projectId),
+        eq(columnTable.teamId, project.teamId),
         eq(columnTable.slug, targetStatus),
       ),
     });
 
     const taskValues: typeof taskTable.$inferInsert = {
+      teamId: project.teamId,
       projectId,
       userId: null,
       title: issue.title,
@@ -120,15 +130,6 @@ export async function handleIssueOpened(payload: IssueOpenedPayload) {
         author: issue.user?.login,
       },
     });
-
-    const project = await db.query.projectTable.findFirst({
-      where: eq(projectTable.id, projectId),
-    });
-
-    if (!project) {
-      console.error("Project not found for task linking comment");
-      continue;
-    }
 
     const clientUrl = process.env.KANEO_CLIENT_URL || "http://localhost:5173";
     const taskUrl = `${clientUrl}/dashboard/workspace/${project.workspaceId}/project/${projectId}/task/${createdTask.id}`;

@@ -20,7 +20,8 @@ type WorkspaceIdSource =
         | "column"
         | "workflowRule"
         | "milestone"
-        | "wikiPage";
+        | "wikiPage"
+        | "team";
       idKey: string;
     };
 
@@ -55,16 +56,18 @@ export function workspaceAccessMiddleware(
         workspaceId = c.req.query(source.key) || null;
       } else if (source.type === "body") {
         const body = await readJsonObjectBody(c);
-        workspaceId =
-          typeof body[source.key] === "string" ? body[source.key] : null;
+        const bodyVal = body[source.key];
+        workspaceId = typeof bodyVal === "string" ? bodyVal : null;
       } else if (source.type === "param") {
         workspaceId = c.req.param(source.key) || null;
       } else if (source.type === "lookup") {
         const body = await readJsonObjectBody(c);
+        const idFromBodyRaw = body[source.idKey];
         const idFromBody =
-          typeof body[source.idKey] === "string" ? body[source.idKey] : null;
-        const id =
-          c.req.param(source.idKey) || c.req.query(source.idKey) || idFromBody;
+          typeof idFromBodyRaw === "string" ? idFromBodyRaw : null;
+        const id = (c.req.param(source.idKey) ||
+          c.req.query(source.idKey) ||
+          idFromBody) as string | null;
         if (id) {
           workspaceId = await lookupWorkspaceId(source.resource, id);
         }
@@ -103,7 +106,8 @@ async function lookupWorkspaceId(
     | "column"
     | "workflowRule"
     | "milestone"
-    | "wikiPage",
+    | "wikiPage"
+    | "team",
   id: string,
 ): Promise<string | null> {
   try {
@@ -120,12 +124,12 @@ async function lookupWorkspaceId(
       case "task": {
         const [task] = await db
           .select({
-            workspaceId: schema.projectTable.workspaceId,
+            workspaceId: schema.teamTable.workspaceId,
           })
           .from(schema.taskTable)
           .innerJoin(
-            schema.projectTable,
-            eq(schema.taskTable.projectId, schema.projectTable.id),
+            schema.teamTable,
+            eq(schema.taskTable.teamId, schema.teamTable.id),
           )
           .where(eq(schema.taskTable.id, id))
           .limit(1);
@@ -144,7 +148,7 @@ async function lookupWorkspaceId(
       case "timeEntry": {
         const [timeEntry] = await db
           .select({
-            workspaceId: schema.projectTable.workspaceId,
+            workspaceId: schema.teamTable.workspaceId,
           })
           .from(schema.timeEntryTable)
           .innerJoin(
@@ -152,8 +156,8 @@ async function lookupWorkspaceId(
             eq(schema.timeEntryTable.taskId, schema.taskTable.id),
           )
           .innerJoin(
-            schema.projectTable,
-            eq(schema.taskTable.projectId, schema.projectTable.id),
+            schema.teamTable,
+            eq(schema.taskTable.teamId, schema.teamTable.id),
           )
           .where(eq(schema.timeEntryTable.id, id))
           .limit(1);
@@ -163,7 +167,7 @@ async function lookupWorkspaceId(
       case "activity": {
         const [activity] = await db
           .select({
-            workspaceId: schema.projectTable.workspaceId,
+            workspaceId: schema.teamTable.workspaceId,
           })
           .from(schema.activityTable)
           .innerJoin(
@@ -171,8 +175,8 @@ async function lookupWorkspaceId(
             eq(schema.activityTable.taskId, schema.taskTable.id),
           )
           .innerJoin(
-            schema.projectTable,
-            eq(schema.taskTable.projectId, schema.projectTable.id),
+            schema.teamTable,
+            eq(schema.taskTable.teamId, schema.teamTable.id),
           )
           .where(eq(schema.activityTable.id, id))
           .limit(1);
@@ -182,7 +186,7 @@ async function lookupWorkspaceId(
       case "comment": {
         const [comment] = await db
           .select({
-            workspaceId: schema.projectTable.workspaceId,
+            workspaceId: schema.teamTable.workspaceId,
           })
           .from(schema.commentTable)
           .innerJoin(
@@ -190,8 +194,8 @@ async function lookupWorkspaceId(
             eq(schema.commentTable.taskId, schema.taskTable.id),
           )
           .innerJoin(
-            schema.projectTable,
-            eq(schema.taskTable.projectId, schema.projectTable.id),
+            schema.teamTable,
+            eq(schema.taskTable.teamId, schema.teamTable.id),
           )
           .where(eq(schema.commentTable.id, id))
           .limit(1);
@@ -201,12 +205,12 @@ async function lookupWorkspaceId(
       case "column": {
         const [column] = await db
           .select({
-            workspaceId: schema.projectTable.workspaceId,
+            workspaceId: schema.teamTable.workspaceId,
           })
           .from(schema.columnTable)
           .innerJoin(
-            schema.projectTable,
-            eq(schema.columnTable.projectId, schema.projectTable.id),
+            schema.teamTable,
+            eq(schema.columnTable.teamId, schema.teamTable.id),
           )
           .where(eq(schema.columnTable.id, id))
           .limit(1);
@@ -256,6 +260,15 @@ async function lookupWorkspaceId(
           .where(eq(schema.wikiPageTable.id, id))
           .limit(1);
         return wikiPage?.workspaceId || null;
+      }
+
+      case "team": {
+        const [team] = await db
+          .select({ workspaceId: schema.teamTable.workspaceId })
+          .from(schema.teamTable)
+          .where(eq(schema.teamTable.id, id))
+          .limit(1);
+        return team?.workspaceId || null;
       }
 
       default:
@@ -361,6 +374,14 @@ export const workspaceAccess = {
     workspaceAccessMiddleware({
       sources: [
         { type: "lookup", resource: "wikiPage", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
+  fromTeam: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "team", idKey },
         { type: "query", key: "workspaceId" },
       ],
     }),

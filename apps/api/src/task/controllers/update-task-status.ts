@@ -21,11 +21,11 @@ async function updateTaskStatus({
     });
   }
 
-  await assertValidTaskStatus(status, existingTask.projectId);
+  await assertValidTaskStatus(status, existingTask.teamId);
 
   const column = await db.query.columnTable.findFirst({
     where: and(
-      eq(columnTable.projectId, existingTask.projectId),
+      eq(columnTable.teamId, existingTask.teamId),
       eq(columnTable.slug, status),
     ),
   });
