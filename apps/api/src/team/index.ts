@@ -9,6 +9,7 @@ import createTeamProject from "./controllers/create-team-project";
 import getTeamColumns from "./controllers/get-team-columns";
 import getTeamIssues from "./controllers/get-team-issues";
 import getTeamProjects from "./controllers/get-team-projects";
+import reorderTeamColumns from "./controllers/reorder-team-columns";
 
 const team = new Hono<{
   Variables: {
@@ -106,6 +107,41 @@ const team = new Hono<{
         color,
         isFinal,
       });
+      return c.json(result);
+    },
+  )
+  .put(
+    "/:teamId/columns/reorder",
+    describeRoute({
+      operationId: "reorderTeamColumns",
+      tags: ["Teams"],
+      description: "Reorder columns for a team",
+      responses: {
+        200: {
+          description: "Columns reordered successfully",
+          content: {
+            "application/json": { schema: resolver(v.any()) },
+          },
+        },
+      },
+    }),
+    validator("param", v.object({ teamId: v.string() })),
+    validator(
+      "json",
+      v.object({
+        columns: v.array(
+          v.object({
+            id: v.string(),
+            position: v.number(),
+          }),
+        ),
+      }),
+    ),
+    workspaceAccess.fromTeam("teamId"),
+    async (c) => {
+      const { teamId } = c.req.valid("param");
+      const { columns } = c.req.valid("json");
+      const result = await reorderTeamColumns(teamId, columns);
       return c.json(result);
     },
   )

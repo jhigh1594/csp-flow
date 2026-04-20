@@ -4,6 +4,7 @@ import {
   FolderOpen,
   LayoutGrid,
   Plus,
+  Settings,
   Users,
 } from "lucide-react";
 import { useState } from "react";
@@ -191,6 +192,22 @@ function TeamSection({ team, workspaceId }: TeamSectionProps) {
                 >
                   <Users className="h-3.5 w-3.5 text-sidebar-foreground/60" />
                   <span>Members</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  size="default"
+                  className="h-7 ps-6 text-sm hover:bg-transparent hover:text-sidebar-accent-foreground active:bg-transparent"
+                  render={
+                    <Link
+                      to="/dashboard/workspace/$workspaceId/team/$teamId/settings"
+                      params={{ workspaceId, teamId: team.id }}
+                    />
+                  }
+                >
+                  <Settings className="h-3.5 w-3.5 text-sidebar-foreground/60" />
+                  <span>Settings</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
