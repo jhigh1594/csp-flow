@@ -355,7 +355,7 @@ function RouteComponent() {
 
       if (tasks.length === 0) continue;
 
-      const defaultCol = DEFAULT_COLUMNS.find((c) => c.id === column.slug);
+      const defaultCol = DEFAULT_COLUMNS.find((c) => c.id === column.id);
       groups.push({
         columnId: column.id,
         columnName: column.name,

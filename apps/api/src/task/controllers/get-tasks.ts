@@ -137,6 +137,7 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     assigneeId: userTable.id,
     assigneeImage: userTable.image,
     projectId: taskTable.projectId,
+    roadmapGroup: taskTable.roadmapGroup,
   };
 
   const query = db
