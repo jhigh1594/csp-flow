@@ -1,15 +1,27 @@
-import { asc, isNull } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import db from "../../database";
 import { wikiPageTable } from "../../database/schema";
 
 async function getWikiPages(projectId: string) {
-  const pages = await db
-    .select()
+  return db
+    .select({
+      id: wikiPageTable.id,
+      projectId: wikiPageTable.projectId,
+      title: wikiPageTable.title,
+      isLocked: wikiPageTable.isLocked,
+      archivedAt: wikiPageTable.archivedAt,
+      createdBy: wikiPageTable.createdBy,
+      createdAt: wikiPageTable.createdAt,
+      updatedAt: wikiPageTable.updatedAt,
+    })
     .from(wikiPageTable)
-    .where(isNull(wikiPageTable.archivedAt))
+    .where(
+      and(
+        eq(wikiPageTable.projectId, projectId),
+        isNull(wikiPageTable.archivedAt),
+      ),
+    )
     .orderBy(asc(wikiPageTable.createdAt));
-
-  return pages.filter((page) => page.projectId === projectId);
 }
 
 export default getWikiPages;
