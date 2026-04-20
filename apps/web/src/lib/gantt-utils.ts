@@ -43,6 +43,7 @@ export function buildTimeline(
   tasks: ScheduledTask[],
   zoom: ZoomLevel,
   columnWidthRemOverride?: number,
+  extraDates?: Date[],
 ): GanttTimeline | null {
   if (tasks.length === 0) return null;
 
@@ -50,10 +51,16 @@ export function buildTimeline(
     (cur, t) => (t.scheduleStart < cur ? t.scheduleStart : cur),
     tasks[0].scheduleStart,
   );
-  const latest = tasks.reduce(
+  let latest = tasks.reduce(
     (cur, t) => (t.scheduleEnd > cur ? t.scheduleEnd : cur),
     tasks[0].scheduleEnd,
   );
+
+  if (extraDates) {
+    for (const d of extraDates) {
+      if (d > latest) latest = d;
+    }
+  }
 
   let rangeStart: Date;
   let days: Date[];
