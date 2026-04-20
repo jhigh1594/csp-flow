@@ -2,6 +2,7 @@ import { createId } from "@paralleldrive/cuid2";
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
+  date,
   foreignKey,
   index,
   integer,
@@ -936,6 +937,144 @@ export const deviceCodeTable = pgTable(
   ],
 );
 
+// Program Tracker tables
+
+export const weeklyStatusTable = pgTable(
+  "weekly_status",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    teamId: text("team_id")
+      .notNull()
+      .references(() => teamTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaceTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    weekStart: date("week_start").notNull(),
+    health: text("health").notNull().default("green"),
+    accomplishments: text("accomplishments"),
+    nextWeekFocus: text("next_week_focus"),
+    leadershipAsks: text("leadership_asks"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("weekly_status_teamId_idx").on(table.teamId),
+    index("weekly_status_workspaceId_idx").on(table.workspaceId),
+    unique("weekly_status_team_week_unique").on(table.teamId, table.weekStart),
+  ],
+);
+
+export const demandTable = pgTable(
+  "demand",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    teamId: text("team_id")
+      .notNull()
+      .references(() => teamTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    name: text("name").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    businessPartnershipDate: date("business_partnership_date"),
+    discoveryDate: date("discovery_date"),
+    requirementsDate: date("requirements_date"),
+    demandSubmissionDate: date("demand_submission_date"),
+    developmentDate: date("development_date"),
+    uatDate: date("uat_date"),
+    goLiveDate: date("go_live_date"),
+    adoptionDate: date("adoption_date"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("demand_teamId_idx").on(table.teamId),
+    index("demand_sortOrder_idx").on(table.teamId, table.sortOrder),
+  ],
+);
+
+export const riskTable = pgTable(
+  "risk",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    teamId: text("team_id")
+      .notNull()
+      .references(() => teamTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    description: text("description").notNull(),
+    impact: text("impact").notNull().default("medium"),
+    status: text("status").notNull().default("open"),
+    owner: text("owner"),
+    dueDate: date("due_date"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("risk_teamId_idx").on(table.teamId),
+    index("risk_status_idx").on(table.teamId, table.status),
+  ],
+);
+
+export const roadmapReleaseTable = pgTable(
+  "roadmap_release",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    teamId: text("team_id")
+      .notNull()
+      .references(() => teamTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    name: text("name").notNull(),
+    quarter: text("quarter").notNull(),
+    month: integer("month").notNull(),
+    fiscalYear: integer("fiscal_year").notNull(),
+    personas: text("personas").array(),
+    description: text("description"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("roadmap_release_teamId_idx").on(table.teamId),
+    index("roadmap_release_quarter_idx").on(table.teamId, table.quarter),
+  ],
+);
+
+export const weeklyStatusSnapshotTable = pgTable(
+  "weekly_status_snapshot",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    teamId: text("team_id")
+      .notNull()
+      .references(() => teamTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaceTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    weekStart: date("week_start").notNull(),
+    snapshot: jsonb("snapshot").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("weekly_status_snapshot_teamId_idx").on(table.teamId),
+    unique("weekly_status_snapshot_team_week_unique").on(table.teamId, table.weekStart),
+  ],
+);
+
 // Auth-schema compatible aliases in schema.ts
 export const user = userTable;
 export const session = sessionTable;
@@ -1019,5 +1158,48 @@ export const invitationRelations = relations(invitation, ({ one }) => ({
   user: one(user, {
     fields: [invitation.inviterId],
     references: [user.id],
+  }),
+}));
+
+export const weeklyStatusRelations = relations(weeklyStatusTable, ({ one }) => ({
+  team: one(teamTable, {
+    fields: [weeklyStatusTable.teamId],
+    references: [teamTable.id],
+  }),
+  workspace: one(workspaceTable, {
+    fields: [weeklyStatusTable.workspaceId],
+    references: [workspaceTable.id],
+  }),
+}));
+
+export const demandRelations = relations(demandTable, ({ one }) => ({
+  team: one(teamTable, {
+    fields: [demandTable.teamId],
+    references: [teamTable.id],
+  }),
+}));
+
+export const riskRelations = relations(riskTable, ({ one }) => ({
+  team: one(teamTable, {
+    fields: [riskTable.teamId],
+    references: [teamTable.id],
+  }),
+}));
+
+export const roadmapReleaseRelations = relations(roadmapReleaseTable, ({ one }) => ({
+  team: one(teamTable, {
+    fields: [roadmapReleaseTable.teamId],
+    references: [teamTable.id],
+  }),
+}));
+
+export const weeklyStatusSnapshotRelations = relations(weeklyStatusSnapshotTable, ({ one }) => ({
+  team: one(teamTable, {
+    fields: [weeklyStatusSnapshotTable.teamId],
+    references: [teamTable.id],
+  }),
+  workspace: one(workspaceTable, {
+    fields: [weeklyStatusSnapshotTable.workspaceId],
+    references: [workspaceTable.id],
   }),
 }));

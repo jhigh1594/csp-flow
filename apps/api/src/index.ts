@@ -36,6 +36,7 @@ import notification from "./notification";
 import notificationPreferences from "./notification-preferences";
 import { initializePlugins } from "./plugins";
 import { migrateGitHubIntegration } from "./plugins/github/migration";
+import program from "./program";
 import project from "./project";
 import { getPublicProject } from "./project/controllers/get-public-project";
 import { initializeScheduler, shutdownScheduler } from "./scheduler";
@@ -481,6 +482,7 @@ export function createApp() {
   const invitationApi = api.route("/invitation", invitation);
   const workspaceApi = api.route("/workspace", workspace);
   const teamApi = api.route("/teams", team);
+  const programApi = api.route("/program", program);
   const milestoneApi = api.route("/milestone", milestone);
   const wikiApi = api.route("/wiki", wiki);
 
@@ -521,6 +523,7 @@ export function createApp() {
     taskApi,
     taskRelationApi,
     teamApi,
+    programApi,
     telegramIntegrationApi,
     timeEntryApi,
     wikiApi,
@@ -600,6 +603,7 @@ const {
   taskApi,
   taskRelationApi,
   teamApi,
+  programApi,
   telegramIntegrationApi,
   timeEntryApi,
   wikiApi,
@@ -636,6 +640,7 @@ export type AppType =
   | typeof telegramIntegrationApi
   | typeof taskRelationApi
   | typeof teamApi
+  | typeof programApi
   | typeof externalLinkApi
   | typeof wikiApi
   | typeof workflowRuleApi

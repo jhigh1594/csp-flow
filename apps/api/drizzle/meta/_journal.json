@@ -8,6 +8,13 @@
       "when": 1776704501838,
       "tag": "0000_small_gamora",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776720539565,
+      "tag": "0001_small_santa_claus",
+      "breakpoints": true
     }
   ]
 }
