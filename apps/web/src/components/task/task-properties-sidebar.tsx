@@ -6,6 +6,7 @@ import {
   Copy,
   Diamond,
   GitBranch,
+  Layers,
   Plus,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -33,7 +34,11 @@ import { cn } from "@/lib/cn";
 import { getColumnIcon } from "@/lib/column";
 import { dueDateStatusColors, getDueDateStatus } from "@/lib/due-date-status";
 import { formatDateShort } from "@/lib/format";
-import { getPriorityLabel, getStatusDisplayLabel } from "@/lib/i18n/domain";
+import {
+  getPriorityLabel,
+  getRoadmapGroupLabel,
+  getStatusDisplayLabel,
+} from "@/lib/i18n/domain";
 import { getPriorityIcon } from "@/lib/priority";
 import { toast } from "@/lib/toast";
 import TaskAssigneePopover from "./task-assignee-popover";
@@ -42,6 +47,7 @@ import TaskLabelsPopover from "./task-labels-popover";
 import TaskMilestonePopover from "./task-milestone-popover";
 import TaskMovePopover from "./task-move-popover";
 import TaskPriorityPopover from "./task-priority-popover";
+import TaskRoadmapGroupPopover from "./task-roadmap-group-popover";
 import TaskStartDatePopover from "./task-start-date-popover";
 import TaskStatusPopover from "./task-status-popover";
 
@@ -330,6 +336,22 @@ export default function TaskPropertiesSidebar({
                     </span>
                   </Button>
                 </TaskMilestonePopover>
+              )}
+              {task && (
+                <TaskRoadmapGroupPopover task={task}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start h-7 px-1.5 gap-1.5"
+                  >
+                    <Layers className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span className="text-xs font-semibold truncate">
+                      {task.roadmapGroup
+                        ? getRoadmapGroupLabel(task.roadmapGroup)
+                        : t("tasks:properties.roadmapGroup")}
+                    </span>
+                  </Button>
+                </TaskRoadmapGroupPopover>
               )}
             </div>
           </div>
@@ -719,6 +741,22 @@ export default function TaskPropertiesSidebar({
                       </span>
                     </Button>
                   </TaskMilestonePopover>
+                )}
+                {task && (
+                  <TaskRoadmapGroupPopover task={task}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="justify-start h-7 px-1.5 gap-1.5 w-full"
+                    >
+                      <Layers className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="text-xs font-semibold truncate">
+                        {task.roadmapGroup
+                          ? getRoadmapGroupLabel(task.roadmapGroup)
+                          : t("tasks:properties.roadmapGroup")}
+                      </span>
+                    </Button>
+                  </TaskRoadmapGroupPopover>
                 )}
               </div>
             </div>

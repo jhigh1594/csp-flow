@@ -29,6 +29,12 @@ export function getPriorityLabel(priority: string) {
   });
 }
 
+export function getRoadmapGroupLabel(group: string) {
+  return i18n.t(`tasks:roadmapGroup.${group}`, {
+    defaultValue: toDisplayCase(group),
+  });
+}
+
 function toDisplayCase(value: string) {
   return value
     .replace(/[-_]/g, " ")

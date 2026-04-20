@@ -1265,6 +1265,11 @@
 			"high": "High",
 			"urgent": "Urgent"
 		},
+		"roadmapGroup": {
+			"now": "Now",
+			"next": "Next",
+			"later": "Later"
+		},
 		"boardSearchPlaceholder": "Search tickets...",
 		"view": {
 			"board": "Board",
@@ -1416,7 +1421,8 @@
 			"start": "Start",
 			"startDate": "Start date",
 			"noDate": "No date",
-			"milestone": "Milestone"
+			"milestone": "Milestone",
+			"roadmapGroup": "Roadmap"
 		},
 		"move": {
 			"title": "Move task",
@@ -1443,6 +1449,9 @@
 			"milestone": {
 				"noMilestone": "No milestone",
 				"updateError": "Failed to update task milestone"
+			},
+			"roadmapGroup": {
+				"updateError": "Failed to update task roadmap group"
 			},
 			"dueDate": {
 				"updateSuccess": "Task due date updated successfully",
