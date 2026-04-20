@@ -1,7 +1,5 @@
 import { createHash } from "crypto";
 import { readFileSync } from "fs";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
 import { sql } from "drizzle-orm";
 import db from "../database";
 
@@ -25,7 +23,7 @@ function fileHash(filePath: string): string {
  * On a fresh install the `team` table doesn't exist yet, so we skip and let
  * Drizzle apply the baseline files normally.
  */
-export async function ensureMigrationBaseline() {
+export async function ensureMigrationBaseline(migrationsDir: string) {
   const teamTableExists = await db.execute(sql`
     SELECT EXISTS (
       SELECT 1 FROM information_schema.tables WHERE table_name = 'team'
@@ -39,9 +37,6 @@ export async function ensureMigrationBaseline() {
   if (!isUpgrade) {
     return;
   }
-
-  const currentDir = dirname(fileURLToPath(import.meta.url));
-  const migrationsDir = `${currentDir}/../../drizzle`;
 
   for (const migration of BASELINE_MIGRATIONS) {
     const filePath = `${migrationsDir}/${migration.tag}.sql`;

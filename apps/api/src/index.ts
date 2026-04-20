@@ -540,12 +540,12 @@ export async function runStartupTasks() {
   await migrateWorkspaceUserEmail();
   await migrateSessionColumn();
   await migrateApiKeyReferenceId();
-  await ensureMigrationBaseline();
+
+  const migrationsFolder = `${currentDir}/../drizzle`;
+  await ensureMigrationBaseline(migrationsFolder);
 
   console.log("🔄 Migrating database...");
-  await migrate(db, {
-    migrationsFolder: `${currentDir}/../drizzle`,
-  });
+  await migrate(db, { migrationsFolder });
   console.log("✅ Database migrated successfully!");
 
   await migrateNotificationPreferencesSchema();
