@@ -6,11 +6,7 @@ import { taskTable, teamTable } from "../../database/schema";
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 500;
 
-async function getTeamIssues(
-  teamId: string,
-  cursor?: string,
-  limit?: number,
-) {
+async function getTeamIssues(teamId: string, cursor?: string, limit?: number) {
   const team = await db.query.teamTable.findFirst({
     where: eq(teamTable.id, teamId),
   });

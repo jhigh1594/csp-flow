@@ -24,9 +24,14 @@ type WorkflowEditorProps = {
   teamId: string;
 };
 
-export default function WorkflowEditor({ projectId, teamId }: WorkflowEditorProps) {
+export default function WorkflowEditor({
+  projectId,
+  teamId,
+}: WorkflowEditorProps) {
   const { t } = useTranslation();
-  const { data: columns, isLoading: columnsLoading } = useGetTeamColumns({ teamId });
+  const { data: columns, isLoading: columnsLoading } = useGetTeamColumns({
+    teamId,
+  });
   const { data: rules, isLoading: rulesLoading } =
     useGetWorkflowRules(projectId);
   const { mutateAsync: upsertRule } = useUpsertWorkflowRule();

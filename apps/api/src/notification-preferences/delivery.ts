@@ -203,7 +203,10 @@ async function resolveNotificationContext(notification: {
         workspaceName: workspaceTable.name,
       })
       .from(projectTable)
-      .innerJoin(workspaceTable, eq(projectTable.workspaceId, workspaceTable.id))
+      .innerJoin(
+        workspaceTable,
+        eq(projectTable.workspaceId, workspaceTable.id),
+      )
       .where(eq(projectTable.id, taskRow.projectId))
       .limit(1);
 
@@ -218,7 +221,11 @@ async function resolveNotificationContext(notification: {
       projectName: project.projectName,
       taskId: taskRow.taskId,
       taskTitle: taskRow.taskTitle,
-      taskUrl: buildTaskUrl(taskRow.workspaceId, project.projectId, taskRow.taskId),
+      taskUrl: buildTaskUrl(
+        taskRow.workspaceId,
+        project.projectId,
+        taskRow.taskId,
+      ),
     };
   }
 

@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/popover";
 import icons from "@/constants/project-icons";
 import useCreateProject from "@/hooks/mutations/project/use-create-project";
-import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
 import useGetTeams from "@/hooks/queries/team/use-get-teams";
+import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
 import { cn } from "@/lib/cn";
 import generateProjectSlug from "@/lib/generate-project-id";
 import { toast } from "@/lib/toast";
@@ -37,7 +37,11 @@ type CreateProjectModalProps = {
   teamId?: string;
 };
 
-function CreateProjectModal({ open, onClose, teamId }: CreateProjectModalProps) {
+function CreateProjectModal({
+  open,
+  onClose,
+  teamId,
+}: CreateProjectModalProps) {
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");

@@ -28,7 +28,12 @@ async function createTask(
       status,
       startDate: startDate?.toISOString() || undefined,
       dueDate: dueDate?.toISOString() || undefined,
-      priority: priority as "medium" | "low" | "no-priority" | "high" | "urgent",
+      priority: priority as
+        | "medium"
+        | "low"
+        | "no-priority"
+        | "high"
+        | "urgent",
     },
     param: { projectId },
   });

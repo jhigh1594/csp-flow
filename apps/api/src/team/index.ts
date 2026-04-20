@@ -118,7 +118,8 @@ const team = new Hono<{
     describeRoute({
       operationId: "createTeamIssue",
       tags: ["Teams"],
-      description: "Create a new issue for a team (projectId is null by default)",
+      description:
+        "Create a new issue for a team (projectId is null by default)",
       responses: {
         200: {
           description: "Issue created successfully",

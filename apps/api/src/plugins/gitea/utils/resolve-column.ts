@@ -1,6 +1,10 @@
 import { and, asc, eq } from "drizzle-orm";
 import db from "../../../database";
-import { columnTable, projectTable, workflowRuleTable } from "../../../database/schema";
+import {
+  columnTable,
+  projectTable,
+  workflowRuleTable,
+} from "../../../database/schema";
 
 export async function resolveTargetStatus(
   projectId: string,

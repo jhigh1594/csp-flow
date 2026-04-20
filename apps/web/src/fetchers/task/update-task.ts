@@ -9,7 +9,12 @@ async function updateTask(taskId: string, task: Task) {
       title: task.title,
       description: task.description || "",
       status: task.status,
-      priority: (task.priority || "no-priority") as "medium" | "low" | "no-priority" | "high" | "urgent",
+      priority: (task.priority || "no-priority") as
+        | "medium"
+        | "low"
+        | "no-priority"
+        | "high"
+        | "urgent",
       startDate: task.startDate?.toString(),
       dueDate: task.dueDate?.toString(),
       position: task.position ?? 0,

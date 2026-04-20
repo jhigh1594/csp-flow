@@ -152,9 +152,7 @@ export async function migrateColumns() {
     }
   }
 
-  console.log(
-    `✅ Column migration complete! Migrated ${teams.length} teams`,
-  );
+  console.log(`✅ Column migration complete! Migrated ${teams.length} teams`);
 }
 
 async function ensureMigrationWorkflowRule(

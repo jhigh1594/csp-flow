@@ -1,7 +1,12 @@
 import { and, eq, max } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
-import { columnTable, projectTable, taskTable, userTable } from "../../database/schema";
+import {
+  columnTable,
+  projectTable,
+  taskTable,
+  userTable,
+} from "../../database/schema";
 import { publishEvent } from "../../events";
 import { assertValidTaskStatus } from "../validate-task-fields";
 import getNextTaskNumber from "./get-next-task-number";

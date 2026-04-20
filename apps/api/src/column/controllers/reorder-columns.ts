@@ -21,9 +21,7 @@ async function reorderColumns(
     const [updated] = await db
       .update(columnTable)
       .set({ position: col.position })
-      .where(
-        and(eq(columnTable.id, col.id), eq(columnTable.teamId, teamId)),
-      )
+      .where(and(eq(columnTable.id, col.id), eq(columnTable.teamId, teamId)))
       .returning({ id: columnTable.id });
 
     if (!updated) {

@@ -8,11 +8,7 @@ export type GetTeamIssuesRequest = InferRequestType<
   limit?: number;
 };
 
-async function getTeamIssues({
-  teamId,
-  cursor,
-  limit,
-}: GetTeamIssuesRequest) {
+async function getTeamIssues({ teamId, cursor, limit }: GetTeamIssuesRequest) {
   const response = await client.teams[":teamId"].issues.$get({
     param: { teamId },
     query: {

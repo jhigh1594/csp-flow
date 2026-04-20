@@ -977,7 +977,9 @@ const task = new Hono<{
             });
 
       if (!asset) {
-        throw new HTTPException(500, { message: "Failed to save asset record" });
+        throw new HTTPException(500, {
+          message: "Failed to save asset record",
+        });
       }
 
       return c.json({

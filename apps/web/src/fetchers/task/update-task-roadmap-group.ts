@@ -5,7 +5,11 @@ async function updateTaskRoadmapGroup(taskId: string, task: Task) {
   const response = await client.task["roadmap-group"][":id"].$put({
     param: { id: taskId },
     json: {
-      roadmapGroup: (task.roadmapGroup ?? null) as "next" | "later" | "now" | null,
+      roadmapGroup: (task.roadmapGroup ?? null) as
+        | "next"
+        | "later"
+        | "now"
+        | null,
     },
   });
 

@@ -79,7 +79,13 @@ const project = new Hono<{
     async (c) => {
       const { name, icon, slug, teamId } = c.req.valid("json");
       const workspaceId = c.get("workspaceId");
-      const newProject = await createProjectCtrl(workspaceId, name, icon, slug, teamId);
+      const newProject = await createProjectCtrl(
+        workspaceId,
+        name,
+        icon,
+        slug,
+        teamId,
+      );
       return c.json(newProject);
     },
   )

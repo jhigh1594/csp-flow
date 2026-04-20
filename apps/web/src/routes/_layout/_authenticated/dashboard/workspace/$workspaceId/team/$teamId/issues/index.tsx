@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ChevronRight, Circle, Plus, SquareKanban, List } from "lucide-react";
+import { ChevronRight, Circle, List, Plus, SquareKanban } from "lucide-react";
 import { useMemo, useState } from "react";
-import Layout from "@/components/common/layout";
 import WorkspaceCrumbSelect from "@/components/common/header/workspace-crumb-select";
+import Layout from "@/components/common/layout";
 import PageTitle from "@/components/page-title";
 import CreateTaskModal from "@/components/shared/modals/create-task-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -20,9 +20,9 @@ import useGetTeamColumns from "@/hooks/queries/team/use-get-team-columns";
 import useGetTeamIssues from "@/hooks/queries/team/use-get-team-issues";
 import useGetTeams from "@/hooks/queries/team/use-get-teams";
 import { useGetActiveWorkspaceUsers } from "@/hooks/queries/workspace-users/use-get-active-workspace-users";
+import { cn } from "@/lib/cn";
 import { getColumnIcon } from "@/lib/column";
 import { getPriorityIcon } from "@/lib/priority";
-import { cn } from "@/lib/cn";
 
 type IssuesSearchParams = {
   taskId?: string;
@@ -500,15 +500,9 @@ function RouteComponent() {
               </div>
             </div>
           ) : viewMode === "board" ? (
-            <BoardView
-              columns={typedColumns}
-              issues={typedIssues}
-            />
+            <BoardView columns={typedColumns} issues={typedIssues} />
           ) : (
-            <ListView
-              issues={typedIssues}
-              workspaceId={workspaceId}
-            />
+            <ListView issues={typedIssues} workspaceId={workspaceId} />
           )}
         </div>
       </Layout.Content>

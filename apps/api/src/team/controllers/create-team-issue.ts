@@ -1,10 +1,15 @@
 import { and, eq, max } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
-import { columnTable, taskTable, teamTable, userTable } from "../../database/schema";
+import {
+  columnTable,
+  taskTable,
+  teamTable,
+  userTable,
+} from "../../database/schema";
 import { publishEvent } from "../../events";
-import { assertValidTaskStatus } from "../../task/validate-task-fields";
 import getNextTaskNumber from "../../task/controllers/get-next-task-number";
+import { assertValidTaskStatus } from "../../task/validate-task-fields";
 
 async function createTeamIssue({
   teamId,

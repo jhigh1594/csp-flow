@@ -1,7 +1,11 @@
 import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
-import { columnTable, projectTable, workflowRuleTable } from "../../database/schema";
+import {
+  columnTable,
+  projectTable,
+  workflowRuleTable,
+} from "../../database/schema";
 
 async function upsertWorkflowRule({
   projectId,
