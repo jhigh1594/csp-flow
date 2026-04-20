@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { describeRoute, resolver, validator } from "hono-openapi";
 import * as v from "valibot";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
+import createTeam from "./controllers/create-team";
 import createTeamColumn from "./controllers/create-team-column";
 import createTeamIssue from "./controllers/create-team-issue";
 import createTeamProject from "./controllers/create-team-project";
@@ -15,6 +16,37 @@ const team = new Hono<{
     workspaceId: string;
   };
 }>()
+  .post(
+    "/",
+    describeRoute({
+      operationId: "createTeam",
+      tags: ["Teams"],
+      description: "Create a new team in a workspace",
+      responses: {
+        200: {
+          description: "Team created successfully",
+          content: {
+            "application/json": { schema: resolver(v.any()) },
+          },
+        },
+      },
+    }),
+    validator(
+      "json",
+      v.object({
+        workspaceId: v.string(),
+        name: v.string(),
+        identifier: v.optional(v.string()),
+      }),
+    ),
+    workspaceAccess.fromBody(),
+    async (c) => {
+      const { name, identifier } = c.req.valid("json");
+      const workspaceId = c.get("workspaceId");
+      const team = await createTeam({ workspaceId, name, identifier });
+      return c.json(team);
+    },
+  )
   .get(
     "/:teamId/columns",
     describeRoute({

@@ -1,11 +1,27 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronRight, FolderOpen, LayoutGrid, Users } from "lucide-react";
+import {
+  ChevronRight,
+  FolderOpen,
+  LayoutGrid,
+  Plus,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import {
   Collapsible,
   CollapsiblePanel,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -14,6 +30,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import useCreateTeam from "@/hooks/mutations/team/use-create-team";
 import useGetTeamProjects from "@/hooks/queries/team/use-get-team-projects";
 import useGetTeams from "@/hooks/queries/team/use-get-teams";
 import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
@@ -170,21 +187,88 @@ function TeamSection({ team, workspaceId }: TeamSectionProps) {
 export function NavTeams() {
   const { data: workspace } = useActiveWorkspace();
   const { data: teams } = useGetTeams({ workspaceId: workspace?.id || "" });
+  const { mutateAsync: createTeam, isPending } = useCreateTeam();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [teamName, setTeamName] = useState("");
 
   if (!workspace) return null;
 
+  async function handleCreate() {
+    if (!teamName.trim() || !workspace) return;
+    try {
+      await createTeam({ workspaceId: workspace.id, name: teamName.trim() });
+      setTeamName("");
+      setDialogOpen(false);
+    } catch {
+      toast.error("Failed to create team");
+    }
+  }
+
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden gap-1 p-2 pt-1">
-      <SidebarGroupLabel className="h-7 px-0 text-sidebar-accent-foreground">
-        Teams
-      </SidebarGroupLabel>
-      <SidebarGroupContent>
-        <div className="flex flex-col gap-1">
-          {teams?.map((team) => (
-            <TeamSection key={team.id} team={team} workspaceId={workspace.id} />
-          ))}
+    <>
+      <SidebarGroup className="group-data-[collapsible=icon]:hidden gap-1 p-2 pt-1">
+        <div className="flex items-center justify-between">
+          <SidebarGroupLabel className="h-7 px-0 text-sidebar-accent-foreground">
+            Teams
+          </SidebarGroupLabel>
+          <button
+            type="button"
+            onClick={() => setDialogOpen(true)}
+            className="flex h-5 w-5 items-center justify-center rounded hover:bg-sidebar-accent text-sidebar-foreground/60 hover:text-sidebar-accent-foreground"
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </button>
         </div>
-      </SidebarGroupContent>
-    </SidebarGroup>
+        <SidebarGroupContent>
+          <div className="flex flex-col gap-1">
+            {teams?.map((team) => (
+              <TeamSection
+                key={team.id}
+                team={team}
+                workspaceId={workspace.id}
+              />
+            ))}
+          </div>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>New team</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="team-name">Team name</Label>
+            <Input
+              id="team-name"
+              placeholder="e.g. Engineering"
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleCreate();
+              }}
+              autoFocus
+            />
+          </div>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setDialogOpen(false)}
+              className="inline-flex h-8 items-center rounded-md border px-3 text-sm hover:bg-muted"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleCreate}
+              disabled={!teamName.trim() || isPending}
+              className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              {isPending ? "Creating…" : "Create team"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
