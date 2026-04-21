@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod/v4";
 import useInviteWorkspaceUser from "@/hooks/mutations/workspace-user/use-invite-workspace-user";
 import { toast } from "@/lib/toast";
-import { Route } from "@/routes/_layout/_authenticated/dashboard/workspace/$workspaceId/members";
 import { Button } from "../ui/button";
 import { Dialog, DialogClose, DialogPopup, DialogTitle } from "../ui/dialog";
 import {
@@ -22,6 +21,7 @@ import { Input } from "../ui/input";
 type Props = {
   open: boolean;
   onClose: () => void;
+  workspaceId: string;
 };
 
 const teamMemberSchema = z.object({
@@ -30,11 +30,10 @@ const teamMemberSchema = z.object({
 
 type TeamMemberFormValues = z.infer<typeof teamMemberSchema>;
 
-function InviteTeamMemberModal({ open, onClose }: Props) {
+function InviteTeamMemberModal({ open, onClose, workspaceId }: Props) {
   const { t } = useTranslation();
   const { mutateAsync } = useInviteWorkspaceUser();
   const queryClient = useQueryClient();
-  const { workspaceId } = Route.useParams();
 
   const form = useForm<TeamMemberFormValues>({
     resolver: standardSchemaResolver(teamMemberSchema),

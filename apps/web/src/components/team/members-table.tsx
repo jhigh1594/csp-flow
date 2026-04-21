@@ -5,7 +5,6 @@ import useCancelInvitation from "@/hooks/mutations/workspace-user/use-cancel-inv
 import useDeleteWorkspaceUser from "@/hooks/mutations/workspace-user/use-delete-workspace-user";
 import { formatDateMedium } from "@/lib/format";
 import { toast } from "@/lib/toast";
-import { Route } from "@/routes/_layout/_authenticated/dashboard/workspace/$workspaceId/members";
 import type {
   WorkspaceUser,
   WorkspaceUserInvitation,
@@ -34,9 +33,11 @@ import {
 function MembersTable({
   invitations,
   users,
+  workspaceId,
 }: {
   invitations: WorkspaceUserInvitation[];
   users: WorkspaceUser[];
+  workspaceId: string;
 }) {
   const [memberToDelete, setMemberToDelete] = useState<WorkspaceUser | null>(
     null,
@@ -45,7 +46,6 @@ function MembersTable({
     useState<WorkspaceUserInvitation | null>(null);
   const { t } = useTranslation();
   const { user: currentUser } = useAuth();
-  const { workspaceId } = Route.useParams();
   const { mutateAsync: deleteWorkspaceUser, isPending } =
     useDeleteWorkspaceUser();
   const { mutateAsync: cancelInvitation, isPending: isCancelling } =

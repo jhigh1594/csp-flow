@@ -43,11 +43,16 @@ function RouteComponent() {
           </Button>
         }
       >
-        <MembersTable users={users ?? []} invitations={userInvitations ?? []} />
+        <MembersTable
+          users={users ?? []}
+          invitations={userInvitations ?? []}
+          workspaceId={workspaceId}
+        />
 
         <InviteTeamMemberModal
           open={isInviteTeamMemberModalOpen}
           onClose={() => setIsInviteTeamMemberModalOpen(false)}
+          workspaceId={workspaceId}
         />
       </WorkspaceLayout>
     </>
