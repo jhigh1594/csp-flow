@@ -44,7 +44,6 @@ export default function CommentInput({ taskId }: CommentInputProps) {
 
       toast.success(t("activity:comment.added"));
     } catch (error) {
-      console.error("Failed to create comment:", error);
       toast.error(t("activity:comment.failedToAdd"));
     }
   }, [content, createComment, queryClient, t, taskId]);

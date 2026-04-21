@@ -400,16 +400,12 @@ function CreateTaskModal({
           );
 
       for (const label of labels) {
-        try {
-          await createLabel({
-            name: label.name,
-            color: label.color,
-            taskId: savedTask.id,
-            workspaceId: workspace.id,
-          });
-        } catch (error) {
-          console.error("Failed to create label:", error);
-        }
+        await createLabel({
+          name: label.name,
+          color: label.color,
+          taskId: savedTask.id,
+          workspaceId: workspace.id,
+        });
       }
 
       setDraftTask(savedTask);

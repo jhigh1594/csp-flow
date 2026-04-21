@@ -50,14 +50,10 @@ export default function TaskTitle({ taskId }: TaskTitleProps) {
 
       if (!currentTask || !updateTaskFn) return;
 
-      try {
-        await updateTaskFn({
-          ...currentTask,
-          title,
-        });
-      } catch (error) {
-        console.error("Failed to update title:", error);
-      }
+      await updateTaskFn({
+        ...currentTask,
+        title,
+      });
     }, 800),
     [],
   );

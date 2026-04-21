@@ -522,14 +522,10 @@ export default function TaskDescription({ taskId }: TaskDescriptionProps) {
       const updateTaskFn = updateTaskRef.current;
       if (!currentTask || !updateTaskFn) return;
 
-      try {
-        await updateTaskFn({
-          ...currentTask,
-          description: markdown,
-        });
-      } catch (error) {
-        console.error("Failed to update description:", error);
-      }
+      await updateTaskFn({
+        ...currentTask,
+        description: markdown,
+      });
     }, 700),
     [],
   );
