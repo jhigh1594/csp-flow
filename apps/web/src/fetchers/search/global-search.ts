@@ -1,6 +1,6 @@
 import { client } from "@kaneo/libs";
 
-type SearchParams = {
+export type SearchParams = {
   q: string;
   type?:
     | "all"

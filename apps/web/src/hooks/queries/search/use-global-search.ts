@@ -1,19 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import type { SearchParams } from "@/fetchers/search/global-search";
 import globalSearch from "@/fetchers/search/global-search";
-
-type SearchParams = {
-  q: string;
-  type?:
-    | "all"
-    | "tasks"
-    | "projects"
-    | "workspaces"
-    | "comments"
-    | "activities";
-  workspaceId?: string;
-  projectId?: string;
-  limit?: number;
-};
 
 function useGlobalSearch(params: SearchParams) {
   return useQuery({
