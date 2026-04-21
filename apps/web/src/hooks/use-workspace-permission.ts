@@ -81,24 +81,6 @@ export function useWorkspacePermission() {
         return this.checkRolePermission({ team: ["remove"] });
       },
 
-      // Legacy compatibility method
-      checkPermission(requiredRole: PermissionLevel = "member"): boolean {
-        if (!activeWorkspace || !activeMember) return false;
-
-        const userRole = activeMember.role as PermissionLevel;
-
-        if (requiredRole === "owner") {
-          return userRole === "owner";
-        }
-
-        if (requiredRole === "admin") {
-          return ["owner", "admin"].includes(userRole);
-        }
-
-        // For member level, all roles have access
-        return ["owner", "admin", "member"].includes(userRole);
-      },
-
       isOwner: activeMember?.role === "owner",
       isAdmin: ["owner", "admin"].includes(activeMember?.role || ""),
       role: activeMember?.role as PermissionLevel | undefined,

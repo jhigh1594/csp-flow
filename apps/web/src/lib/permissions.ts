@@ -12,7 +12,6 @@ const statement = {
   project: ["create", "read", "update", "delete", "share"],
   task: ["create", "read", "update", "delete", "assign"],
   workspace: ["read", "update", "delete", "manage_settings"],
-  // team: ["invite", "remove", "manage_roles"],
 } as const;
 
 const ac = createAccessControl(statement);
@@ -23,7 +22,6 @@ const member = ac.newRole({
   project: ["create", "read"],
   task: ["create", "read", "update"],
   workspace: ["read"],
-  // team: ["invite"], // Members can invite others
 });
 
 const admin = ac.newRole({
@@ -31,7 +29,6 @@ const admin = ac.newRole({
   project: ["create", "read", "update", "delete", "share"],
   task: ["create", "read", "update", "delete", "assign"],
   workspace: ["read", "update", "manage_settings"],
-  // team: ["invite", "remove", "manage_roles"],
 });
 
 const owner = ac.newRole({
@@ -39,7 +36,6 @@ const owner = ac.newRole({
   project: ["create", "read", "update", "delete", "share"],
   task: ["create", "read", "update", "delete", "assign"],
   workspace: ["read", "update", "delete", "manage_settings"],
-  // team: ["invite", "remove", "manage_roles"],
 });
 
 export { ac, admin, member, owner, statement };
