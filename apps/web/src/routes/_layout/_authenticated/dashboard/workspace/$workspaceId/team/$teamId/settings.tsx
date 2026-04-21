@@ -38,7 +38,7 @@ function TeamSettingsPage() {
       await deleteTeam({ teamId });
       setDeleteDialogOpen(false);
       navigate({
-        to: "/dashboard/workspace/$workspaceId/issues",
+        to: "/dashboard/workspace/$workspaceId/",
         params: { workspaceId },
       });
     } catch {
