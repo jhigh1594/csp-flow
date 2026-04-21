@@ -91,8 +91,11 @@ export default function ColumnEditor({ teamId }: ColumnEditorProps) {
     }
   };
 
-  const handleDragStart = (index: number) => {
+  const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    const target = e.currentTarget as HTMLElement;
+    e.dataTransfer.setDragImage(target, 20, target.offsetHeight / 2);
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
@@ -129,7 +132,7 @@ export default function ColumnEditor({ teamId }: ColumnEditorProps) {
             key={col.id}
             role="listitem"
             draggable
-            onDragStart={() => handleDragStart(index)}
+            onDragStart={(e) => handleDragStart(e, index)}
             onDragOver={(e) => handleDragOver(e, index)}
             onDragEnd={handleDragEnd}
             className="flex items-center gap-2 p-2 border border-border rounded-md bg-card hover:bg-muted transition-colors"
@@ -138,6 +141,8 @@ export default function ColumnEditor({ teamId }: ColumnEditorProps) {
             <Input
               defaultValue={col.name}
               className="h-8 text-sm flex-1"
+              draggable={false}
+              onDragStart={(e) => e.stopPropagation()}
               onBlur={(e) => {
                 if (e.target.value !== col.name) {
                   handleRename(col.id, e.target.value, col.name);

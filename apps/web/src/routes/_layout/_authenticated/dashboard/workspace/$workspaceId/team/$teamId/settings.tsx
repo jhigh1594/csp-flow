@@ -118,7 +118,7 @@ function TeamSettingsPage() {
           <DialogHeader>
             <DialogTitle>Delete team?</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground px-6 pb-6">
             This will permanently delete the team and all associated issues,
             projects, and columns. This action cannot be undone.
           </p>
