@@ -1,13 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import WorkspaceLayout from "@/components/common/workspace-layout";
 import PageTitle from "@/components/page-title";
+import ProgramNav from "@/components/program/program-nav";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardHeader,
-  CardPanel,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardPanel, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -24,11 +20,7 @@ export const Route = createFileRoute(
   "/_layout/_authenticated/dashboard/workspace/$workspaceId/program/",
 )({ component: RouteComponent });
 
-function RagBadge({
-  health,
-}: {
-  health: string | null | undefined;
-}) {
+function RagBadge({ health }: { health: string | null | undefined }) {
   if (!health) {
     return (
       <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600">
@@ -64,7 +56,11 @@ function RagBadge({
 function RouteComponent() {
   const { workspaceId } = Route.useParams();
   const navigate = useNavigate();
-  const { data: teams, isLoading, isError } = useGetProgramTeams({ workspaceId });
+  const {
+    data: teams,
+    isLoading,
+    isError,
+  } = useGetProgramTeams({ workspaceId });
 
   const handleTeamClick = (teamId: string) => {
     navigate({
@@ -81,6 +77,7 @@ function RouteComponent() {
         <PageTitle title="Program Tracker" />
         <WorkspaceLayout title="Program Tracker">
           <div className="p-6 space-y-6">
+            <ProgramNav workspaceId={workspaceId} />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
                 <div
@@ -109,7 +106,8 @@ function RouteComponent() {
             <div className="text-center space-y-3">
               <h3 className="text-xl font-semibold">Failed to load teams</h3>
               <p className="text-muted-foreground">
-                There was an error loading program data. Check API logs or restart the server.
+                There was an error loading program data. Check API logs or
+                restart the server.
               </p>
             </div>
           </div>
@@ -141,6 +139,7 @@ function RouteComponent() {
       <PageTitle title="Program Tracker" />
       <WorkspaceLayout title="Program Tracker">
         <div className="p-6 space-y-8">
+          <ProgramNav workspaceId={workspaceId} />
           {/* Team cards grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {teams.map((team) => (
