@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import WorkspaceLayout from "@/components/common/workspace-layout";
 import PageTitle from "@/components/page-title";
+import ProgramNav from "@/components/program/program-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 import useGetSnapshotDiff from "@/hooks/queries/program/use-get-snapshot-diff";
 import useGetSnapshotWeeks from "@/hooks/queries/program/use-get-snapshot-weeks";
@@ -250,6 +251,7 @@ function RouteComponent() {
         <PageTitle title="Week-over-Week" />
         <WorkspaceLayout title="Week-over-Week">
           <div className="p-6 space-y-4">
+            <ProgramNav workspaceId={workspaceId} />
             <div className="flex gap-2">
               {[1, 2, 3, 4].map((i) => (
                 <Skeleton key={i} className="h-8 w-20 rounded-full" />
@@ -271,12 +273,15 @@ function RouteComponent() {
       <>
         <PageTitle title="Week-over-Week" />
         <WorkspaceLayout title="Week-over-Week">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center space-y-3">
-              <p className="text-muted-foreground">
-                No snapshots yet — save a status update to start tracking
-                week-over-week changes.
-              </p>
+          <div className="p-6 space-y-4">
+            <ProgramNav workspaceId={workspaceId} />
+            <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="text-center space-y-3">
+                <p className="text-muted-foreground">
+                  No snapshots yet — save a status update to start tracking
+                  week-over-week changes.
+                </p>
+              </div>
             </div>
           </div>
         </WorkspaceLayout>
@@ -290,6 +295,7 @@ function RouteComponent() {
       <WorkspaceLayout title="Week-over-Week">
         <div className="p-6 space-y-6">
           {/* Week selector pills */}
+          <ProgramNav workspaceId={workspaceId} />
           <div className="flex flex-wrap gap-2">
             {displayWeeks.map((week) => {
               const isSelected = week === selectedWeek;
