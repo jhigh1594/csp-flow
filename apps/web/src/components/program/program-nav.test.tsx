@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 let mockPathname = "/dashboard/workspace/ws-1/program";
@@ -11,7 +12,7 @@ vi.mock("@tanstack/react-router", () => ({
     to,
     params,
   }: {
-    children: React.ReactNode;
+    children: ReactNode;
     className?: string;
     to: string;
     params?: Record<string, string>;
