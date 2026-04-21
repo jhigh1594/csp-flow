@@ -17,8 +17,12 @@ function useCreateRelease() {
   return useMutation({
     mutationFn: (variables: CreateReleaseVariables) => createRelease(variables),
     onSuccess: (_, { teamId, workspaceId }) => {
-      queryClient.invalidateQueries({ queryKey: ["program-team-status", teamId] });
-      queryClient.invalidateQueries({ queryKey: ["program-roadmap", workspaceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["program-team-status", teamId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["program-roadmap", workspaceId],
+      });
     },
   });
 }

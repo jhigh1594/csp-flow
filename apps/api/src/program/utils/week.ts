@@ -3,7 +3,11 @@ export function getCurrentWeekStart(): string {
   const dayUTC = now.getUTCDay();
   const diffUTC = dayUTC === 0 ? -6 : 1 - dayUTC;
   const monday = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + diffUTC),
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + diffUTC,
+    ),
   );
   return monday.toISOString().split("T")[0] as string;
 }

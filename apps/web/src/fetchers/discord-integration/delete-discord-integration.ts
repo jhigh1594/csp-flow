@@ -1,4 +1,4 @@
-import { getApiUrl } from "@/fetchers/get-api-url";
+import { getApiUrl, unwrapResponse } from "@/fetchers/get-api-url";
 
 async function deleteDiscordIntegration(projectId: string) {
   const response = await fetch(
@@ -12,12 +12,7 @@ async function deleteDiscordIntegration(projectId: string) {
     },
   );
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default deleteDiscordIntegration;

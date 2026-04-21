@@ -1,4 +1,4 @@
-import { getApiUrl } from "@/fetchers/get-api-url";
+import { getApiUrl, unwrapResponse } from "@/fetchers/get-api-url";
 
 export type GenericWebhookIntegration = {
   id: string;
@@ -30,12 +30,7 @@ async function getGenericWebhookIntegration(
     },
   );
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return (await response.json()) as GenericWebhookIntegration | null;
+  return unwrapResponse<GenericWebhookIntegration | null>(response);
 }
 
 export default getGenericWebhookIntegration;

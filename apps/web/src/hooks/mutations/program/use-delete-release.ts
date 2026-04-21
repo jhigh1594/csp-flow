@@ -13,8 +13,12 @@ function useDeleteRelease() {
     mutationFn: ({ workspaceId, teamId, releaseId }: DeleteReleaseVariables) =>
       deleteRelease({ workspaceId, teamId, releaseId }),
     onSuccess: (_, { teamId, workspaceId }) => {
-      queryClient.invalidateQueries({ queryKey: ["program-team-status", teamId] });
-      queryClient.invalidateQueries({ queryKey: ["program-roadmap", workspaceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["program-team-status", teamId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["program-roadmap", workspaceId],
+      });
     },
   });
 }

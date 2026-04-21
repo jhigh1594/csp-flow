@@ -1,5 +1,6 @@
 import { client } from "@kaneo/libs";
 import type { InferRequestType } from "hono/client";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 export type CreateLabelRequest = InferRequestType<
   (typeof client)["label"]["$post"]
@@ -20,13 +21,7 @@ async function createLabel({
     },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  const data = await response.json();
-  return data;
+  return unwrapResponse(response);
 }
 
 export default createLabel;

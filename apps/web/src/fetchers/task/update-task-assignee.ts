@@ -1,4 +1,5 @@
 import { client } from "@kaneo/libs";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 import type Task from "@/types/task";
 
 type UpdateTaskAssigneePayload = Pick<Task, "userId">;
@@ -14,14 +15,7 @@ async function updateTaskAssignee(
     },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  const data = await response.json();
-
-  return data;
+  return unwrapResponse(response);
 }
 
 export default updateTaskAssignee;

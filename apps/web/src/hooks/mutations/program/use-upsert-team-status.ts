@@ -21,10 +21,21 @@ function useUpsertTeamStatus() {
       nextWeekFocus,
       leadershipAsks,
     }: UpsertTeamStatusVariables) =>
-      upsertTeamStatus({ workspaceId, teamId, health, accomplishments, nextWeekFocus, leadershipAsks }),
+      upsertTeamStatus({
+        workspaceId,
+        teamId,
+        health,
+        accomplishments,
+        nextWeekFocus,
+        leadershipAsks,
+      }),
     onSuccess: (_, { teamId, workspaceId }) => {
-      queryClient.invalidateQueries({ queryKey: ["program-team-status", teamId] });
-      queryClient.invalidateQueries({ queryKey: ["program-teams", workspaceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["program-team-status", teamId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["program-teams", workspaceId],
+      });
     },
   });
 }

@@ -10,7 +10,9 @@ export async function requireTeamInWorkspace(
   const [team] = await db
     .select({ id: teamTable.id })
     .from(teamTable)
-    .where(and(eq(teamTable.id, teamId), eq(teamTable.workspaceId, workspaceId)))
+    .where(
+      and(eq(teamTable.id, teamId), eq(teamTable.workspaceId, workspaceId)),
+    )
     .limit(1);
   if (!team) throw new HTTPException(404, { message: "Team not found" });
 }

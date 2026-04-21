@@ -1,4 +1,5 @@
 import { client } from "@kaneo/libs";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 async function deleteGiteaIntegration(projectId: string) {
   const response = await client["gitea-integration"].project[
@@ -7,12 +8,7 @@ async function deleteGiteaIntegration(projectId: string) {
     param: { projectId },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default deleteGiteaIntegration;

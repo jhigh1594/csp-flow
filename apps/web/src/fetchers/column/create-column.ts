@@ -1,4 +1,5 @@
 import { client } from "@kaneo/libs";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 async function createColumn(
   teamId: string,
@@ -9,12 +10,7 @@ async function createColumn(
     json: data,
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default createColumn;

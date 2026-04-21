@@ -46,7 +46,12 @@ async function updateRelease({
   const [release] = await db
     .update(roadmapReleaseTable)
     .set(updateValues)
-    .where(and(eq(roadmapReleaseTable.id, releaseId), eq(roadmapReleaseTable.teamId, teamId)))
+    .where(
+      and(
+        eq(roadmapReleaseTable.id, releaseId),
+        eq(roadmapReleaseTable.teamId, teamId),
+      ),
+    )
     .returning();
 
   if (!release) {

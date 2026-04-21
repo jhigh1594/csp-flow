@@ -32,7 +32,8 @@ const program = new Hono<{
       description: "Get all teams for a workspace with latest status summary",
       responses: {
         200: {
-          description: "List of teams with status, risk count, and next demand milestone",
+          description:
+            "List of teams with status, risk count, and next demand milestone",
           content: {
             "application/json": { schema: resolver(v.any()) },
           },
@@ -62,7 +63,10 @@ const program = new Hono<{
         },
       },
     }),
-    validator("param", v.object({ workspaceId: v.string(), teamId: v.string() })),
+    validator(
+      "param",
+      v.object({ workspaceId: v.string(), teamId: v.string() }),
+    ),
     workspaceAccess.fromParam("workspaceId"),
     async (c) => {
       const { teamId } = c.req.valid("param");
@@ -85,7 +89,10 @@ const program = new Hono<{
         },
       },
     }),
-    validator("param", v.object({ workspaceId: v.string(), teamId: v.string() })),
+    validator(
+      "param",
+      v.object({ workspaceId: v.string(), teamId: v.string() }),
+    ),
     validator(
       "json",
       v.object({
@@ -127,7 +134,10 @@ const program = new Hono<{
         },
       },
     }),
-    validator("param", v.object({ workspaceId: v.string(), teamId: v.string() })),
+    validator(
+      "param",
+      v.object({ workspaceId: v.string(), teamId: v.string() }),
+    ),
     validator(
       "json",
       v.object({
@@ -240,7 +250,10 @@ const program = new Hono<{
         },
       },
     }),
-    validator("param", v.object({ workspaceId: v.string(), teamId: v.string() })),
+    validator(
+      "param",
+      v.object({ workspaceId: v.string(), teamId: v.string() }),
+    ),
     validator(
       "json",
       v.object({
@@ -368,7 +381,10 @@ const program = new Hono<{
         },
       },
     }),
-    validator("param", v.object({ workspaceId: v.string(), teamId: v.string() })),
+    validator(
+      "param",
+      v.object({ workspaceId: v.string(), teamId: v.string() }),
+    ),
     validator(
       "json",
       v.object({

@@ -1,16 +1,12 @@
 import { client } from "@kaneo/libs";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 async function deleteColumn(id: string) {
   const response = await client.column[":id"].$delete({
     param: { id },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default deleteColumn;

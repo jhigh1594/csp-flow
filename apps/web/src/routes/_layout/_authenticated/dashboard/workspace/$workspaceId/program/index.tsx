@@ -121,12 +121,15 @@ function RouteComponent() {
       <>
         <PageTitle title="Program Tracker" />
         <WorkspaceLayout title="Program Tracker">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="text-center space-y-3">
-              <h3 className="text-xl font-semibold">No teams found</h3>
-              <p className="text-muted-foreground">
-                No workstreams have been configured for this workspace.
-              </p>
+          <div className="p-6 space-y-6">
+            <ProgramNav workspaceId={workspaceId} />
+            <div className="flex items-center justify-center min-h-[50vh]">
+              <div className="text-center space-y-3">
+                <h3 className="text-xl font-semibold">No teams found</h3>
+                <p className="text-muted-foreground">
+                  No workstreams have been configured for this workspace.
+                </p>
+              </div>
             </div>
           </div>
         </WorkspaceLayout>

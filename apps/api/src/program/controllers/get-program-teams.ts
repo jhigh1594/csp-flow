@@ -67,10 +67,7 @@ async function getProgramTeams(workspaceId: string) {
     })
     .from(riskTable)
     .where(
-      and(
-        inArray(riskTable.teamId, teamIds),
-        eq(riskTable.status, "open"),
-      ),
+      and(inArray(riskTable.teamId, teamIds), eq(riskTable.status, "open")),
     )
     .groupBy(riskTable.teamId);
 

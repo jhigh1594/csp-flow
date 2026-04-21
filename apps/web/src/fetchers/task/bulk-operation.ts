@@ -1,4 +1,5 @@
 import { client } from "@kaneo/libs";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 type BulkOperationType =
   | "updateStatus"
@@ -22,12 +23,7 @@ async function bulkOperation({
     json: { taskIds, operation, value },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default bulkOperation;

@@ -1,5 +1,6 @@
 import { client } from "@kaneo/libs";
 import type { InferRequestType } from "hono/client";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 export type UpsertTeamStatusRequest = InferRequestType<
   (typeof client)["program"][":workspaceId"]["teams"][":teamId"]["status"]["$put"]
@@ -16,17 +17,14 @@ async function upsertTeamStatus({
   nextWeekFocus,
   leadershipAsks,
 }: UpsertTeamStatusRequest) {
-  const response = await client.program[":workspaceId"].teams[":teamId"].status.$put({
+  const response = await client.program[":workspaceId"].teams[
+    ":teamId"
+  ].status.$put({
     param: { workspaceId, teamId },
     json: { health, accomplishments, nextWeekFocus, leadershipAsks },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default upsertTeamStatus;

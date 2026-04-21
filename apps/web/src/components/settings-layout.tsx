@@ -48,8 +48,7 @@ export function SettingsLayout({
   const { t } = useTranslation();
   const navigate = useNavigate();
   const resolvedBackLabel = backLabel ?? t("navigation:settingsLayout.back");
-  const resolvedParentLabel =
-    parentLabel ?? t("navigation:page.settingsTitle");
+  const resolvedParentLabel = parentLabel ?? t("navigation:page.settingsTitle");
   const resolvedParentPath = parentPath ?? "/dashboard/settings";
 
   const handleBack = () => {

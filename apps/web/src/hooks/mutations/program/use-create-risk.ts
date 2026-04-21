@@ -16,8 +16,12 @@ function useCreateRisk() {
   return useMutation({
     mutationFn: (variables: CreateRiskVariables) => createRisk(variables),
     onSuccess: (_, { teamId, workspaceId }) => {
-      queryClient.invalidateQueries({ queryKey: ["program-team-status", teamId] });
-      queryClient.invalidateQueries({ queryKey: ["program-teams", workspaceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["program-team-status", teamId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["program-teams", workspaceId],
+      });
     },
   });
 }

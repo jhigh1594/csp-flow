@@ -89,7 +89,7 @@ export default function CommentCard({
       setIsEditing(false);
       await queryClient.invalidateQueries({ queryKey: ["activities", taskId] });
       toast.success(t("activity:comment.updated"));
-    } catch (error) {
+    } catch (_error) {
       toast.error(t("activity:comment.failedToUpdate"));
     }
   }, [

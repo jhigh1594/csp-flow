@@ -943,7 +943,9 @@ export function registerMcpTools(
     },
     async (args) =>
       run(() =>
-        client.json(`/api/program/${encodeURIComponent(args.workspaceId)}/teams`),
+        client.json(
+          `/api/program/${encodeURIComponent(args.workspaceId)}/teams`,
+        ),
       ),
   );
 
@@ -1016,7 +1018,9 @@ export function registerMcpTools(
     },
     async (args) =>
       run(() =>
-        client.json(`/api/program/${encodeURIComponent(args.workspaceId)}/roadmap`),
+        client.json(
+          `/api/program/${encodeURIComponent(args.workspaceId)}/roadmap`,
+        ),
       ),
   );
 

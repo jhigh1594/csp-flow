@@ -96,7 +96,6 @@ export function GanttTaskBar({
     end: Date;
   } | null>(null);
 
-  // Drop the drag overlay once server data matches
   useEffect(() => {
     if (!dragDisplay) return;
     const startMatches =

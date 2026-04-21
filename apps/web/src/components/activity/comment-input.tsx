@@ -43,7 +43,7 @@ export default function CommentInput({ taskId }: CommentInputProps) {
       await queryClient.invalidateQueries({ queryKey: ["activities", taskId] });
 
       toast.success(t("activity:comment.added"));
-    } catch (error) {
+    } catch (_error) {
       toast.error(t("activity:comment.failedToAdd"));
     }
   }, [content, createComment, queryClient, t, taskId]);

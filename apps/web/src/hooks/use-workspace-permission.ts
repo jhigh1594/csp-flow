@@ -85,7 +85,7 @@ export function useWorkspacePermission() {
       isAdmin: ["owner", "admin"].includes(activeMember?.role || ""),
       role: activeMember?.role as PermissionLevel | undefined,
     }),
-    [activeMember, activeWorkspace],
+    [activeMember],
   );
 
   return {

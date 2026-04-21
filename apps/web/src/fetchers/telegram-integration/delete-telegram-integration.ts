@@ -1,4 +1,4 @@
-import { getApiUrl } from "@/fetchers/get-api-url";
+import { getApiUrl, unwrapResponse } from "@/fetchers/get-api-url";
 
 async function deleteTelegramIntegration(projectId: string) {
   const response = await fetch(
@@ -9,12 +9,7 @@ async function deleteTelegramIntegration(projectId: string) {
     },
   );
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return (await response.json()) as { success: boolean };
+  return unwrapResponse<{ success: boolean }>(response);
 }
 
 export default deleteTelegramIntegration;

@@ -1,5 +1,6 @@
 import { client } from "@kaneo/libs";
 import type { InferRequestType } from "hono/client";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 export type GetProgramTeamsRequest = InferRequestType<
   (typeof client)["program"][":workspaceId"]["teams"]["$get"]
@@ -10,12 +11,7 @@ async function getProgramTeams({ workspaceId }: GetProgramTeamsRequest) {
     param: { workspaceId },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default getProgramTeams;

@@ -947,10 +947,16 @@ export const weeklyStatusTable = pgTable(
       .primaryKey(),
     teamId: text("team_id")
       .notNull()
-      .references(() => teamTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+      .references(() => teamTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     workspaceId: text("workspace_id")
       .notNull()
-      .references(() => workspaceTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+      .references(() => workspaceTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     weekStart: date("week_start").notNull(),
     health: text("health").notNull().default("green"),
     accomplishments: text("accomplishments"),
@@ -977,7 +983,10 @@ export const demandTable = pgTable(
       .primaryKey(),
     teamId: text("team_id")
       .notNull()
-      .references(() => teamTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+      .references(() => teamTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     name: text("name").notNull(),
     sortOrder: integer("sort_order").notNull().default(0),
     businessPartnershipDate: date("business_partnership_date"),
@@ -1008,7 +1017,10 @@ export const riskTable = pgTable(
       .primaryKey(),
     teamId: text("team_id")
       .notNull()
-      .references(() => teamTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+      .references(() => teamTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     description: text("description").notNull(),
     impact: text("impact").notNull().default("medium"),
     status: text("status").notNull().default("open"),
@@ -1034,7 +1046,10 @@ export const roadmapReleaseTable = pgTable(
       .primaryKey(),
     teamId: text("team_id")
       .notNull()
-      .references(() => teamTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+      .references(() => teamTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     name: text("name").notNull(),
     quarter: text("quarter").notNull(),
     month: integer("month").notNull(),
@@ -1061,10 +1076,16 @@ export const weeklyStatusSnapshotTable = pgTable(
       .primaryKey(),
     teamId: text("team_id")
       .notNull()
-      .references(() => teamTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+      .references(() => teamTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     workspaceId: text("workspace_id")
       .notNull()
-      .references(() => workspaceTable.id, { onDelete: "cascade", onUpdate: "cascade" }),
+      .references(() => workspaceTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
     weekStart: date("week_start").notNull(),
     snapshot: jsonb("snapshot").notNull(),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
@@ -1072,7 +1093,10 @@ export const weeklyStatusSnapshotTable = pgTable(
   (table) => [
     index("weekly_status_snapshot_teamId_idx").on(table.teamId),
     index("weekly_status_snapshot_workspaceId_idx").on(table.workspaceId),
-    unique("weekly_status_snapshot_team_week_unique").on(table.teamId, table.weekStart),
+    unique("weekly_status_snapshot_team_week_unique").on(
+      table.teamId,
+      table.weekStart,
+    ),
   ],
 );
 
@@ -1162,16 +1186,19 @@ export const invitationRelations = relations(invitation, ({ one }) => ({
   }),
 }));
 
-export const weeklyStatusRelations = relations(weeklyStatusTable, ({ one }) => ({
-  team: one(teamTable, {
-    fields: [weeklyStatusTable.teamId],
-    references: [teamTable.id],
+export const weeklyStatusRelations = relations(
+  weeklyStatusTable,
+  ({ one }) => ({
+    team: one(teamTable, {
+      fields: [weeklyStatusTable.teamId],
+      references: [teamTable.id],
+    }),
+    workspace: one(workspaceTable, {
+      fields: [weeklyStatusTable.workspaceId],
+      references: [workspaceTable.id],
+    }),
   }),
-  workspace: one(workspaceTable, {
-    fields: [weeklyStatusTable.workspaceId],
-    references: [workspaceTable.id],
-  }),
-}));
+);
 
 export const demandRelations = relations(demandTable, ({ one }) => ({
   team: one(teamTable, {
@@ -1187,20 +1214,26 @@ export const riskRelations = relations(riskTable, ({ one }) => ({
   }),
 }));
 
-export const roadmapReleaseRelations = relations(roadmapReleaseTable, ({ one }) => ({
-  team: one(teamTable, {
-    fields: [roadmapReleaseTable.teamId],
-    references: [teamTable.id],
+export const roadmapReleaseRelations = relations(
+  roadmapReleaseTable,
+  ({ one }) => ({
+    team: one(teamTable, {
+      fields: [roadmapReleaseTable.teamId],
+      references: [teamTable.id],
+    }),
   }),
-}));
+);
 
-export const weeklyStatusSnapshotRelations = relations(weeklyStatusSnapshotTable, ({ one }) => ({
-  team: one(teamTable, {
-    fields: [weeklyStatusSnapshotTable.teamId],
-    references: [teamTable.id],
+export const weeklyStatusSnapshotRelations = relations(
+  weeklyStatusSnapshotTable,
+  ({ one }) => ({
+    team: one(teamTable, {
+      fields: [weeklyStatusSnapshotTable.teamId],
+      references: [teamTable.id],
+    }),
+    workspace: one(workspaceTable, {
+      fields: [weeklyStatusSnapshotTable.workspaceId],
+      references: [workspaceTable.id],
+    }),
   }),
-  workspace: one(workspaceTable, {
-    fields: [weeklyStatusSnapshotTable.workspaceId],
-    references: [workspaceTable.id],
-  }),
-}));
+);

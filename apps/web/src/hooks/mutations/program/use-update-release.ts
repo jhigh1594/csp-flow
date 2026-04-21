@@ -18,8 +18,12 @@ function useUpdateRelease() {
   return useMutation({
     mutationFn: (variables: UpdateReleaseVariables) => updateRelease(variables),
     onSuccess: (_, { teamId, workspaceId }) => {
-      queryClient.invalidateQueries({ queryKey: ["program-team-status", teamId] });
-      queryClient.invalidateQueries({ queryKey: ["program-roadmap", workspaceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["program-team-status", teamId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["program-roadmap", workspaceId],
+      });
     },
   });
 }

@@ -32,9 +32,7 @@ export async function runTeamCentricMigration() {
 
   // 1. team.identifier
   if (!(await columnExists("team", "identifier"))) {
-    await db.execute(
-      sql`ALTER TABLE "team" ADD COLUMN "identifier" text`,
-    );
+    await db.execute(sql`ALTER TABLE "team" ADD COLUMN "identifier" text`);
     await db.execute(sql`
       UPDATE "team"
       SET "identifier" = CASE
@@ -106,9 +104,7 @@ export async function runTeamCentricMigration() {
   `);
   // Remove tasks that can't be mapped (orphaned rows)
   await db.execute(sql`DELETE FROM "task" WHERE "team_id" IS NULL`);
-  await db.execute(
-    sql`ALTER TABLE "task" ALTER COLUMN "team_id" SET NOT NULL`,
-  );
+  await db.execute(sql`ALTER TABLE "task" ALTER COLUMN "team_id" SET NOT NULL`);
   await db.execute(
     sql`ALTER TABLE "task" ALTER COLUMN "project_id" DROP NOT NULL`,
   );

@@ -7,9 +7,7 @@ async function tableExists(table: string): Promise<boolean> {
       SELECT 1 FROM information_schema.tables WHERE table_name = ${table}
     ) AS exists
   `);
-  return (
-    result.rows[0]?.exists === true || result.rows[0]?.exists === "t"
-  );
+  return result.rows[0]?.exists === true || result.rows[0]?.exists === "t";
 }
 
 /**
@@ -145,16 +143,36 @@ export async function runProgramTrackerMigration() {
     FOREIGN KEY ("workspace_id") REFERENCES "workspace"("id") ON DELETE CASCADE ON UPDATE CASCADE
   `);
 
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS "demand_teamId_idx" ON "demand" ("team_id")`);
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS "demand_sortOrder_idx" ON "demand" ("team_id","sort_order")`);
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS "risk_teamId_idx" ON "risk" ("team_id")`);
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS "risk_status_idx" ON "risk" ("team_id","status")`);
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS "roadmap_release_teamId_idx" ON "roadmap_release" ("team_id")`);
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS "roadmap_release_quarter_idx" ON "roadmap_release" ("team_id","quarter")`);
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS "weekly_status_snapshot_teamId_idx" ON "weekly_status_snapshot" ("team_id")`);
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS "weekly_status_snapshot_workspaceId_idx" ON "weekly_status_snapshot" ("workspace_id")`);
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS "weekly_status_teamId_idx" ON "weekly_status" ("team_id")`);
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS "weekly_status_workspaceId_idx" ON "weekly_status" ("workspace_id")`);
+  await db.execute(
+    sql`CREATE INDEX IF NOT EXISTS "demand_teamId_idx" ON "demand" ("team_id")`,
+  );
+  await db.execute(
+    sql`CREATE INDEX IF NOT EXISTS "demand_sortOrder_idx" ON "demand" ("team_id","sort_order")`,
+  );
+  await db.execute(
+    sql`CREATE INDEX IF NOT EXISTS "risk_teamId_idx" ON "risk" ("team_id")`,
+  );
+  await db.execute(
+    sql`CREATE INDEX IF NOT EXISTS "risk_status_idx" ON "risk" ("team_id","status")`,
+  );
+  await db.execute(
+    sql`CREATE INDEX IF NOT EXISTS "roadmap_release_teamId_idx" ON "roadmap_release" ("team_id")`,
+  );
+  await db.execute(
+    sql`CREATE INDEX IF NOT EXISTS "roadmap_release_quarter_idx" ON "roadmap_release" ("team_id","quarter")`,
+  );
+  await db.execute(
+    sql`CREATE INDEX IF NOT EXISTS "weekly_status_snapshot_teamId_idx" ON "weekly_status_snapshot" ("team_id")`,
+  );
+  await db.execute(
+    sql`CREATE INDEX IF NOT EXISTS "weekly_status_snapshot_workspaceId_idx" ON "weekly_status_snapshot" ("workspace_id")`,
+  );
+  await db.execute(
+    sql`CREATE INDEX IF NOT EXISTS "weekly_status_teamId_idx" ON "weekly_status" ("team_id")`,
+  );
+  await db.execute(
+    sql`CREATE INDEX IF NOT EXISTS "weekly_status_workspaceId_idx" ON "weekly_status" ("workspace_id")`,
+  );
 
   console.log("✅ Program tracker migration complete!");
 }

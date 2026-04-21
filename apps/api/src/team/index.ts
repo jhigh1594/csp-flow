@@ -6,6 +6,7 @@ import createTeam from "./controllers/create-team";
 import createTeamColumn from "./controllers/create-team-column";
 import createTeamIssue from "./controllers/create-team-issue";
 import createTeamProject from "./controllers/create-team-project";
+import deleteTeam from "./controllers/delete-team";
 import getTeamColumns from "./controllers/get-team-columns";
 import getTeamIssues from "./controllers/get-team-issues";
 import getTeamProjects from "./controllers/get-team-projects";
@@ -249,6 +250,29 @@ const team = new Hono<{
       const { teamId } = c.req.valid("param");
       const projects = await getTeamProjects(teamId);
       return c.json(projects);
+    },
+  )
+  .delete(
+    "/:teamId",
+    describeRoute({
+      operationId: "deleteTeam",
+      tags: ["Teams"],
+      description: "Delete a team and all its associated data",
+      responses: {
+        200: {
+          description: "Team deleted successfully",
+          content: {
+            "application/json": { schema: resolver(v.any()) },
+          },
+        },
+      },
+    }),
+    validator("param", v.object({ teamId: v.string() })),
+    workspaceAccess.fromTeam("teamId"),
+    async (c) => {
+      const { teamId } = c.req.valid("param");
+      const team = await deleteTeam(teamId);
+      return c.json(team);
     },
   )
   .post(

@@ -1,5 +1,6 @@
 import { client } from "@kaneo/libs";
 import type { InferRequestType } from "hono/client";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 export type CreateTeamProjectRequest = InferRequestType<
   (typeof client)["teams"][":teamId"]["projects"]["$post"]
@@ -20,12 +21,7 @@ async function createTeamProject({
     json: { name, description, slug, icon },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default createTeamProject;

@@ -1,4 +1,4 @@
-import { getApiUrl } from "@/fetchers/get-api-url";
+import { getApiUrl, unwrapResponse } from "@/fetchers/get-api-url";
 import type { DiscordIntegration } from "./get-discord-integration";
 
 export type CreateDiscordIntegrationRequest = {
@@ -30,12 +30,7 @@ async function createDiscordIntegration(
     },
   );
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return (await response.json()) as DiscordIntegration;
+  return unwrapResponse<DiscordIntegration>(response);
 }
 
 export default createDiscordIntegration;

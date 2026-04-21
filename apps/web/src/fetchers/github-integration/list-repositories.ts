@@ -1,5 +1,6 @@
 import { client } from "@kaneo/libs";
 import type { InferResponseType } from "hono";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 export type ListRepositoriesResponse = InferResponseType<
   (typeof client)["github-integration"]["repositories"]["$get"]
@@ -8,13 +9,7 @@ export type ListRepositoriesResponse = InferResponseType<
 async function listRepositories(): Promise<ListRepositoriesResponse> {
   const response = await client["github-integration"].repositories.$get();
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  const result = await response.json();
-  return result;
+  return unwrapResponse(response);
 }
 
 export default listRepositories;

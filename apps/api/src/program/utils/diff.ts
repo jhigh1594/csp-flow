@@ -70,7 +70,10 @@ export function diffDemands(
       result.push({ type: "added", name: toDemand.name });
     } else {
       const fromDemand = fromMap.get(id)!;
-      const dateChanges: Record<string, { from: string | null; to: string | null }> = {};
+      const dateChanges: Record<
+        string,
+        { from: string | null; to: string | null }
+      > = {};
       for (const key of DEMAND_DATE_KEYS) {
         const fromVal = (fromDemand[key] as string | null | undefined) ?? null;
         const toVal = (toDemand[key] as string | null | undefined) ?? null;

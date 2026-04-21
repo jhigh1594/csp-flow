@@ -1,4 +1,4 @@
-import { getApiUrl } from "@/fetchers/get-api-url";
+import { getApiUrl, unwrapResponse } from "@/fetchers/get-api-url";
 import type { NotificationPreferences } from "./get-notification-preferences";
 
 export type UpsertNotificationWorkspaceRuleRequest = {
@@ -27,12 +27,7 @@ async function upsertNotificationWorkspaceRule(
     },
   );
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return (await response.json()) as NotificationPreferences;
+  return unwrapResponse<NotificationPreferences>(response);
 }
 
 export default upsertNotificationWorkspaceRule;

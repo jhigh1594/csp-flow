@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import WorkspaceLayout from "@/components/common/workspace-layout";
 import PageTitle from "@/components/page-title";
+import ProgramNav from "@/components/program/program-nav";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import useGetRoadmap from "@/hooks/queries/program/use-get-roadmap";
-import ProgramNav from "@/components/program/program-nav";
 
 export const Route = createFileRoute(
   "/_layout/_authenticated/dashboard/workspace/$workspaceId/program/roadmap/",

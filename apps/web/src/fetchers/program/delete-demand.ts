@@ -1,21 +1,23 @@
 import { client } from "@kaneo/libs";
 import type { InferRequestType } from "hono/client";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 export type DeleteDemandRequest = InferRequestType<
   (typeof client)["program"][":workspaceId"]["teams"][":teamId"]["demands"][":demandId"]["$delete"]
 >["param"];
 
-async function deleteDemand({ workspaceId, teamId, demandId }: DeleteDemandRequest) {
-  const response = await client.program[":workspaceId"].teams[":teamId"].demands[":demandId"].$delete({
+async function deleteDemand({
+  workspaceId,
+  teamId,
+  demandId,
+}: DeleteDemandRequest) {
+  const response = await client.program[":workspaceId"].teams[
+    ":teamId"
+  ].demands[":demandId"].$delete({
     param: { workspaceId, teamId, demandId },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default deleteDemand;

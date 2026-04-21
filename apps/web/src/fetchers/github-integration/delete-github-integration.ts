@@ -1,4 +1,5 @@
 import { client } from "@kaneo/libs";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 async function deleteGithubIntegration(projectId: string) {
   const response = await client["github-integration"].project[
@@ -7,13 +8,7 @@ async function deleteGithubIntegration(projectId: string) {
     param: { projectId },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  const result = await response.json();
-  return result;
+  return unwrapResponse(response);
 }
 
 export default deleteGithubIntegration;

@@ -13,8 +13,12 @@ function useDeleteRisk() {
     mutationFn: ({ workspaceId, teamId, riskId }: DeleteRiskVariables) =>
       deleteRisk({ workspaceId, teamId, riskId }),
     onSuccess: (_, { teamId, workspaceId }) => {
-      queryClient.invalidateQueries({ queryKey: ["program-team-status", teamId] });
-      queryClient.invalidateQueries({ queryKey: ["program-teams", workspaceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["program-team-status", teamId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["program-teams", workspaceId],
+      });
     },
   });
 }

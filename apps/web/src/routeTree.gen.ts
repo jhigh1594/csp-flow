@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TestErrorRouteImport } from './routes/test-error'
 import { Route as DeviceRouteImport } from './routes/device'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DeviceIndexRouteImport } from './routes/device/index'
 import { Route as PublicProjectProjectIdRouteImport } from './routes/public-project.$projectId'
@@ -21,7 +20,6 @@ import { Route as AuthVerifyOtpRouteImport } from './routes/auth/verify-otp'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthCheckEmailRouteImport } from './routes/auth/check-email'
-import { Route as LayoutAuthenticatedRouteImport } from './routes/_layout/_authenticated'
 import { Route as InvitationAcceptInviteIdRouteImport } from './routes/invitation/accept.$inviteId'
 import { Route as LayoutAuthenticatedProfileSetupRouteImport } from './routes/_layout/_authenticated/profile-setup'
 import { Route as LayoutAuthenticatedOnboardingRouteImport } from './routes/_layout/_authenticated/onboarding'
@@ -75,10 +73,6 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LayoutRoute = LayoutRouteImport.update({
-  id: '/_layout',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -119,10 +113,6 @@ const AuthCheckEmailRoute = AuthCheckEmailRouteImport.update({
   path: '/check-email',
   getParentRoute: () => AuthRoute,
 } as any)
-const LayoutAuthenticatedRoute = LayoutAuthenticatedRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const InvitationAcceptInviteIdRoute =
   InvitationAcceptInviteIdRouteImport.update({
     id: '/invitation/accept/$inviteId',
@@ -131,27 +121,27 @@ const InvitationAcceptInviteIdRoute =
   } as any)
 const LayoutAuthenticatedProfileSetupRoute =
   LayoutAuthenticatedProfileSetupRouteImport.update({
-    id: '/profile-setup',
+    id: '/_layout/_authenticated/profile-setup',
     path: '/profile-setup',
-    getParentRoute: () => LayoutAuthenticatedRoute,
+    getParentRoute: () => rootRouteImport,
   } as any)
 const LayoutAuthenticatedOnboardingRoute =
   LayoutAuthenticatedOnboardingRouteImport.update({
-    id: '/onboarding',
+    id: '/_layout/_authenticated/onboarding',
     path: '/onboarding',
-    getParentRoute: () => LayoutAuthenticatedRoute,
+    getParentRoute: () => rootRouteImport,
   } as any)
 const LayoutAuthenticatedInvitationsRoute =
   LayoutAuthenticatedInvitationsRouteImport.update({
-    id: '/invitations',
+    id: '/_layout/_authenticated/invitations',
     path: '/invitations',
-    getParentRoute: () => LayoutAuthenticatedRoute,
+    getParentRoute: () => rootRouteImport,
   } as any)
 const LayoutAuthenticatedDashboardRoute =
   LayoutAuthenticatedDashboardRouteImport.update({
-    id: '/dashboard',
+    id: '/_layout/_authenticated/dashboard',
     path: '/dashboard',
-    getParentRoute: () => LayoutAuthenticatedRoute,
+    getParentRoute: () => rootRouteImport,
   } as any)
 const LayoutAuthenticatedDashboardIndexRoute =
   LayoutAuthenticatedDashboardIndexRouteImport.update({
@@ -490,11 +480,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_layout': typeof LayoutRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/device': typeof DeviceRouteWithChildren
   '/test-error': typeof TestErrorRoute
-  '/_layout/_authenticated': typeof LayoutAuthenticatedRouteWithChildren
   '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
@@ -641,11 +629,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/_layout'
     | '/auth'
     | '/device'
     | '/test-error'
-    | '/_layout/_authenticated'
     | '/auth/check-email'
     | '/auth/sign-in'
     | '/auth/sign-up'
@@ -694,11 +680,14 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  LayoutRoute: typeof LayoutRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   DeviceRoute: typeof DeviceRouteWithChildren
   TestErrorRoute: typeof TestErrorRoute
   PublicProjectProjectIdRoute: typeof PublicProjectProjectIdRoute
+  LayoutAuthenticatedDashboardRoute: typeof LayoutAuthenticatedDashboardRouteWithChildren
+  LayoutAuthenticatedInvitationsRoute: typeof LayoutAuthenticatedInvitationsRoute
+  LayoutAuthenticatedOnboardingRoute: typeof LayoutAuthenticatedOnboardingRoute
+  LayoutAuthenticatedProfileSetupRoute: typeof LayoutAuthenticatedProfileSetupRoute
   InvitationAcceptInviteIdRoute: typeof InvitationAcceptInviteIdRoute
 }
 
@@ -723,13 +712,6 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_layout': {
-      id: '/_layout'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -788,13 +770,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCheckEmailRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_layout/_authenticated': {
-      id: '/_layout/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof LayoutAuthenticatedRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/invitation/accept/$inviteId': {
       id: '/invitation/accept/$inviteId'
       path: '/invitation/accept/$inviteId'
@@ -807,28 +782,28 @@ declare module '@tanstack/react-router' {
       path: '/profile-setup'
       fullPath: '/profile-setup'
       preLoaderRoute: typeof LayoutAuthenticatedProfileSetupRouteImport
-      parentRoute: typeof LayoutAuthenticatedRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/_authenticated/onboarding': {
       id: '/_layout/_authenticated/onboarding'
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof LayoutAuthenticatedOnboardingRouteImport
-      parentRoute: typeof LayoutAuthenticatedRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/_authenticated/invitations': {
       id: '/_layout/_authenticated/invitations'
       path: '/invitations'
       fullPath: '/invitations'
       preLoaderRoute: typeof LayoutAuthenticatedInvitationsRouteImport
-      parentRoute: typeof LayoutAuthenticatedRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/_authenticated/dashboard': {
       id: '/_layout/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof LayoutAuthenticatedDashboardRouteImport
-      parentRoute: typeof LayoutAuthenticatedRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/_authenticated/dashboard/': {
       id: '/_layout/_authenticated/dashboard/'
@@ -1057,6 +1032,35 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthRouteChildren {
+  AuthCheckEmailRoute: typeof AuthCheckEmailRoute
+  AuthSignInRoute: typeof AuthSignInRoute
+  AuthSignUpRoute: typeof AuthSignUpRoute
+  AuthVerifyOtpRoute: typeof AuthVerifyOtpRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCheckEmailRoute: AuthCheckEmailRoute,
+  AuthSignInRoute: AuthSignInRoute,
+  AuthSignUpRoute: AuthSignUpRoute,
+  AuthVerifyOtpRoute: AuthVerifyOtpRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
+interface DeviceRouteChildren {
+  DeviceApproveRoute: typeof DeviceApproveRoute
+  DeviceIndexRoute: typeof DeviceIndexRoute
+}
+
+const DeviceRouteChildren: DeviceRouteChildren = {
+  DeviceApproveRoute: DeviceApproveRoute,
+  DeviceIndexRoute: DeviceIndexRoute,
+}
+
+const DeviceRouteWithChildren =
+  DeviceRoute._addFileChildren(DeviceRouteChildren)
+
 interface LayoutAuthenticatedDashboardSettingsAccountRouteChildren {
   LayoutAuthenticatedDashboardSettingsAccountDeveloperRoute: typeof LayoutAuthenticatedDashboardSettingsAccountDeveloperRoute
   LayoutAuthenticatedDashboardSettingsAccountInformationRoute: typeof LayoutAuthenticatedDashboardSettingsAccountInformationRoute
@@ -1225,71 +1229,17 @@ const LayoutAuthenticatedDashboardRouteWithChildren =
     LayoutAuthenticatedDashboardRouteChildren,
   )
 
-interface LayoutAuthenticatedRouteChildren {
-  LayoutAuthenticatedDashboardRoute: typeof LayoutAuthenticatedDashboardRouteWithChildren
-  LayoutAuthenticatedInvitationsRoute: typeof LayoutAuthenticatedInvitationsRoute
-  LayoutAuthenticatedOnboardingRoute: typeof LayoutAuthenticatedOnboardingRoute
-  LayoutAuthenticatedProfileSetupRoute: typeof LayoutAuthenticatedProfileSetupRoute
-}
-
-const LayoutAuthenticatedRouteChildren: LayoutAuthenticatedRouteChildren = {
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  AuthRoute: AuthRouteWithChildren,
+  DeviceRoute: DeviceRouteWithChildren,
+  TestErrorRoute: TestErrorRoute,
+  PublicProjectProjectIdRoute: PublicProjectProjectIdRoute,
   LayoutAuthenticatedDashboardRoute:
     LayoutAuthenticatedDashboardRouteWithChildren,
   LayoutAuthenticatedInvitationsRoute: LayoutAuthenticatedInvitationsRoute,
   LayoutAuthenticatedOnboardingRoute: LayoutAuthenticatedOnboardingRoute,
   LayoutAuthenticatedProfileSetupRoute: LayoutAuthenticatedProfileSetupRoute,
-}
-
-const LayoutAuthenticatedRouteWithChildren =
-  LayoutAuthenticatedRoute._addFileChildren(LayoutAuthenticatedRouteChildren)
-
-interface LayoutRouteChildren {
-  LayoutAuthenticatedRoute: typeof LayoutAuthenticatedRouteWithChildren
-}
-
-const LayoutRouteChildren: LayoutRouteChildren = {
-  LayoutAuthenticatedRoute: LayoutAuthenticatedRouteWithChildren,
-}
-
-const LayoutRouteWithChildren =
-  LayoutRoute._addFileChildren(LayoutRouteChildren)
-
-interface AuthRouteChildren {
-  AuthCheckEmailRoute: typeof AuthCheckEmailRoute
-  AuthSignInRoute: typeof AuthSignInRoute
-  AuthSignUpRoute: typeof AuthSignUpRoute
-  AuthVerifyOtpRoute: typeof AuthVerifyOtpRoute
-}
-
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthCheckEmailRoute: AuthCheckEmailRoute,
-  AuthSignInRoute: AuthSignInRoute,
-  AuthSignUpRoute: AuthSignUpRoute,
-  AuthVerifyOtpRoute: AuthVerifyOtpRoute,
-}
-
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
-interface DeviceRouteChildren {
-  DeviceApproveRoute: typeof DeviceApproveRoute
-  DeviceIndexRoute: typeof DeviceIndexRoute
-}
-
-const DeviceRouteChildren: DeviceRouteChildren = {
-  DeviceApproveRoute: DeviceApproveRoute,
-  DeviceIndexRoute: DeviceIndexRoute,
-}
-
-const DeviceRouteWithChildren =
-  DeviceRoute._addFileChildren(DeviceRouteChildren)
-
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  LayoutRoute: LayoutRouteWithChildren,
-  AuthRoute: AuthRouteWithChildren,
-  DeviceRoute: DeviceRouteWithChildren,
-  TestErrorRoute: TestErrorRoute,
-  PublicProjectProjectIdRoute: PublicProjectProjectIdRoute,
   InvitationAcceptInviteIdRoute: InvitationAcceptInviteIdRoute,
 }
 export const routeTree = rootRouteImport

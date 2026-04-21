@@ -39,9 +39,9 @@ describe("ProgramNav", () => {
   it("marks Overview active on program root", () => {
     mockPathname = "/dashboard/workspace/ws-1/program";
     render(<ProgramNav workspaceId="ws-1" />);
-    expect(
-      screen.getByRole("link", { name: "Overview" }).className,
-    ).toContain("bg-secondary");
+    expect(screen.getByRole("link", { name: "Overview" }).className).toContain(
+      "bg-secondary",
+    );
     expect(
       screen.getByRole("link", { name: "Roadmap" }).className,
     ).not.toContain("bg-secondary");
@@ -53,9 +53,9 @@ describe("ProgramNav", () => {
   it("marks Roadmap active on roadmap route", () => {
     mockPathname = "/dashboard/workspace/ws-1/program/roadmap";
     render(<ProgramNav workspaceId="ws-1" />);
-    expect(
-      screen.getByRole("link", { name: "Roadmap" }).className,
-    ).toContain("bg-secondary");
+    expect(screen.getByRole("link", { name: "Roadmap" }).className).toContain(
+      "bg-secondary",
+    );
     expect(
       screen.getByRole("link", { name: "Overview" }).className,
     ).not.toContain("bg-secondary");

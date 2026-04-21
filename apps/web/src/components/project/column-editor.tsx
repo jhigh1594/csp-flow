@@ -43,7 +43,11 @@ export default function ColumnEditor({ teamId }: ColumnEditorProps) {
     }
   };
 
-  const handleRename = async (id: string, name: string, currentName: string) => {
+  const handleRename = async (
+    id: string,
+    name: string,
+    currentName: string,
+  ) => {
     if (name === currentName) return;
     try {
       await updateColumn({ id, teamId, data: { name } });

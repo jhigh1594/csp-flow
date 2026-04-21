@@ -2,12 +2,12 @@ import { and, eq, inArray } from "drizzle-orm";
 import db from "../../database";
 import { weeklyStatusSnapshotTable } from "../../database/schema";
 import {
-  type SnapshotDemand,
-  type SnapshotRelease,
-  type SnapshotRisk,
   diffDemands,
   diffReleases,
   diffRisks,
+  type SnapshotDemand,
+  type SnapshotRelease,
+  type SnapshotRisk,
 } from "../utils/diff";
 
 type SnapshotStatus = {
@@ -85,10 +85,7 @@ async function getSnapshotDiff({
       toSnap?.demands ?? [],
     );
 
-    const riskDiffs = diffRisks(
-      fromSnap?.risks ?? [],
-      toSnap?.risks ?? [],
-    );
+    const riskDiffs = diffRisks(fromSnap?.risks ?? [], toSnap?.risks ?? []);
 
     const roadmapDiffs = diffReleases(
       fromSnap?.releases ?? [],

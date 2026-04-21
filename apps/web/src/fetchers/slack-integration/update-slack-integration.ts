@@ -1,4 +1,4 @@
-import { getApiUrl } from "@/fetchers/get-api-url";
+import { getApiUrl, unwrapResponse } from "@/fetchers/get-api-url";
 import type { SlackIntegration } from "./get-slack-integration";
 
 export type UpdateSlackIntegrationRequest = {
@@ -31,12 +31,7 @@ async function updateSlackIntegration(
     },
   );
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return (await response.json()) as SlackIntegration;
+  return unwrapResponse<SlackIntegration>(response);
 }
 
 export default updateSlackIntegration;

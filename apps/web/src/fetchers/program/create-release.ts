@@ -1,5 +1,6 @@
 import { client } from "@kaneo/libs";
 import type { InferRequestType } from "hono/client";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 export type CreateReleaseRequest = InferRequestType<
   (typeof client)["program"][":workspaceId"]["teams"][":teamId"]["releases"]["$post"]
@@ -18,17 +19,14 @@ async function createRelease({
   personas,
   description,
 }: CreateReleaseRequest) {
-  const response = await client.program[":workspaceId"].teams[":teamId"].releases.$post({
+  const response = await client.program[":workspaceId"].teams[
+    ":teamId"
+  ].releases.$post({
     param: { workspaceId, teamId },
     json: { name, quarter, month, fiscalYear, personas, description },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default createRelease;

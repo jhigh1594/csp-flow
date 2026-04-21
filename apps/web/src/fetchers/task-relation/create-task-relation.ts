@@ -1,4 +1,5 @@
 import { client } from "@kaneo/libs";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 async function createTaskRelation({
   sourceTaskId,
@@ -17,14 +18,7 @@ async function createTaskRelation({
     },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  const data = await response.json();
-
-  return data;
+  return unwrapResponse(response);
 }
 
 export default createTaskRelation;

@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
-import { readFileSync } from "fs";
 import { sql } from "drizzle-orm";
+import { readFileSync } from "fs";
 import db from "../database";
 
 const BASELINE_MIGRATIONS = [

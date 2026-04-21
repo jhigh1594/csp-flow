@@ -1,5 +1,6 @@
 import { client } from "@kaneo/libs";
 import type { InferRequestType } from "hono/client";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 export type UpdateProjectRequest = InferRequestType<
   (typeof client)["project"][":id"]["$put"]
@@ -19,14 +20,7 @@ async function updateProject({
     json: { name, icon, slug, description, isPublic },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  const data = await response.json();
-
-  return data;
+  return unwrapResponse(response);
 }
 
 export default updateProject;

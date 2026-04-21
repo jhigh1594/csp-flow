@@ -1,5 +1,6 @@
 import { client } from "@kaneo/libs";
 import type { InferRequestType } from "hono/client";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 export type UpdateRiskRequest = InferRequestType<
   (typeof client)["program"][":workspaceId"]["teams"][":teamId"]["risks"][":riskId"]["$patch"]
@@ -18,17 +19,14 @@ async function updateRisk({
   owner,
   dueDate,
 }: UpdateRiskRequest) {
-  const response = await client.program[":workspaceId"].teams[":teamId"].risks[":riskId"].$patch({
+  const response = await client.program[":workspaceId"].teams[":teamId"].risks[
+    ":riskId"
+  ].$patch({
     param: { workspaceId, teamId, riskId },
     json: { description, impact, status, owner, dueDate },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default updateRisk;

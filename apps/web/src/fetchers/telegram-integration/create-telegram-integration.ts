@@ -1,4 +1,4 @@
-import { getApiUrl } from "@/fetchers/get-api-url";
+import { getApiUrl, unwrapResponse } from "@/fetchers/get-api-url";
 import type { TelegramIntegration } from "./get-telegram-integration";
 
 export type CreateTelegramIntegrationRequest = {
@@ -32,12 +32,7 @@ async function createTelegramIntegration(
     },
   );
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return (await response.json()) as TelegramIntegration;
+  return unwrapResponse<TelegramIntegration>(response);
 }
 
 export default createTelegramIntegration;

@@ -1,4 +1,5 @@
 import { client } from "@kaneo/libs";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 type CreateMilestoneInput = {
   projectId: string;
@@ -15,12 +16,7 @@ async function createMilestone({
     json: { projectId, title, targetDate },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default createMilestone;

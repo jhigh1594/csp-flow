@@ -13,12 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tabs,
-  TabsList,
-  TabsPanel,
-  TabsTab,
-} from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsPanel, TabsTab } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import useCreateDemand from "@/hooks/mutations/program/use-create-demand";
 import useCreateRelease from "@/hooks/mutations/program/use-create-release";
@@ -71,7 +66,11 @@ function DateInput({
       value={value ?? ""}
       onChange={(e) => onChange(e.target.value)}
       className={`w-32 rounded border border-input bg-background px-2 py-0.5 text-xs outline-none focus:ring-1 focus:ring-ring ${
-        value ? (isPast(value) ? "text-green-600" : "text-muted-foreground") : "text-muted-foreground"
+        value
+          ? isPast(value)
+            ? "text-green-600"
+            : "text-muted-foreground"
+          : "text-muted-foreground"
       }`}
     />
   );
@@ -288,17 +287,16 @@ function RouteComponent() {
       teamId,
       releaseId,
       name: edits.name ?? release.name,
-      quarter: (edits.quarter ?? release.quarter) as
-        | "q1"
-        | "q2"
-        | "q3"
-        | "q4",
+      quarter: (edits.quarter ?? release.quarter) as "q1" | "q2" | "q3" | "q4",
       month: edits.month ? Number(edits.month) : release.month,
       fiscalYear: edits.fiscalYear
         ? Number(edits.fiscalYear)
         : release.fiscalYear,
       personas: edits.personas
-        ? edits.personas.split(",").map((p) => p.trim()).filter(Boolean)
+        ? edits.personas
+            .split(",")
+            .map((p) => p.trim())
+            .filter(Boolean)
         : release.personas,
       description: edits.description ?? release.description,
     });
@@ -388,17 +386,10 @@ function RouteComponent() {
                               demand.name,
                             )}
                             onChange={(e) =>
-                              setDemandField(
-                                demand.id,
-                                "name",
-                                e.target.value,
-                              )
+                              setDemandField(demand.id, "name", e.target.value)
                             }
                             onBlur={(e) =>
-                              handleUpdateDemandName(
-                                demand.id,
-                                e.target.value,
-                              )
+                              handleUpdateDemandName(demand.id, e.target.value)
                             }
                             className="max-w-xs"
                           />
@@ -420,20 +411,14 @@ function RouteComponent() {
                               ],
                               ["discoveryDate", "Discovery"],
                               ["requirementsDate", "Requirements"],
-                              [
-                                "demandSubmissionDate",
-                                "Demand Submission",
-                              ],
+                              ["demandSubmissionDate", "Demand Submission"],
                               ["developmentDate", "Development"],
                               ["uatDate", "UAT"],
                               ["goLiveDate", "Go Live"],
                               ["adoptionDate", "Adoption"],
                             ] as [string, string][]
                           ).map(([field, label]) => (
-                            <div
-                              key={field}
-                              className="flex flex-col gap-0.5"
-                            >
+                            <div key={field} className="flex flex-col gap-0.5">
                               <span className="text-xs text-muted-foreground">
                                 {label}
                               </span>
@@ -450,11 +435,7 @@ function RouteComponent() {
                                 }
                                 onChange={(val) => {
                                   setDemandField(demand.id, field, val);
-                                  handleUpdateDemandDate(
-                                    demand.id,
-                                    field,
-                                    val,
-                                  );
+                                  handleUpdateDemandDate(demand.id, field, val);
                                 }}
                               />
                             </div>
@@ -579,11 +560,7 @@ function RouteComponent() {
                                 risk.impact,
                               )}
                               onChange={(e) =>
-                                setRiskField(
-                                  risk.id,
-                                  "impact",
-                                  e.target.value,
-                                )
+                                setRiskField(risk.id, "impact", e.target.value)
                               }
                               className="w-full rounded border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
                             >
@@ -600,11 +577,7 @@ function RouteComponent() {
                                 risk.status,
                               )}
                               onChange={(e) =>
-                                setRiskField(
-                                  risk.id,
-                                  "status",
-                                  e.target.value,
-                                )
+                                setRiskField(risk.id, "status", e.target.value)
                               }
                               className="w-full rounded border border-input bg-background px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-ring"
                             >
@@ -622,11 +595,7 @@ function RouteComponent() {
                                 risk.owner,
                               )}
                               onChange={(e) =>
-                                setRiskField(
-                                  risk.id,
-                                  "owner",
-                                  e.target.value,
-                                )
+                                setRiskField(risk.id, "owner", e.target.value)
                               }
                             />
                           </TableCell>
@@ -641,11 +610,7 @@ function RouteComponent() {
                                 ) || ""
                               }
                               onChange={(e) =>
-                                setRiskField(
-                                  risk.id,
-                                  "dueDate",
-                                  e.target.value,
-                                )
+                                setRiskField(risk.id, "dueDate", e.target.value)
                               }
                               className="w-full rounded border border-input bg-background px-2 py-0.5 text-xs outline-none focus:ring-1 focus:ring-ring"
                             />

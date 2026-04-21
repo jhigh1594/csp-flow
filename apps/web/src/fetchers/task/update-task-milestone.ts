@@ -1,4 +1,5 @@
 import { client } from "@kaneo/libs";
+import { unwrapResponse } from "@/fetchers/get-api-url";
 
 async function updateTaskMilestone(taskId: string, milestoneId: string | null) {
   const response = await client.task.milestone[":id"].$put({
@@ -6,12 +7,7 @@ async function updateTaskMilestone(taskId: string, milestoneId: string | null) {
     json: { milestoneId },
   });
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return response.json();
+  return unwrapResponse(response);
 }
 
 export default updateTaskMilestone;

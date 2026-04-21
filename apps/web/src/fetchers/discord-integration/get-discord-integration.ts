@@ -1,4 +1,4 @@
-import { getApiUrl } from "@/fetchers/get-api-url";
+import { getApiUrl, unwrapResponse } from "@/fetchers/get-api-url";
 
 export type DiscordIntegration = {
   id: string;
@@ -27,12 +27,7 @@ async function getDiscordIntegration(projectId: string) {
     },
   );
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(error);
-  }
-
-  return (await response.json()) as DiscordIntegration;
+  return unwrapResponse<DiscordIntegration>(response);
 }
 
 export default getDiscordIntegration;
