@@ -32,6 +32,7 @@ import label from "./label";
 import mcpRoutes, { mcpWellKnownRoutes } from "./mcp";
 import { migrateColumns } from "./migrations/column-migration";
 import { ensureMigrationBaseline } from "./migrations/ensure-migration-baseline";
+import { runProgramTrackerMigration } from "./migrations/program-tracker-migration";
 import { runTeamCentricMigration } from "./migrations/team-centric-migration";
 import milestone from "./milestone";
 import notification from "./notification";
@@ -551,6 +552,7 @@ export async function runStartupTasks() {
   await migrateNotificationPreferencesSchema();
   await migrateGitHubIntegration();
   await runTeamCentricMigration();
+  await runProgramTrackerMigration();
   await migrateColumns();
 
   initializePlugins();

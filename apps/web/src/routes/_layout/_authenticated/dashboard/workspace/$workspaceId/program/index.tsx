@@ -64,7 +64,7 @@ function RagBadge({
 function RouteComponent() {
   const { workspaceId } = Route.useParams();
   const navigate = useNavigate();
-  const { data: teams, isLoading } = useGetProgramTeams({ workspaceId });
+  const { data: teams, isLoading, isError } = useGetProgramTeams({ workspaceId });
 
   const handleTeamClick = (teamId: string) => {
     navigate({
@@ -93,6 +93,24 @@ function RouteComponent() {
                   <Skeleton className="h-4 w-28" />
                 </div>
               ))}
+            </div>
+          </div>
+        </WorkspaceLayout>
+      </>
+    );
+  }
+
+  if (isError) {
+    return (
+      <>
+        <PageTitle title="Program Tracker" />
+        <WorkspaceLayout title="Program Tracker">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="text-center space-y-3">
+              <h3 className="text-xl font-semibold">Failed to load teams</h3>
+              <p className="text-muted-foreground">
+                There was an error loading program data. Check API logs or restart the server.
+              </p>
             </div>
           </div>
         </WorkspaceLayout>
