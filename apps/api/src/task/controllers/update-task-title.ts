@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
 import { taskTable } from "../../database/schema";
+import { generateAndStoreEmbedding } from "../../embeddings/upsert-task-embedding";
 
 async function updateTaskTitle({ id, title }: { id: string; title: string }) {
   const existingTask = await db.query.taskTable.findFirst({
@@ -25,6 +26,14 @@ async function updateTaskTitle({ id, title }: { id: string; title: string }) {
       message: "Failed to update task title",
     });
   }
+
+  generateAndStoreEmbedding(
+    updatedTask.id,
+    updatedTask.title,
+    updatedTask.description,
+  ).catch((err) =>
+    console.error(`[embedding] failed to embed task ${updatedTask.id}:`, err),
+  );
 
   return updatedTask;
 }

@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
 import { columnTable, taskTable } from "../../database/schema";
+import { generateAndStoreEmbedding } from "../../embeddings/upsert-task-embedding";
 import { assertValidTaskStatus } from "../validate-task-fields";
 
 async function updateTask(
@@ -59,6 +60,19 @@ async function updateTask(
     throw new HTTPException(500, {
       message: "Failed to update task",
     });
+  }
+
+  if (
+    title !== existingTask.title ||
+    description !== existingTask.description
+  ) {
+    generateAndStoreEmbedding(
+      updatedTask.id,
+      updatedTask.title,
+      updatedTask.description,
+    ).catch((err) =>
+      console.error(`[embedding] failed to embed task ${updatedTask.id}:`, err),
+    );
   }
 
   return updatedTask;

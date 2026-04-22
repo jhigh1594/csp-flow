@@ -7,6 +7,7 @@ import {
   taskTable,
   userTable,
 } from "../../database/schema";
+import { generateAndStoreEmbedding } from "../../embeddings/upsert-task-embedding";
 import { publishEvent } from "../../events";
 import { assertValidTaskStatus } from "../validate-task-fields";
 import getNextTaskNumber from "./get-next-task-number";
@@ -103,6 +104,14 @@ async function createTask({
     type: "task",
     content: null,
   });
+
+  generateAndStoreEmbedding(
+    createdTask.id,
+    createdTask.title,
+    createdTask.description,
+  ).catch((err) =>
+    console.error(`[embedding] failed to embed task ${createdTask.id}:`, err),
+  );
 
   return {
     ...createdTask,

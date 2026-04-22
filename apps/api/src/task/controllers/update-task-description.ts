@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
 import { taskTable } from "../../database/schema";
+import { generateAndStoreEmbedding } from "../../embeddings/upsert-task-embedding";
 
 async function updateTaskDescription({
   id,
@@ -31,6 +32,14 @@ async function updateTaskDescription({
       message: "Failed to update task description",
     });
   }
+
+  generateAndStoreEmbedding(
+    updatedTask.id,
+    updatedTask.title,
+    updatedTask.description,
+  ).catch((err) =>
+    console.error(`[embedding] failed to embed task ${updatedTask.id}:`, err),
+  );
 
   return updatedTask;
 }
