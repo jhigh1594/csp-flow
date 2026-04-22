@@ -3,6 +3,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
 import type { ProjectWithTasks } from "@/types/project";
 import TaskCard from "../task-card";
@@ -35,9 +36,20 @@ export function ColumnDropzone({
         strategy={verticalListSortingStrategy}
       >
         <div className="flex flex-col gap-2">
-          {column.tasks.map((task) => (
-            <TaskCard key={task.id} task={task} />
-          ))}
+          <AnimatePresence initial={false}>
+            {column.tasks.map((task) => (
+              <motion.div
+                key={task.id}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.15 }}
+                style={{ overflow: "hidden" }}
+              >
+                <TaskCard task={task} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </SortableContext>
     </div>
