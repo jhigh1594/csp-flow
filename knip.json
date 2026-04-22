@@ -1,35 +1,35 @@
 {
-  "workspaces": {
-    ".": {
-      "entry": [],
-      "project": []
-    },
-    "apps/web": {
-      "entry": ["src/main.tsx", "src/routes/**/*.tsx", "src/routes/**/*.ts"],
-      "project": ["src/**/*.{ts,tsx}"]
-    },
-    "apps/api": {
-      "entry": ["src/index.ts"],
-      "project": ["src/**/*.ts"]
-    },
-    "apps/site": {
-      "entry": ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
-      "project": ["**/*.{ts,tsx}"]
-    },
-    "packages/libs": {
-      "entry": ["src/index.ts"],
-      "project": ["src/**/*.{ts,tsx}"]
-    },
-    "packages/email": {
-      "entry": ["src/index.ts"],
-      "project": ["src/**/*.{ts,tsx}"]
-    }
-  },
-  "ignore": [
-    ".remember/**",
-    "**/node_modules/**",
-    "**/dist/**",
-    "**/build/**",
-    "apps/docs/**"
-  ]
+	"workspaces": {
+		".": {
+			"entry": [],
+			"project": []
+		},
+		"apps/web": {
+			"entry": ["src/main.tsx", "src/routes/**/*.tsx", "src/routes/**/*.ts"],
+			"project": ["src/**/*.{ts,tsx}"]
+		},
+		"apps/api": {
+			"entry": ["src/index.ts"],
+			"project": ["src/**/*.ts"]
+		},
+		"apps/site": {
+			"entry": ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
+			"project": ["**/*.{ts,tsx}"]
+		},
+		"packages/libs": {
+			"entry": ["src/index.ts"],
+			"project": ["src/**/*.{ts,tsx}"]
+		},
+		"packages/email": {
+			"entry": ["src/index.ts"],
+			"project": ["src/**/*.{ts,tsx}"]
+		}
+	},
+	"ignore": [
+		".remember/**",
+		"**/node_modules/**",
+		"**/dist/**",
+		"**/build/**",
+		"apps/docs/**"
+	]
 }

@@ -7,18 +7,12 @@ import {
 
 describe("diffDemands", () => {
   it("detects a newly added demand", () => {
-    const result = diffDemands(
-      [],
-      [{ id: "d1", name: "Portal Login" }],
-    );
+    const result = diffDemands([], [{ id: "d1", name: "Portal Login" }]);
     expect(result).toEqual([{ type: "added", name: "Portal Login" }]);
   });
 
   it("detects a removed demand", () => {
-    const result = diffDemands(
-      [{ id: "d1", name: "Portal Login" }],
-      [],
-    );
+    const result = diffDemands([{ id: "d1", name: "Portal Login" }], []);
     expect(result).toEqual([{ type: "removed", name: "Portal Login" }]);
   });
 
@@ -160,11 +154,23 @@ describe("diffReleases", () => {
 
   it("detects a release moved to a different fiscal year", () => {
     const result = diffReleases(
-      [{ id: "rel1", name: "v2.0", quarter: "q4", month: 12, fiscalYear: 2025 }],
+      [
+        {
+          id: "rel1",
+          name: "v2.0",
+          quarter: "q4",
+          month: 12,
+          fiscalYear: 2025,
+        },
+      ],
       [{ id: "rel1", name: "v2.0", quarter: "q1", month: 1, fiscalYear: 2026 }],
     );
     expect(result).toHaveLength(1);
-    expect(result[0]).toMatchObject({ type: "moved", from: "Q4 2025", to: "Q1 2026" });
+    expect(result[0]).toMatchObject({
+      type: "moved",
+      from: "Q4 2025",
+      to: "Q1 2026",
+    });
   });
 
   it("does not emit moved when nothing changed", () => {

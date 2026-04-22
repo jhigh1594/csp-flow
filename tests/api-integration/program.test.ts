@@ -205,7 +205,10 @@ describe("API integration: program tracker", () => {
         {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ description: "Data breach risk", impact: "high" }),
+          body: JSON.stringify({
+            description: "Data breach risk",
+            impact: "high",
+          }),
         },
       );
       expect(response.status).toBe(201);
