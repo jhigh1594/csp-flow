@@ -2,7 +2,7 @@ import db from "../database";
 import { taskEmbeddingTable } from "../database/schema";
 import { generateEmbedding } from "./generate";
 
-const EMBEDDING_MODEL_TAG = "text-embedding-3-small-512";
+const EMBEDDING_MODEL_TAG = "text-embedding-004-512";
 
 export async function generateAndStoreEmbedding(
   taskId: string,

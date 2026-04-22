@@ -52,7 +52,7 @@ Kaneo supports many optional configuration options including:
 #### Semantic Search (pgvector)
 
 To enable AI-powered semantic task search, set:
-- `OPENAI_API_KEY` - Your OpenAI API key
+- `GEMINI_API_KEY` - Your Google Gemini API key (free tier available at aistudio.google.com)
 
 Without this key, semantic search is disabled gracefully — task writes continue to work normally and the search endpoint returns an empty result set.
 

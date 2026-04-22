@@ -1,15 +1,15 @@
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 
-const EMBEDDING_MODEL = "text-embedding-3-small";
+const EMBEDDING_MODEL = "text-embedding-004";
 const EMBEDDING_DIMENSIONS = 512;
 
 type EmbeddingClient = {
-  embeddings: {
-    create: (params: {
+  models: {
+    embedContent: (params: {
       model: string;
-      input: string;
-      dimensions: number;
-    }) => Promise<{ data: Array<{ embedding: number[] }> }>;
+      contents: string;
+      config?: { outputDimensionality?: number };
+    }) => Promise<{ embeddings?: Array<{ values?: number[] }> }>;
   };
 };
 
@@ -17,15 +17,15 @@ export async function generateEmbedding(
   text: string,
   client?: EmbeddingClient,
 ): Promise<number[] | null> {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
-  const openai = client ?? new OpenAI({ apiKey });
-  const response = await openai.embeddings.create({
+  const ai = client ?? new GoogleGenAI({ apiKey });
+  const response = await ai.models.embedContent({
     model: EMBEDDING_MODEL,
-    input: text,
-    dimensions: EMBEDDING_DIMENSIONS,
+    contents: text,
+    config: { outputDimensionality: EMBEDDING_DIMENSIONS },
   });
 
-  return response.data[0]?.embedding ?? null;
+  return response.embeddings?.[0]?.values ?? null;
 }
