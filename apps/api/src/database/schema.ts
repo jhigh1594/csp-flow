@@ -12,6 +12,7 @@ import {
   timestamp,
   unique,
   uniqueIndex,
+  vector,
 } from "drizzle-orm/pg-core";
 
 export const userTable = pgTable("user", {
@@ -1236,4 +1237,34 @@ export const weeklyStatusSnapshotRelations = relations(
       references: [workspaceTable.id],
     }),
   }),
+);
+
+export const taskEmbeddingTable = pgTable(
+  "task_embedding",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    taskId: text("task_id")
+      .notNull()
+      .unique()
+      .references(() => taskTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    embedding: vector("embedding", { dimensions: 512 }).notNull(),
+    embeddingModel: text("embedding_model").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("task_embedding_taskId_idx").on(table.taskId),
+    index("task_embedding_hnsw_idx").using(
+      "hnsw",
+      table.embedding.op("vector_cosine_ops"),
+    ),
+  ],
 );

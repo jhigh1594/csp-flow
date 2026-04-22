@@ -688,10 +688,14 @@ function RouteComponent() {
                             <div className="flex items-start gap-3">
                               <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
                                 <div className="flex flex-col gap-1">
-                                  <label className="text-xs text-muted-foreground">
+                                  <label
+                                    htmlFor={`release-name-${release.id}`}
+                                    className="text-xs text-muted-foreground"
+                                  >
                                     Name
                                   </label>
                                   <Input
+                                    id={`release-name-${release.id}`}
                                     size="sm"
                                     defaultValue={getReleaseField(
                                       release.id,
@@ -708,11 +712,15 @@ function RouteComponent() {
                                   />
                                 </div>
                                 <div className="flex flex-col gap-1">
-                                  <label className="text-xs text-muted-foreground">
+                                  <label
+                                    htmlFor={`release-month-${release.id}`}
+                                    className="text-xs text-muted-foreground"
+                                  >
                                     Month
                                   </label>
                                   <div className="flex items-center gap-1">
                                     <select
+                                      id={`release-month-${release.id}`}
                                       value={
                                         getReleaseField(
                                           release.id,
@@ -743,10 +751,14 @@ function RouteComponent() {
                                   </div>
                                 </div>
                                 <div className="flex flex-col gap-1">
-                                  <label className="text-xs text-muted-foreground">
+                                  <label
+                                    htmlFor={`release-personas-${release.id}`}
+                                    className="text-xs text-muted-foreground"
+                                  >
                                     Personas
                                   </label>
                                   <Input
+                                    id={`release-personas-${release.id}`}
                                     size="sm"
                                     defaultValue={getReleaseField(
                                       release.id,
@@ -764,10 +776,14 @@ function RouteComponent() {
                                   />
                                 </div>
                                 <div className="flex flex-col gap-1">
-                                  <label className="text-xs text-muted-foreground">
+                                  <label
+                                    htmlFor={`release-description-${release.id}`}
+                                    className="text-xs text-muted-foreground"
+                                  >
                                     Description
                                   </label>
                                   <Input
+                                    id={`release-description-${release.id}`}
                                     size="sm"
                                     defaultValue={getReleaseField(
                                       release.id,

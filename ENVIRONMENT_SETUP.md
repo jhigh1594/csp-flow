@@ -49,6 +49,15 @@ Kaneo supports many optional configuration options including:
 - Access control settings
 - CORS configuration
 
+#### Semantic Search (pgvector)
+
+To enable AI-powered semantic task search, set:
+- `OPENAI_API_KEY` - Your OpenAI API key
+
+Without this key, semantic search is disabled gracefully — task writes continue to work normally and the search endpoint returns an empty result set.
+
+**PostgreSQL privilege requirement:** The database user specified in `DATABASE_URL` must have `CREATE EXTENSION` privileges. On a fresh PostgreSQL install the superuser role satisfies this. If you are using a restricted role, run `GRANT CREATE ON DATABASE <db> TO <user>;` or ask your DBA to enable the `vector` extension in advance (`CREATE EXTENSION IF NOT EXISTS vector;`).
+
 #### SMTP Configuration
 
 For sending emails (workspace invitations, magic links, etc.), configure these variables:
