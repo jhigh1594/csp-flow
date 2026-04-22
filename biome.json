@@ -23,6 +23,7 @@
 			"!**/.cache",
 			"!**/coverage",
 			"!**/.claude",
+			"!**/.remember",
 			"!**/openapi.json",
 			"!**/tiptap-icons",
 			"!**/tiptap-node",
