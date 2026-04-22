@@ -4,6 +4,7 @@ import * as v from "valibot";
 import { activitySchema, projectSchema, taskSchema } from "../schemas";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import globalSearch from "./controllers/global-search";
+import { semanticSearch } from "./controllers/semantic-search";
 
 const workspaceSchema = v.object({
   id: v.string(),
@@ -86,6 +87,68 @@ const search = new Hono<{
       userId,
       userEmail,
       type,
+      workspaceId,
+      projectId,
+      limit: typeof limit === "string" ? Number(limit) : limit,
+    });
+
+    return c.json(results);
+  },
+);
+
+const semanticResultSchema = v.object({
+  taskId: v.string(),
+  title: v.string(),
+  description: v.nullable(v.string()),
+  status: v.string(),
+  priority: v.string(),
+  projectId: v.nullable(v.string()),
+  similarity: v.number(),
+});
+
+search.get(
+  "/semantic",
+  describeRoute({
+    operationId: "semanticSearch",
+    tags: ["Search"],
+    description:
+      "Search tasks by semantic similarity using pgvector embeddings",
+    responses: {
+      200: {
+        description: "Semantically ranked task results",
+        content: {
+          "application/json": {
+            schema: resolver(v.array(semanticResultSchema)),
+          },
+        },
+      },
+    },
+  }),
+  validator(
+    "query",
+    v.object({
+      q: v.pipe(
+        v.string(),
+        v.minLength(1, "Query must be at least 1 character"),
+      ),
+      workspaceId: v.optional(v.string()),
+      projectId: v.optional(v.string()),
+      limit: v.optional(
+        v.pipe(
+          v.string(),
+          v.transform(Number),
+          v.minValue(1, "Limit must be at least 1"),
+          v.maxValue(50, "Limit must not exceed 50"),
+        ),
+        "10",
+      ),
+    }),
+  ),
+  async (c) => {
+    const { q, workspaceId, projectId, limit } = c.req.valid("query");
+
+    const results = await semanticSearch({
+      query: q,
       workspaceId,
       projectId,
       limit: typeof limit === "string" ? Number(limit) : limit,
