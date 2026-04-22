@@ -19,7 +19,7 @@ type SemanticSearchResult = {
   title: string;
   description: string | null;
   status: string;
-  priority: string;
+  priority: string | null;
   projectId: string | null;
   similarity: number;
 };

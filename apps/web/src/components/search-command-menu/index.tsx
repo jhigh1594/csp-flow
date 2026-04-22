@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/command";
 import { shortcuts } from "@/constants/shortcuts";
 import useGlobalSearch from "@/hooks/queries/search/use-global-search";
+import useSemanticSearch from "@/hooks/queries/search/use-semantic-search";
 import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
 import { useRegisterShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
@@ -67,6 +68,12 @@ function SearchCommandMenu({ open, setOpen }: SearchCommandMenuProps) {
     type: "all",
     workspaceId: workspace?.id,
     limit: 20,
+  });
+
+  const { data: semanticResults } = useSemanticSearch({
+    q: query,
+    workspaceId: workspace?.id,
+    limit: 10,
   });
 
   useRegisterShortcuts({
@@ -183,12 +190,34 @@ function SearchCommandMenu({ open, setOpen }: SearchCommandMenuProps) {
       }
     };
 
-    return Object.entries(grouped).map(([type, items]) => ({
+    const groups = Object.entries(grouped).map(([type, items]) => ({
       value: type,
       label: groupLabel(type),
       items,
     }));
-  }, [searchEnabled, searchResults?.results, t]);
+
+    const semanticItems = (semanticResults ?? [])
+      .filter((r) => r.projectId)
+      .map((r) => ({
+        id: r.taskId,
+        title: r.title,
+        description: r.description ?? undefined,
+        type: "task" as const,
+        projectId: r.projectId ?? undefined,
+        priority: r.priority ?? undefined,
+        status: r.status,
+      }));
+
+    if (semanticItems.length > 0) {
+      groups.push({
+        value: "semantic",
+        label: t("navigation:search.groups.semantic", "Similar Tasks"),
+        items: semanticItems,
+      });
+    }
+
+    return groups;
+  }, [searchEnabled, searchResults?.results, semanticResults, t]);
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
