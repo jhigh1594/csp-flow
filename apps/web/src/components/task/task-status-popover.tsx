@@ -1,6 +1,5 @@
 import { Check } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -12,7 +11,6 @@ import { useUpdateTaskStatus } from "@/hooks/mutations/task/use-update-task-stat
 import { useNumberedShortcuts } from "@/hooks/use-numbered-shortcuts";
 import { getColumnIcon } from "@/lib/column";
 import { getStatusDisplayLabel } from "@/lib/i18n/domain";
-import { toast } from "@/lib/toast";
 import useProjectStore from "@/store/project";
 import type Task from "@/types/task";
 
@@ -25,7 +23,6 @@ export default function TaskStatusPopover({
   task,
   children,
 }: TaskStatusPopoverProps) {
-  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const { project } = useProjectStore();
   const statusOptions =
@@ -34,25 +31,17 @@ export default function TaskStatusPopover({
       label: col.name,
       isFinal: col.isFinal,
     })) ?? [];
-  const { mutateAsync: updateTaskStatus } = useUpdateTaskStatus();
+  const { mutate: updateTaskStatus, isPending } = useUpdateTaskStatus();
 
   const handleStatusChange = useCallback(
-    async (newStatus: string) => {
-      try {
-        await updateTaskStatus({
-          ...task,
-          status: newStatus,
-        });
-        setOpen(false);
-      } catch (error) {
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : t("tasks:popover.status.updateError"),
-        );
-      }
+    (newStatus: string) => {
+      setOpen(false);
+      updateTaskStatus({
+        ...task,
+        status: newStatus,
+      });
     },
-    [t, task, updateTaskStatus],
+    [task, updateTaskStatus],
   );
 
   const shortcutOptions = useMemo(
@@ -67,7 +56,11 @@ export default function TaskStatusPopover({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <div
+        className={`transition-opacity duration-150${isPending ? " opacity-50 pointer-events-none" : ""}`}
+      >
+        <PopoverTrigger asChild>{children}</PopoverTrigger>
+      </div>
       <PopoverContent className="w-48 p-0" align="start">
         <div>
           {statusOptions.map((status, index) => (

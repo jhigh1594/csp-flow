@@ -1,6 +1,5 @@
 import { Check } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -12,7 +11,6 @@ import { useUpdateTaskPriority } from "@/hooks/mutations/task/use-update-task-st
 import { useNumberedShortcuts } from "@/hooks/use-numbered-shortcuts";
 import { getPriorityLabel } from "@/lib/i18n/domain";
 import { getPriorityIcon } from "@/lib/priority";
-import { toast } from "@/lib/toast";
 import type Task from "@/types/task";
 
 type TaskPriorityPopoverProps = {
@@ -32,27 +30,18 @@ export default function TaskPriorityPopover({
   task,
   children,
 }: TaskPriorityPopoverProps) {
-  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const { mutateAsync: updateTaskPriority } = useUpdateTaskPriority();
+  const { mutate: updateTaskPriority, isPending } = useUpdateTaskPriority();
 
   const handlePriorityChange = useCallback(
-    async (newPriority: string) => {
-      try {
-        await updateTaskPriority({
-          ...task,
-          priority: newPriority,
-        });
-        setOpen(false);
-      } catch (error) {
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : t("tasks:popover.priority.updateError"),
-        );
-      }
+    (newPriority: string) => {
+      setOpen(false);
+      updateTaskPriority({
+        ...task,
+        priority: newPriority,
+      });
     },
-    [t, task, updateTaskPriority],
+    [task, updateTaskPriority],
   );
 
   const shortcutOptions = useMemo(
@@ -67,7 +56,11 @@ export default function TaskPriorityPopover({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <div
+        className={`transition-opacity duration-150${isPending ? " opacity-50 pointer-events-none" : ""}`}
+      >
+        <PopoverTrigger asChild>{children}</PopoverTrigger>
+      </div>
       <PopoverContent className="w-48 p-0" align="start">
         <div>
           {priorityOptions.map((priority, index) => (

@@ -12,7 +12,6 @@ import { ShortcutNumber } from "@/components/ui/shortcut-number";
 import { useUpdateTaskAssignee } from "@/hooks/mutations/task/use-update-task-assignee";
 import { useGetActiveWorkspaceUsers } from "@/hooks/queries/workspace-users/use-get-active-workspace-users";
 import { useNumberedShortcuts } from "@/hooks/use-numbered-shortcuts";
-import { toast } from "@/lib/toast";
 import type Task from "@/types/task";
 
 const INITIAL_VISIBLE_USERS = 40;
@@ -34,7 +33,7 @@ export default function TaskAssigneePopover({
   const [visibleUsersCount, setVisibleUsersCount] = useState(
     INITIAL_VISIBLE_USERS,
   );
-  const { mutateAsync: updateTaskAssignee } = useUpdateTaskAssignee();
+  const { mutate: updateTaskAssignee, isPending } = useUpdateTaskAssignee();
   const { data: workspaceUsers } = useGetActiveWorkspaceUsers(workspaceId);
 
   const usersOptions = useMemo(() => {
@@ -47,22 +46,14 @@ export default function TaskAssigneePopover({
   }, [workspaceUsers]);
 
   const handleAssigneeChange = useCallback(
-    async (newUserId: string) => {
-      try {
-        await updateTaskAssignee({
-          ...task,
-          userId: newUserId,
-        });
-        setOpen(false);
-      } catch (error) {
-        toast.error(
-          error instanceof Error
-            ? error.message
-            : t("tasks:popover.assignee.updateError"),
-        );
-      }
+    (newUserId: string) => {
+      setOpen(false);
+      updateTaskAssignee({
+        ...task,
+        userId: newUserId,
+      });
     },
-    [t, task, updateTaskAssignee],
+    [task, updateTaskAssignee],
   );
 
   const shortcutOptions = useMemo(() => {
@@ -104,7 +95,11 @@ export default function TaskAssigneePopover({
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <div
+        className={`transition-opacity duration-150${isPending ? " opacity-50 pointer-events-none" : ""}`}
+      >
+        <PopoverTrigger asChild>{children}</PopoverTrigger>
+      </div>
       <PopoverContent className="w-56 p-0" align="start">
         <div
           className="max-h-80 space-y-1 overflow-y-auto p-1"
