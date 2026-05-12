@@ -69,7 +69,7 @@ export function diffDemands(
     if (!fromMap.has(id)) {
       result.push({ type: "added", name: toDemand.name });
     } else {
-      const fromDemand = fromMap.get(id)!;
+      const fromDemand = fromMap.get(id);
       const dateChanges: Record<
         string,
         { from: string | null; to: string | null }
@@ -109,7 +109,7 @@ export function diffRisks(
     if (!fromMap.has(id)) {
       result.push({ type: "new", description: toRisk.description });
     } else {
-      const fromRisk = fromMap.get(id)!;
+      const fromRisk = fromMap.get(id);
       if (fromRisk.status !== toRisk.status) {
         if (toRisk.status === "closed") {
           result.push({
@@ -146,7 +146,7 @@ export function diffReleases(
     if (!fromMap.has(id)) {
       result.push({ type: "added", name: toRelease.name });
     } else {
-      const fromRelease = fromMap.get(id)!;
+      const fromRelease = fromMap.get(id);
       if (
         fromRelease.quarter !== toRelease.quarter ||
         fromRelease.month !== toRelease.month ||

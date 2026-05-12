@@ -36,16 +36,33 @@ const isRegistrationDisabled = process.env.DISABLE_REGISTRATION === "true";
 const isPasswordRegistrationDisabled =
   process.env.DISABLE_PASSWORD_REGISTRATION === "true";
 
+function normalizeOrigin(url: string): string {
+  return url.trim().replace(/\/+$/, "");
+}
+
+/** Supports comma-separated `KANEO_CLIENT_URL` (e.g. canonical + custom domain). */
+function parseClientOrigins(raw: string): string[] {
+  return raw
+    .split(",")
+    .map((s) => normalizeOrigin(s))
+    .filter(Boolean);
+}
+
 const apiUrl = process.env.KANEO_API_URL || "http://localhost:1337";
-const clientUrl = process.env.KANEO_CLIENT_URL || "http://localhost:5173";
-const isHttps = apiUrl.startsWith("https://");
+/** URL the browser uses for `/api/auth` (and optionally all `/api`). When Vercel proxies to Railway, set to the web origin (e.g. https://app.example.com). Defaults to `KANEO_API_URL`. */
+const authPublicUrl = process.env.KANEO_AUTH_PUBLIC_ORIGIN?.trim() || apiUrl;
+const authPublicHttps = authPublicUrl.startsWith("https://");
+const clientUrls = parseClientOrigins(
+  process.env.KANEO_CLIENT_URL || "http://localhost:5173",
+);
+const clientUrl = clientUrls[0] ?? "http://localhost:5173";
 const isCrossSubdomain = (() => {
   try {
-    const apiHost = new URL(apiUrl).hostname;
+    const authHost = new URL(normalizeOrigin(authPublicUrl)).hostname;
     const clientHost = new URL(clientUrl).hostname;
     return (
-      apiHost !== clientHost &&
-      apiHost !== "localhost" &&
+      authHost !== clientHost &&
+      authHost !== "localhost" &&
       clientHost !== "localhost"
     );
   } catch {
@@ -53,9 +70,16 @@ const isCrossSubdomain = (() => {
   }
 })();
 
-const trustedOrigins = [clientUrl];
+const trustedOrigins: string[] = [...clientUrls];
 try {
-  const apiOrigin = new URL(apiUrl);
+  const authOrigin = new URL(normalizeOrigin(authPublicUrl));
+  const authOriginString = `${authOrigin.protocol}//${authOrigin.host}`;
+  if (!trustedOrigins.includes(authOriginString)) {
+    trustedOrigins.push(authOriginString);
+  }
+} catch {}
+try {
+  const apiOrigin = new URL(normalizeOrigin(apiUrl));
   const apiOriginString = `${apiOrigin.protocol}//${apiOrigin.host}`;
   if (!trustedOrigins.includes(apiOriginString)) {
     trustedOrigins.push(apiOriginString);
@@ -64,10 +88,10 @@ try {
 
 const baseURLWithoutPath = (() => {
   try {
-    const url = new URL(apiUrl);
+    const url = new URL(normalizeOrigin(authPublicUrl));
     return `${url.protocol}//${url.host}`;
   } catch {
-    return apiUrl.split("/").slice(0, 3).join("/"); // Get protocol://host
+    return authPublicUrl.split("/").slice(0, 3).join("/"); // Get protocol://host
   }
 })();
 
@@ -334,7 +358,7 @@ export const auth = betterAuth({
         },
       },
       async sendInvitationEmail(data) {
-        const inviteLink = `${process.env.KANEO_CLIENT_URL}/invitation/accept/${data.id}`;
+        const inviteLink = `${clientUrl}/invitation/accept/${data.id}`;
         const locale = await getUserLocale(data.email);
 
         const result = await sendWorkspaceInvitationEmail(
@@ -486,11 +510,14 @@ export const auth = betterAuth({
   },
   advanced: {
     defaultCookieAttributes: {
-      // For cross-subdomain auth with HTTPS, use sameSite: "none" with secure: true
-      // For same-domain or HTTP deployments, use sameSite: "lax" with secure: false
-      sameSite: isCrossSubdomain && isHttps ? "none" : "lax",
-      secure: isCrossSubdomain && isHttps, // must be true when sameSite is "none"
-      partitioned: isCrossSubdomain && isHttps,
+      // Cross-site cookie issuance (API host ≠ app host): SameSite=None + Secure (+ partitioned).
+      // Same host as the web app (e.g. Vercel `/api` proxy): Lax + Secure on HTTPS.
+      sameSite: isCrossSubdomain && authPublicHttps ? "none" : "lax",
+      secure: authPublicHttps,
+      partitioned:
+        isCrossSubdomain &&
+        authPublicHttps &&
+        process.env.AUTH_COOKIE_PARTITIONED !== "false",
       domain: process.env.COOKIE_DOMAIN || undefined, // Optional: e.g., ".andrej.com" for explicit cross-subdomain cookies
     },
   },

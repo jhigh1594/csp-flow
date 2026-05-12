@@ -34,8 +34,9 @@
 			"!**/.reference",
 			"!**/.superpowers",
 			"!**/.vercel",
+			"!**/.cursor",
 			"!**/drizzle/meta",
-			"!**/.worktrees/**"
+			"!**/.worktrees"
 		]
 	},
 	"formatter": {
