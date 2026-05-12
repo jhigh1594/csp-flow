@@ -6,6 +6,11 @@ import type Workspace from "@/types/workspace";
 
 export const Route = createFileRoute("/_layout/_authenticated/dashboard/")({
   beforeLoad: async () => {
+    const session = await authClient.getSession();
+    if (!session?.data?.session) {
+      throw redirect({ to: "/auth/sign-in" });
+    }
+
     const workspaces: Workspace[] = await getWorkspaces();
     const invitations = await getPendingInvitations();
 
@@ -13,7 +18,6 @@ export const Route = createFileRoute("/_layout/_authenticated/dashboard/")({
       throw redirect({ to: "/invitations" });
     }
 
-    const session = await authClient.getSession();
     const activeWorkspaceId = session?.data?.session?.activeOrganizationId;
 
     if (workspaces && workspaces.length > 0) {
