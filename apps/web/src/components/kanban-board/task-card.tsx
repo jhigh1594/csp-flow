@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { format } from "date-fns";
 import {
   Calendar,
+  CalendarArrowUp,
   CalendarClock,
   CalendarX,
   GitMerge,
@@ -61,13 +62,7 @@ function TaskCard({ task }: TaskCardProps) {
   const { data: workspace } = useActiveWorkspace();
   const { mutateAsync: deleteTask } = useDeleteTask();
   const navigate = useNavigate();
-  const {
-    showAssignees,
-    showPriority,
-    showDueDates,
-    showLabels,
-    showTaskNumbers,
-  } = useUserPreferencesStore();
+  const { showTaskNumbers } = useUserPreferencesStore();
   const [isDeleteTaskModalOpen, setIsDeleteTaskModalOpen] = useState(false);
   const { data: externalLinks } = useExternalLinks(task.id);
   const { toggleSelection, isSelected, isFocused } = useBulkSelectionStore();
@@ -202,28 +197,17 @@ function TaskCard({ task }: TaskCardProps) {
               </div>
             )}
 
-            {showAssignees && (
+            {task.userId && (
               <div className="absolute top-3 right-3">
-                {task.userId ? (
-                  <Avatar className="h-5 w-5">
-                    <AvatarImage
-                      src={assignee?.user?.image ?? ""}
-                      alt={assignee?.user?.name || ""}
-                    />
-                    <AvatarFallback className="text-xs font-medium border border-border/30">
-                      {assignee?.user?.name?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <div
-                    className="flex h-5 w-5 items-center justify-center rounded-full border border-border bg-muted"
-                    title={t("tasks:assignee.unassigned")}
-                  >
-                    <span className="text-[10px] font-medium text-muted-foreground">
-                      ?
-                    </span>
-                  </div>
-                )}
+                <Avatar className="h-5 w-5">
+                  <AvatarImage
+                    src={assignee?.user?.image ?? ""}
+                    alt={assignee?.user?.name || ""}
+                  />
+                  <AvatarFallback className="text-xs font-medium border border-border/30">
+                    {assignee?.user?.name?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </div>
             )}
 
@@ -242,20 +226,25 @@ function TaskCard({ task }: TaskCardProps) {
               </div>
             </div>
 
-            {showLabels && (
-              <div className="mb-2.5">
-                <TaskCardLabels taskId={task.id} />
-              </div>
-            )}
+            <div className="mb-2.5">
+              <TaskCardLabels taskId={task.id} />
+            </div>
 
-            <div className="flex items-center gap-1.5">
-              {showPriority && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {task.priority && task.priority !== "no-priority" && (
                 <span className="inline-flex items-center gap-1 rounded border border-border/70 bg-muted/55 px-2 py-1 text-[10px] font-medium text-muted-foreground">
-                  {getPriorityIcon(task.priority ?? "")}
+                  {getPriorityIcon(task.priority)}
                 </span>
               )}
 
-              {showDueDates && task.dueDate && (
+              {task.startDate && (
+                <div className="flex items-center gap-1 text-[10px] px-2 py-1 rounded border border-border/70 bg-muted/55 text-muted-foreground">
+                  <CalendarArrowUp className="w-3 h-3" />
+                  <span>{format(new Date(task.startDate), "MMM d")}</span>
+                </div>
+              )}
+
+              {task.dueDate && (
                 <div
                   className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded ${dueDateStatusColors[getDueDateStatus(task.dueDate)]}`}
                 >

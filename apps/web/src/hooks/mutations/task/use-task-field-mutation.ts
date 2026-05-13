@@ -62,6 +62,14 @@ export function useTaskFieldMutation(
 
     onSuccess: (_data, task) => {
       const patch = getPatch(task);
+      // Re-apply confirmed patch to both caches in case a background refetch
+      // overwrote the onMutate optimistic update before the API call finished.
+      if (task.projectId) {
+        queryClient.setQueryData<ProjectWithTasks>(
+          ["tasks", task.projectId],
+          (old) => applyTaskPatch(old, task.id, patch),
+        );
+      }
       const currentProject = useProjectStore.getState().project;
       if (currentProject) {
         useProjectStore
@@ -89,7 +97,15 @@ export function useTaskFieldMutation(
       toast.error(error instanceof Error ? error.message : "Failed to update");
     },
 
-    onSettled: (_data, _error, task) => {
+    onSettled: async (_data, _error, task) => {
+      // Cancel any in-flight background fetches so stale responses can't
+      // overwrite the optimistic update after onSuccess already re-applied it.
+      await queryClient.cancelQueries({ queryKey: ["task", task.id] });
+      if (task.projectId) {
+        await queryClient.cancelQueries({
+          queryKey: ["tasks", task.projectId],
+        });
+      }
       queryClient.invalidateQueries({ queryKey: ["task", task.id] });
       if (task.projectId) {
         queryClient.invalidateQueries({
