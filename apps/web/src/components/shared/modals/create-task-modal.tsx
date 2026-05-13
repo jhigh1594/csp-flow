@@ -1,8 +1,10 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "@tanstack/react-router";
 import { produce } from "immer";
 import {
   CalendarIcon,
   Check,
+  FolderOpen,
   Plus,
   Search,
   Tag,
@@ -41,6 +43,7 @@ import useCreateTask from "@/hooks/mutations/task/use-create-task";
 import { useDeleteTask } from "@/hooks/mutations/task/use-delete-task";
 import { useUpdateTask } from "@/hooks/mutations/task/use-update-task";
 import useGetLabelsByWorkspace from "@/hooks/queries/label/use-get-labels-by-workspace";
+import useGetProjects from "@/hooks/queries/project/use-get-projects";
 import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
 import { useGetActiveWorkspaceUsers } from "@/hooks/queries/workspace-users/use-get-active-workspace-users";
 import { cn } from "@/lib/cn";
@@ -55,6 +58,7 @@ type CreateTaskModalProps = {
   onClose: () => void;
   status?: string;
   projectId?: string;
+  teamId?: string;
 };
 
 type Priority = "no-priority" | "low" | "medium" | "high" | "urgent";
@@ -108,6 +112,7 @@ function CreateTaskModal({
   onClose,
   status,
   projectId,
+  teamId,
 }: CreateTaskModalProps) {
   const { t } = useTranslation();
   const { project, setProject } = useProjectStore();
@@ -192,9 +197,21 @@ function CreateTaskModal({
   const [selectedColor, setSelectedColor] = useState<LabelColor>("gray");
   const [newLabelName, setNewLabelName] = useState("");
 
+  const queryClient = useQueryClient();
+  const { data: allProjects = [] } = useGetProjects({
+    workspaceId: workspace?.id || "",
+  });
+  const teamProjects = useMemo(
+    () => (teamId ? allProjects.filter((p) => p.teamId === teamId) : []),
+    [allProjects, teamId],
+  );
+
+  const [selectedProjectId, setSelectedProjectId] = useState("");
+
   const routeProjectId =
     location.pathname.match(/\/project\/([^/]+)/)?.[1] ?? null;
   const resolvedProjectId = projectId || project?.id || routeProjectId || "";
+  const effectiveProjectId = selectedProjectId || resolvedProjectId;
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const draftCreationPromiseRef = useRef<Promise<Task> | null>(null);
@@ -241,6 +258,7 @@ function CreateTaskModal({
     setSearchValue("");
     setSelectedColor("gray");
     setNewLabelName("");
+    setSelectedProjectId("");
     draftCreationPromiseRef.current = null;
     didSubmitRef.current = false;
     setDraftTask(null);
@@ -318,7 +336,7 @@ function CreateTaskModal({
       return pendingTask.id;
     }
 
-    if (!resolvedProjectId) {
+    if (!effectiveProjectId) {
       toast.error(t("common:modals.createTask.chooseProjectForImages"));
       return null;
     }
@@ -329,7 +347,7 @@ function CreateTaskModal({
       description: description.trim() || "",
       userId: assigneeId,
       priority,
-      projectId: resolvedProjectId,
+      projectId: effectiveProjectId,
       startDate: startDate ? startDate.toISOString() : undefined,
       dueDate: dueDate ? dueDate.toISOString() : undefined,
       status: draftStatus,
@@ -359,14 +377,14 @@ function CreateTaskModal({
     startDate,
     dueDate,
     priority,
-    resolvedProjectId,
+    effectiveProjectId,
     title,
     t,
   ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !resolvedProjectId || !workspace?.id) return;
+    if (!title.trim() || !effectiveProjectId || !workspace?.id) return;
 
     try {
       const taskStatus = status ?? "to-do";
@@ -383,7 +401,7 @@ function CreateTaskModal({
               priority,
               startDate: startDate ? startDate.toISOString() : null,
               dueDate: dueDate ? dueDate.toISOString() : null,
-              projectId: resolvedProjectId,
+              projectId: effectiveProjectId,
             }),
           )
         : normalizeTask(
@@ -392,12 +410,16 @@ function CreateTaskModal({
               description: description.trim() || "",
               userId: assigneeId,
               priority,
-              projectId: resolvedProjectId,
+              projectId: effectiveProjectId,
               startDate: startDate ? startDate.toISOString() : undefined,
               dueDate: dueDate ? dueDate.toISOString() : undefined,
               status: taskStatus,
             }),
           );
+
+      if (teamId) {
+        queryClient.invalidateQueries({ queryKey: ["team-issues", teamId] });
+      }
 
       for (const label of labels) {
         await createLabel({
@@ -657,6 +679,55 @@ function CreateTaskModal({
                 <div className="w-1.5 h-1.5 bg-foreground rounded-full" />
                 {statusLabel}
               </div>
+
+              {teamId && !resolvedProjectId && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className={cn(
+                        "flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors border border-border hover:bg-accent/50",
+                        selectedProjectId
+                          ? "bg-accent/30 text-foreground"
+                          : "text-destructive border-destructive/40",
+                      )}
+                    >
+                      <FolderOpen className="w-3.5 h-3.5" />
+                      <span>
+                        {selectedProjectId
+                          ? (teamProjects.find(
+                              (p) => p.id === selectedProjectId,
+                            )?.name ?? "Project")
+                          : "Select project"}
+                      </span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56 p-1" align="start">
+                    <div className="space-y-0.5">
+                      {teamProjects.length === 0 ? (
+                        <p className="px-2 py-1.5 text-xs text-muted-foreground">
+                          No projects in this team
+                        </p>
+                      ) : (
+                        teamProjects.map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent/50 transition-colors"
+                            onClick={() => setSelectedProjectId(p.id)}
+                          >
+                            <FolderOpen className="w-3.5 h-3.5 text-muted-foreground" />
+                            <span className="flex-1 truncate">{p.name}</span>
+                            {selectedProjectId === p.id && (
+                              <Check className="w-3.5 h-3.5" />
+                            )}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
 
               <Popover>
                 <PopoverTrigger asChild>

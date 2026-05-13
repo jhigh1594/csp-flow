@@ -94,9 +94,11 @@ function BoardColumnCard({ issue }: { issue: TeamIssue }) {
 function BoardView({
   columns,
   issues,
+  teamId,
 }: {
   columns: TeamColumn[];
   issues: TeamIssue[];
+  teamId: string;
 }) {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
@@ -190,6 +192,7 @@ function BoardView({
           setActiveColumnId(null);
         }}
         status={activeColumnId ?? undefined}
+        teamId={teamId}
       />
     </>
   );
@@ -265,9 +268,11 @@ function ListIssueRow({
 function ListView({
   issues,
   workspaceId,
+  teamId,
 }: {
   issues: TeamIssue[];
   workspaceId: string;
+  teamId: string;
 }) {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
     {},
@@ -385,6 +390,7 @@ function ListView({
       <CreateTaskModal
         open={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}
+        teamId={teamId}
       />
     </>
   );
@@ -500,9 +506,17 @@ function RouteComponent() {
               </div>
             </div>
           ) : viewMode === "board" ? (
-            <BoardView columns={typedColumns} issues={typedIssues} />
+            <BoardView
+              columns={typedColumns}
+              issues={typedIssues}
+              teamId={teamId}
+            />
           ) : (
-            <ListView issues={typedIssues} workspaceId={workspaceId} />
+            <ListView
+              issues={typedIssues}
+              workspaceId={workspaceId}
+              teamId={teamId}
+            />
           )}
         </div>
       </Layout.Content>
@@ -510,6 +524,7 @@ function RouteComponent() {
       <CreateTaskModal
         open={isCreateTaskOpen}
         onClose={() => setIsCreateTaskOpen(false)}
+        teamId={teamId}
       />
     </Layout>
   );
