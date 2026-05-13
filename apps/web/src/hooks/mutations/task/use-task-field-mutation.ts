@@ -60,6 +60,16 @@ export function useTaskFieldMutation(
       } satisfies Snapshot;
     },
 
+    onSuccess: (_data, task) => {
+      const patch = getPatch(task);
+      const currentProject = useProjectStore.getState().project;
+      if (currentProject) {
+        useProjectStore
+          .getState()
+          .setProject(applyTaskPatch(currentProject, task.id, patch));
+      }
+    },
+
     onError: (error, task, onMutateResult) => {
       if (onMutateResult?.previousTask !== undefined) {
         queryClient.setQueryData(
