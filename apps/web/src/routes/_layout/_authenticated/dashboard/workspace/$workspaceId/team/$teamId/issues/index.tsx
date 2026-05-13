@@ -1,5 +1,16 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ChevronRight, Circle, List, Plus, SquareKanban } from "lucide-react";
+import { format } from "date-fns";
+import {
+  Calendar,
+  CalendarArrowUp,
+  CalendarClock,
+  CalendarX,
+  ChevronRight,
+  Circle,
+  List,
+  Plus,
+  SquareKanban,
+} from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import WorkspaceCrumbSelect from "@/components/common/header/workspace-crumb-select";
 import Layout from "@/components/common/layout";
@@ -24,6 +35,7 @@ import useGetTeams from "@/hooks/queries/team/use-get-teams";
 import { useGetActiveWorkspaceUsers } from "@/hooks/queries/workspace-users/use-get-active-workspace-users";
 import { cn } from "@/lib/cn";
 import { getColumnIcon } from "@/lib/column";
+import { dueDateStatusColors, getDueDateStatus } from "@/lib/due-date-status";
 import { getPriorityIcon } from "@/lib/priority";
 
 type IssuesSearchParams = {
@@ -50,6 +62,7 @@ type TeamIssue = {
   userId: string | null;
   position: number | null;
   number: number | null;
+  startDate: string | null;
   dueDate: string | null;
   createdAt: string;
 };
@@ -66,8 +79,20 @@ type TeamColumn = {
 
 // ---- Board view ----
 
-function BoardColumnCard({ issue }: { issue: TeamIssue }) {
+function BoardColumnCard({
+  issue,
+  workspaceId,
+}: {
+  issue: TeamIssue;
+  workspaceId: string;
+}) {
   const navigate = useNavigate();
+  const { data: workspaceUsers } = useGetActiveWorkspaceUsers(workspaceId);
+
+  const assignee = useMemo(() => {
+    if (!issue.userId || !workspaceUsers?.members) return null;
+    return workspaceUsers.members.find((m) => m.userId === issue.userId);
+  }, [workspaceUsers, issue.userId]);
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: click handler for task card
@@ -77,16 +102,56 @@ function BoardColumnCard({ issue }: { issue: TeamIssue }) {
         if (e.key === "Enter")
           navigate({ to: ".", search: { taskId: issue.id } });
       }}
-      className="cursor-pointer rounded-lg border border-border bg-background p-3 shadow-xs/5 hover:border-border/90 hover:shadow-sm transition-all duration-200"
+      className="relative cursor-pointer rounded-lg border border-border/70 bg-card p-3 shadow-sm hover:border-border hover:shadow-md transition-all duration-200 ease-out"
     >
-      <div className="mb-2 pr-2 text-sm font-medium leading-5 text-foreground/95 break-words">
+      {issue.userId && (
+        <div className="absolute top-3 right-3">
+          <Avatar className="h-5 w-5">
+            <AvatarImage
+              src={assignee?.user?.image ?? ""}
+              alt={assignee?.user?.name || ""}
+            />
+            <AvatarFallback className="text-xs font-medium border border-border/30">
+              {assignee?.user?.name?.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </div>
+      )}
+
+      <div className="mb-2.5 pr-6 text-sm font-medium leading-5 text-foreground/95 break-words">
         {issue.title}
       </div>
-      <div className="flex items-center gap-1.5">
-        {issue.priority && (
+
+      <div className="flex flex-wrap items-center gap-1.5">
+        {issue.priority && issue.priority !== "no-priority" && (
           <span className="inline-flex items-center gap-1 rounded border border-border/70 bg-muted/55 px-2 py-1 text-[10px] font-medium text-muted-foreground">
             {getPriorityIcon(issue.priority)}
           </span>
+        )}
+
+        {issue.startDate && (
+          <div className="flex items-center gap-1 text-[10px] px-2 py-1 rounded border border-border/70 bg-muted/55 text-muted-foreground">
+            <CalendarArrowUp className="w-3 h-3" />
+            <span>{format(new Date(issue.startDate), "MMM d")}</span>
+          </div>
+        )}
+
+        {issue.dueDate && (
+          <div
+            className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded ${dueDateStatusColors[getDueDateStatus(issue.dueDate)]}`}
+          >
+            {getDueDateStatus(issue.dueDate) === "overdue" && (
+              <CalendarX className="w-3 h-3" />
+            )}
+            {getDueDateStatus(issue.dueDate) === "due-soon" && (
+              <CalendarClock className="w-3 h-3" />
+            )}
+            {(getDueDateStatus(issue.dueDate) === "far-future" ||
+              getDueDateStatus(issue.dueDate) === "no-due-date") && (
+              <Calendar className="w-3 h-3" />
+            )}
+            <span>{format(new Date(issue.dueDate), "MMM d")}</span>
+          </div>
         )}
       </div>
     </div>
@@ -97,10 +162,12 @@ function BoardView({
   columns,
   issues,
   teamId,
+  workspaceId,
 }: {
   columns: TeamColumn[];
   issues: TeamIssue[];
   teamId: string;
+  workspaceId: string;
 }) {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
@@ -148,7 +215,11 @@ function BoardView({
 
                   <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 py-2 flex flex-col gap-2">
                     {columnIssues.map((issue) => (
-                      <BoardColumnCard key={issue.id} issue={issue} />
+                      <BoardColumnCard
+                        key={issue.id}
+                        issue={issue}
+                        workspaceId={workspaceId}
+                      />
                     ))}
                     {columnIssues.length === 0 && (
                       <div className="flex h-full items-center justify-center py-8">
@@ -244,8 +315,16 @@ function ListIssueRow({
       <span className="flex-1 min-w-0 text-sm text-foreground truncate">
         {issue.title}
       </span>
-      <div className="flex-shrink-0">
-        {issue.userId ? (
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {issue.dueDate && (
+          <div
+            className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded ${dueDateStatusColors[getDueDateStatus(issue.dueDate)]}`}
+          >
+            <Calendar className="w-3 h-3" />
+            <span>{format(new Date(issue.dueDate), "MMM d")}</span>
+          </div>
+        )}
+        {issue.userId && (
           <Avatar className="h-5 w-5">
             <AvatarImage
               src={assignee?.user?.image ?? ""}
@@ -255,12 +334,6 @@ function ListIssueRow({
               {assignee?.user?.name?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-        ) : (
-          <div className="w-5 h-5 rounded-full bg-muted border border-border flex items-center justify-center">
-            <span className="text-[9px] font-medium text-muted-foreground">
-              ?
-            </span>
-          </div>
         )}
       </div>
     </div>
@@ -535,6 +608,7 @@ function RouteComponent() {
               columns={typedColumns}
               issues={typedIssues}
               teamId={teamId}
+              workspaceId={workspaceId}
             />
           ) : (
             <ListView
