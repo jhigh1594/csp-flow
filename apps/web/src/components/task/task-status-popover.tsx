@@ -8,10 +8,10 @@ import {
 } from "@/components/ui/popover";
 import { ShortcutNumber } from "@/components/ui/shortcut-number";
 import { useUpdateTaskStatus } from "@/hooks/mutations/task/use-update-task-status";
+import { useGetColumns } from "@/hooks/queries/column/use-get-columns";
 import { useNumberedShortcuts } from "@/hooks/use-numbered-shortcuts";
 import { getColumnIcon } from "@/lib/column";
 import { getStatusDisplayLabel } from "@/lib/i18n/domain";
-import useProjectStore from "@/store/project";
 import type Task from "@/types/task";
 
 type TaskStatusPopoverProps = {
@@ -24,13 +24,12 @@ export default function TaskStatusPopover({
   children,
 }: TaskStatusPopoverProps) {
   const [open, setOpen] = useState(false);
-  const { project } = useProjectStore();
-  const statusOptions =
-    project?.columns?.map((col) => ({
-      value: col.id,
-      label: col.name,
-      isFinal: col.isFinal,
-    })) ?? [];
+  const { data: columns = [] } = useGetColumns(task.projectId ?? "");
+  const statusOptions = columns.map((col) => ({
+    value: col.id,
+    label: col.name,
+    isFinal: col.isFinal,
+  }));
   const { mutate: updateTaskStatus, isPending } = useUpdateTaskStatus();
 
   const handleStatusChange = useCallback(
