@@ -212,6 +212,7 @@ function RouteComponent() {
     <ProjectLayout
       projectId={projectId}
       workspaceId={workspaceId}
+      teamId={teamId}
       activeView="board"
       headerActions={boardHeaderSearch}
     >

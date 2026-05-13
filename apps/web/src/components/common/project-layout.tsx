@@ -27,6 +27,7 @@ import useGetProject from "@/hooks/queries/project/use-get-project";
 type ProjectLayoutProps = {
   projectId: string;
   workspaceId: string;
+  teamId: string;
   headerActions?: ReactNode;
   children: ReactNode;
   showViewSwitcher?: boolean;
@@ -36,6 +37,7 @@ type ProjectLayoutProps = {
 export default function ProjectLayout({
   projectId,
   workspaceId,
+  teamId,
   headerActions,
   children,
   showViewSwitcher = true,
@@ -61,36 +63,36 @@ export default function ProjectLayout({
 
   const handleNavigateToBacklog = () => {
     navigate({
-      to: "/dashboard/workspace/$workspaceId/project/$projectId/backlog",
-      params: { workspaceId, projectId },
+      to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/backlog",
+      params: { workspaceId, teamId, projectId },
     });
   };
 
   const handleNavigateToBoard = () => {
     navigate({
-      to: "/dashboard/workspace/$workspaceId/project/$projectId/board",
-      params: { workspaceId, projectId },
+      to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/board",
+      params: { workspaceId, teamId, projectId },
     });
   };
 
   const handleNavigateToGantt = () => {
     navigate({
-      to: "/dashboard/workspace/$workspaceId/project/$projectId/gantt",
-      params: { workspaceId, projectId },
+      to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/gantt",
+      params: { workspaceId, teamId, projectId },
     });
   };
 
   const handleNavigateToWiki = () => {
     navigate({
-      to: "/dashboard/workspace/$workspaceId/project/$projectId/wiki",
-      params: { workspaceId, projectId },
+      to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/wiki",
+      params: { workspaceId, teamId, projectId },
     });
   };
 
   const handleNavigateToMilestones = () => {
     navigate({
-      to: "/dashboard/workspace/$workspaceId/project/$projectId/milestones",
-      params: { workspaceId, projectId },
+      to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/milestones",
+      params: { workspaceId, teamId, projectId },
     });
   };
 
@@ -98,16 +100,17 @@ export default function ProjectLayout({
     navigate({
       to:
         resolvedView === "backlog"
-          ? "/dashboard/workspace/$workspaceId/project/$projectId/backlog"
+          ? "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/backlog"
           : resolvedView === "gantt"
-            ? "/dashboard/workspace/$workspaceId/project/$projectId/gantt"
+            ? "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/gantt"
             : resolvedView === "wiki"
-              ? "/dashboard/workspace/$workspaceId/project/$projectId/wiki"
+              ? "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/wiki"
               : resolvedView === "milestones"
-                ? "/dashboard/workspace/$workspaceId/project/$projectId/milestones"
-                : "/dashboard/workspace/$workspaceId/project/$projectId/board",
+                ? "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/milestones"
+                : "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/board",
       params: {
         workspaceId,
+        teamId,
         projectId: nextProjectId,
       },
     });

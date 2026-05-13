@@ -131,7 +131,7 @@ function DraggableTask({
 
 function RouteComponent() {
   const { t } = useTranslation();
-  const { projectId, workspaceId } = Route.useParams();
+  const { projectId, workspaceId, teamId } = Route.useParams();
   const { taskId } = Route.useSearch();
   const navigate = useNavigate();
   const { data: project } = useGetTasks(projectId);
@@ -447,6 +447,7 @@ function RouteComponent() {
     <ProjectLayout
       projectId={projectId}
       workspaceId={workspaceId}
+      teamId={teamId}
       activeView="gantt"
     >
       <PageTitle

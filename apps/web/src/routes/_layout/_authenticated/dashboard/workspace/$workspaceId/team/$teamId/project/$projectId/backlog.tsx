@@ -352,6 +352,7 @@ function RouteComponent() {
     <ProjectLayout
       projectId={projectId}
       workspaceId={workspaceId}
+      teamId={teamId}
       activeView="backlog"
     >
       <PageTitle
