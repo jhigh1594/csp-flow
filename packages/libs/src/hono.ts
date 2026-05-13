@@ -4,7 +4,12 @@ import type { AppType } from "@kaneo/api";
 import { hc } from "hono/client";
 import { resolveApiBaseUrl } from "./api-url";
 
-const apiUrl = resolveApiBaseUrl(import.meta.env.VITE_API_URL);
+const sameOriginFlag = import.meta.env.VITE_API_USE_SAME_ORIGIN;
+const useSameOrigin = sameOriginFlag === "true" || sameOriginFlag === true;
+const apiUrl =
+  useSameOrigin && typeof window !== "undefined"
+    ? `${window.location.origin}/api`
+    : resolveApiBaseUrl(import.meta.env.VITE_API_URL);
 
 export const client = hc<AppType>(apiUrl, {
   fetch: (input: RequestInfo | URL, init?: RequestInit) => {
