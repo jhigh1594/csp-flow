@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, Circle, List, Plus, SquareKanban } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import WorkspaceCrumbSelect from "@/components/common/header/workspace-crumb-select";
 import Layout from "@/components/common/layout";
 import PageTitle from "@/components/page-title";
 import CreateTaskModal from "@/components/shared/modals/create-task-modal";
+import TaskDetailsSheet from "@/components/task/task-details-sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { KbdSequence } from "@/components/ui/kbd";
@@ -16,6 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { shortcuts } from "@/constants/shortcuts";
+import useGetProjects from "@/hooks/queries/project/use-get-projects";
 import useGetTeamColumns from "@/hooks/queries/team/use-get-team-columns";
 import useGetTeamIssues from "@/hooks/queries/team/use-get-team-issues";
 import useGetTeams from "@/hooks/queries/team/use-get-teams";
@@ -269,10 +271,12 @@ function ListView({
   issues,
   workspaceId,
   teamId,
+  projectNameMap,
 }: {
   issues: TeamIssue[];
   workspaceId: string;
   teamId: string;
+  projectNameMap: Map<string, string>;
 }) {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
     {},
@@ -306,14 +310,14 @@ function ListView({
       if (projectId !== null) {
         result.push({
           projectId,
-          projectName: projectId,
+          projectName: projectNameMap.get(projectId) ?? projectId,
           issues: groupIssues,
         });
       }
     }
 
     return result;
-  }, [issues]);
+  }, [issues, projectNameMap]);
 
   const isExpanded = (key: string | null) => {
     const k = key ?? "__no_project__";
@@ -400,6 +404,8 @@ function ListView({
 
 function RouteComponent() {
   const { teamId, workspaceId } = Route.useParams();
+  const { taskId } = Route.useSearch();
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
 
@@ -410,12 +416,31 @@ function RouteComponent() {
     teamId,
   });
   const { data: teams } = useGetTeams({ workspaceId });
+  const { data: projects = [] } = useGetProjects({ workspaceId });
 
   const teamName = useMemo(() => {
     if (!teams) return "Team Issues";
     const team = teams.find((t) => t.id === teamId);
     return team?.name ? `${team.name} Issues` : "Team Issues";
   }, [teams, teamId]);
+
+  const projectNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of projects as Array<{ id: string; name: string }>) {
+      map.set(p.id, p.name);
+    }
+    return map;
+  }, [projects]);
+
+  const selectedIssue = useMemo(
+    () =>
+      taskId ? (issues as TeamIssue[]).find((i) => i.id === taskId) : undefined,
+    [taskId, issues],
+  );
+
+  const handleCloseTaskSheet = useCallback(() => {
+    navigate({ to: ".", search: {}, replace: true });
+  }, [navigate]);
 
   const isLoading = issuesLoading || columnsLoading;
 
@@ -516,6 +541,7 @@ function RouteComponent() {
               issues={typedIssues}
               workspaceId={workspaceId}
               teamId={teamId}
+              projectNameMap={projectNameMap}
             />
           )}
         </div>
@@ -525,6 +551,13 @@ function RouteComponent() {
         open={isCreateTaskOpen}
         onClose={() => setIsCreateTaskOpen(false)}
         teamId={teamId}
+      />
+
+      <TaskDetailsSheet
+        taskId={taskId}
+        projectId={selectedIssue?.projectId ?? ""}
+        workspaceId={workspaceId}
+        onClose={handleCloseTaskSheet}
       />
     </Layout>
   );
