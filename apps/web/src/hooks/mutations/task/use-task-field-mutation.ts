@@ -117,6 +117,8 @@ export function useTaskFieldMutation(
       queryClient.invalidateQueries({ queryKey: ["activities", task.id] });
       queryClient.invalidateQueries({ queryKey: ["task-relations"] });
       queryClient.invalidateQueries({ queryKey: ["milestone-tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      queryClient.invalidateQueries({ queryKey: ["team-issues"] });
     },
   });
 }
