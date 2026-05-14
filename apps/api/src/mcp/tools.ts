@@ -1332,6 +1332,218 @@ export function registerMcpTools(
       ),
   );
 
+  // ── Team + workspace user tools (U4) ─────────────────────────────
+
+  server.registerTool(
+    "list_teams",
+    {
+      description: "List all teams in a workspace.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(
+          `/api/auth/organization/list-teams?organizationId=${encodeURIComponent(args.workspaceId)}`,
+          {
+            method: "POST",
+            body: JSON.stringify({ organizationId: args.workspaceId }),
+          },
+        ),
+      ),
+  );
+
+  server.registerTool(
+    "create_team",
+    {
+      description: "Create a new team in a workspace.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+        name: nonEmptyString.describe("Team name"),
+        identifier: optionalNonEmptyString.describe(
+          "Short identifier (auto-derived from name if omitted)",
+        ),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json("/api/teams", {
+          method: "POST",
+          body: JSON.stringify({
+            workspaceId: args.workspaceId,
+            name: args.name,
+            identifier: args.identifier,
+          }),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "update_team",
+    {
+      description: "Update a team's name or identifier.",
+      inputSchema: z.object({
+        teamId: nonEmptyString.describe("Team ID"),
+        name: optionalNonEmptyString.describe("New name"),
+        identifier: optionalNonEmptyString.describe("New identifier"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/teams/${encodeURIComponent(args.teamId)}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            name: args.name,
+            identifier: args.identifier,
+          }),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "get_team_issues",
+    {
+      description:
+        "List all issues (team-level tasks) for a team with pagination.",
+      inputSchema: z.object({
+        teamId: nonEmptyString.describe("Team ID"),
+        cursor: optionalNonEmptyString.describe("Pagination cursor"),
+        limit: z.number().int().positive().optional().describe("Page size"),
+      }),
+    },
+    async (args) => {
+      const qs = new URLSearchParams();
+      if (args.cursor) qs.set("cursor", args.cursor);
+      if (args.limit) qs.set("limit", String(args.limit));
+      return run(() =>
+        client.json(
+          `/api/teams/${encodeURIComponent(args.teamId)}/issues${qs.toString() ? `?${qs.toString()}` : ""}`,
+        ),
+      );
+    },
+  );
+
+  server.registerTool(
+    "get_team_projects",
+    {
+      description: "List all projects for a team.",
+      inputSchema: z.object({
+        teamId: nonEmptyString.describe("Team ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/teams/${encodeURIComponent(args.teamId)}/projects`),
+      ),
+  );
+
+  server.registerTool(
+    "create_team_project",
+    {
+      description: "Create a new project for a team.",
+      inputSchema: z.object({
+        teamId: nonEmptyString.describe("Team ID"),
+        name: nonEmptyString.describe("Project name"),
+        description: z.string().optional().describe("Project description"),
+        slug: optionalNonEmptyString.describe("URL slug"),
+        icon: optionalNonEmptyString.describe("Project icon"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/teams/${encodeURIComponent(args.teamId)}/projects`, {
+          method: "POST",
+          body: JSON.stringify({
+            name: args.name,
+            description: args.description,
+            slug: args.slug,
+            icon: args.icon,
+          }),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "list_workspace_members",
+    {
+      description: "List all members of a workspace.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(
+          `/api/workspace/${encodeURIComponent(args.workspaceId)}/members`,
+        ),
+      ),
+  );
+
+  server.registerTool(
+    "invite_workspace_member",
+    {
+      description: "Invite a user to a workspace by email.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+        email: nonEmptyString.describe("Email address to invite"),
+        role: z
+          .enum(["admin", "member"])
+          .optional()
+          .describe("Role (default: member)"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json("/api/auth/organization/invite-member", {
+          method: "POST",
+          body: JSON.stringify({
+            email: args.email,
+            role: args.role ?? "member",
+            organizationId: args.workspaceId,
+          }),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "remove_workspace_member",
+    {
+      description: "Remove a member from a workspace.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+        memberId: nonEmptyString.describe("Member ID to remove"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json("/api/auth/organization/remove-member", {
+          method: "POST",
+          body: JSON.stringify({
+            memberId: args.memberId,
+            organizationId: args.workspaceId,
+          }),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "cancel_invitation",
+    {
+      description: "Cancel a pending workspace invitation.",
+      inputSchema: z.object({
+        invitationId: nonEmptyString.describe("Invitation ID to cancel"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json("/api/auth/organization/cancel-invitation", {
+          method: "POST",
+          body: JSON.stringify({ invitationId: args.invitationId }),
+        }),
+      ),
+  );
+
   // ── Context injection tools (U10) ──────────────────────────────────
 
   registerContextTools(server, client);
