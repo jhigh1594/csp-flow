@@ -50,10 +50,10 @@ function RouteComponent() {
     },
   });
 
-  const handleProjectClick = (projectId: string) => {
+  const handleProjectClick = (projectId: string, teamId: string) => {
     navigate({
-      to: "/dashboard/workspace/$workspaceId/project/$projectId/board",
-      params: { workspaceId, projectId },
+      to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/board",
+      params: { workspaceId, teamId, projectId },
     });
   };
 
@@ -226,7 +226,7 @@ function RouteComponent() {
                 <TableRow
                   key={project.id}
                   className="cursor-pointer"
-                  onClick={() => handleProjectClick(project.id)}
+                  onClick={() => handleProjectClick(project.id, project.teamId)}
                 >
                   <TableCell className="py-3">
                     <div className="flex items-center gap-3">
