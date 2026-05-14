@@ -29,9 +29,14 @@ import TaskCard from "./task-card";
 type KanbanBoardProps = {
   project: ProjectWithTasks;
   disableDragDrop?: boolean;
+  teamId?: string;
 };
 
-function KanbanBoard({ project, disableDragDrop = false }: KanbanBoardProps) {
+function KanbanBoard({
+  project,
+  disableDragDrop = false,
+  teamId,
+}: KanbanBoardProps) {
   const queryClient = useQueryClient();
   const { setProject } = useProjectStore();
   const {
@@ -76,11 +81,15 @@ function KanbanBoard({ project, disableDragDrop = false }: KanbanBoardProps) {
       },
       Enter: () => {
         if (focusedTaskId && project) {
+          const task = project.columns
+            .flatMap((col) => col.tasks)
+            .find((t) => t.id === focusedTaskId);
+          if (!task?.projectId) return;
           navigate({
             to: "/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId",
             params: {
               workspaceId: project.workspaceId,
-              projectId: project.id,
+              projectId: task.projectId,
               taskId: focusedTaskId,
             },
           });
@@ -253,7 +262,7 @@ function KanbanBoard({ project, disableDragDrop = false }: KanbanBoardProps) {
                 key={column.id}
                 className="h-full max-w-96 min-w-80 shrink-0 flex-1"
               >
-                <Column column={column} />
+                <Column column={column} teamId={teamId} />
               </div>
             ))}
           </div>

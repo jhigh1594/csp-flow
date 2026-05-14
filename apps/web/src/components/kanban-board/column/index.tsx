@@ -9,9 +9,10 @@ import { ColumnHeader } from "./column-header";
 
 type ColumnProps = {
   column: ProjectWithTasks["columns"][number];
+  teamId?: string;
 };
 
-function Column({ column }: ColumnProps) {
+function Column({ column, teamId }: ColumnProps) {
   const { t } = useTranslation();
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isDropzoneOver, setIsDropzoneOver] = useState(false);
@@ -28,7 +29,8 @@ function Column({ column }: ColumnProps) {
       <CreateTaskModal
         open={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}
-        projectId={project?.id}
+        projectId={teamId ? undefined : project?.id}
+        teamId={teamId}
         status={column.id}
       />
 

@@ -123,7 +123,7 @@ function TaskCard({ task }: TaskCardProps) {
   function handleTaskCardClick(
     e: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>,
   ) {
-    if (!project || !task || !workspace) return;
+    if (!task || !workspace) return;
 
     if ((e as React.MouseEvent).metaKey || (e as React.KeyboardEvent).ctrlKey) {
       toggleSelection(task.id);
@@ -156,7 +156,7 @@ function TaskCard({ task }: TaskCardProps) {
     try {
       await deleteTask(task.id);
       queryClient.invalidateQueries({
-        queryKey: ["tasks", project?.id],
+        queryKey: ["tasks", task.projectId],
       });
     } catch (error) {
       toast.error(
@@ -191,9 +191,11 @@ function TaskCard({ task }: TaskCardProps) {
               }
             }}
           >
-            {showTaskNumbers && (
+            {showTaskNumbers && task.number != null && (
               <div className="mb-2 text-[10px] font-mono text-muted-foreground/90">
-                {project?.slug}-{task.number}
+                {project?.slug
+                  ? `${project.slug}-${task.number}`
+                  : `#${task.number}`}
               </div>
             )}
 
@@ -374,11 +376,11 @@ function TaskCard({ task }: TaskCardProps) {
           </div>
         </ContextMenuTrigger>
 
-        {project && workspace && (
+        {task.projectId && workspace && (
           <TaskCardContextMenuContent
             task={task}
             taskCardContext={{
-              projectId: project.id,
+              projectId: task.projectId,
               worskpaceId: workspace.id,
             }}
             onDeleteClick={() => setIsDeleteTaskModalOpen(true)}
