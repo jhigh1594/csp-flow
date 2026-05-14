@@ -11,6 +11,7 @@ import getTeamColumns from "./controllers/get-team-columns";
 import getTeamIssues from "./controllers/get-team-issues";
 import getTeamProjects from "./controllers/get-team-projects";
 import reorderTeamColumns from "./controllers/reorder-team-columns";
+import updateTeam from "./controllers/update-team";
 
 const team = new Hono<{
   Variables: {
@@ -272,6 +273,37 @@ const team = new Hono<{
     async (c) => {
       const { teamId } = c.req.valid("param");
       const team = await deleteTeam(teamId);
+      return c.json(team);
+    },
+  )
+  .put(
+    "/:teamId",
+    describeRoute({
+      operationId: "updateTeam",
+      tags: ["Teams"],
+      description: "Update a team's name or identifier",
+      responses: {
+        200: {
+          description: "Team updated successfully",
+          content: {
+            "application/json": { schema: resolver(v.any()) },
+          },
+        },
+      },
+    }),
+    validator("param", v.object({ teamId: v.string() })),
+    validator(
+      "json",
+      v.object({
+        name: v.optional(v.string()),
+        identifier: v.optional(v.string()),
+      }),
+    ),
+    workspaceAccess.fromTeam("teamId"),
+    async (c) => {
+      const { teamId } = c.req.valid("param");
+      const { name, identifier } = c.req.valid("json");
+      const team = await updateTeam(teamId, { name, identifier });
       return c.json(team);
     },
   )

@@ -4,6 +4,7 @@ import * as v from "valibot";
 import { timeEntrySchema } from "../schemas";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import createTimeEntry from "./controllers/create-time-entry";
+import deleteTimeEntry from "./controllers/delete-time-entry";
 import getTimeEntriesByTaskId from "./controllers/get-time-entries";
 import getTimeEntry from "./controllers/get-time-entry";
 import updateTimeEntry from "./controllers/update-time-entry";
@@ -131,6 +132,29 @@ const timeEntry = new Hono<{
         endTime: endTime ? new Date(endTime) : undefined,
         description,
       });
+      return c.json(timeEntry);
+    },
+  )
+  .delete(
+    "/:id",
+    describeRoute({
+      operationId: "deleteTimeEntry",
+      tags: ["Time Entries"],
+      description: "Delete a time entry",
+      responses: {
+        200: {
+          description: "Time entry deleted successfully",
+          content: {
+            "application/json": { schema: resolver(timeEntrySchema) },
+          },
+        },
+      },
+    }),
+    validator("param", v.object({ id: v.string() })),
+    workspaceAccess.fromTimeEntry(),
+    async (c) => {
+      const { id } = c.req.valid("param");
+      const timeEntry = await deleteTimeEntry(id);
       return c.json(timeEntry);
     },
   );
