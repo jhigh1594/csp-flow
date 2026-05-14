@@ -1050,4 +1050,284 @@ export function registerMcpTools(
       );
     },
   );
+
+  // ── Deletion tools (U2) ──────────────────────────────────────────
+
+  server.registerTool(
+    "delete_task",
+    {
+      description: "Delete a task by ID.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Task ID to delete"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/task/${encodeURIComponent(args.id)}`, {
+          method: "DELETE",
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "delete_project",
+    {
+      description: "Delete a project and all its tasks by ID.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Project ID to delete"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/project/${encodeURIComponent(args.id)}`, {
+          method: "DELETE",
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "delete_label",
+    {
+      description:
+        "Delete a workspace label by ID, or detach a label from a task.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Label ID to delete"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/label/${encodeURIComponent(args.id)}`, {
+          method: "DELETE",
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "delete_comment",
+    {
+      description: "Delete a comment/activity by ID.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Comment/activity ID to delete"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/comment/${encodeURIComponent(args.id)}`, {
+          method: "DELETE",
+        }),
+      ),
+  );
+
+  // ── Column CRUD tools (U3) ──────────────────────────────────────
+
+  server.registerTool(
+    "list_columns",
+    {
+      description: "List all columns for a project or team board.",
+      inputSchema: z.object({
+        projectId: optionalNonEmptyString.describe(
+          "Project ID (use for project boards)",
+        ),
+        teamId: optionalNonEmptyString.describe(
+          "Team ID (use for team boards)",
+        ),
+      }),
+    },
+    async (args) => {
+      if (args.projectId) {
+        return run(() =>
+          client.json(
+            `/api/column?projectId=${encodeURIComponent(args.projectId!)}`,
+          ),
+        );
+      }
+      if (args.teamId) {
+        return run(() =>
+          client.json(`/api/team/${encodeURIComponent(args.teamId!)}/columns`),
+        );
+      }
+      return errorResult("Provide either projectId or teamId");
+    },
+  );
+
+  server.registerTool(
+    "create_column",
+    {
+      description: "Create a new column on a project or team board.",
+      inputSchema: z.object({
+        projectId: optionalNonEmptyString.describe("Project ID"),
+        teamId: optionalNonEmptyString.describe("Team ID"),
+        name: nonEmptyString.describe("Column name"),
+        position: z.number().describe("Column position (0-based)"),
+        icon: optionalNonEmptyString.describe("Column icon"),
+        color: optionalNonEmptyString.describe("Column color (hex)"),
+        isFinal: z
+          .boolean()
+          .optional()
+          .describe("Whether this is a final/done column"),
+      }),
+    },
+    async (args) => {
+      if (args.projectId) {
+        return run(() =>
+          client.json("/api/column", {
+            method: "POST",
+            body: JSON.stringify({
+              projectId: args.projectId,
+              name: args.name,
+              position: args.position,
+              icon: args.icon,
+              color: args.color,
+            }),
+          }),
+        );
+      }
+      if (args.teamId) {
+        return run(() =>
+          client.json(`/api/team/${encodeURIComponent(args.teamId!)}/columns`, {
+            method: "POST",
+            body: JSON.stringify({
+              name: args.name,
+              icon: args.icon,
+              color: args.color,
+              isFinal: args.isFinal,
+            }),
+          }),
+        );
+      }
+      return errorResult("Provide either projectId or teamId");
+    },
+  );
+
+  server.registerTool(
+    "update_column",
+    {
+      description: "Update a column's name, position, or other properties.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Column ID"),
+        name: optionalNonEmptyString.describe("New name"),
+        position: z.number().optional().describe("New position"),
+        icon: optionalNonEmptyString.describe("New icon"),
+        color: optionalNonEmptyString.describe("New color (hex)"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/column/${encodeURIComponent(args.id)}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            name: args.name,
+            position: args.position,
+            icon: args.icon,
+            color: args.color,
+          }),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "delete_column",
+    {
+      description: "Delete a column from a board.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Column ID to delete"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/column/${encodeURIComponent(args.id)}`, {
+          method: "DELETE",
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "reorder_columns",
+    {
+      description:
+        "Reorder columns on a team board. Provide an array of { id, position }.",
+      inputSchema: z.object({
+        teamId: nonEmptyString.describe("Team ID"),
+        columns: z
+          .array(
+            z.object({
+              id: nonEmptyString.describe("Column ID"),
+              position: z.number().describe("New position"),
+            }),
+          )
+          .describe("Ordered list of column IDs with their new positions"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(
+          `/api/team/${encodeURIComponent(args.teamId)}/columns/reorder`,
+          {
+            method: "PUT",
+            body: JSON.stringify({ columns: args.columns }),
+          },
+        ),
+      ),
+  );
+
+  // ── Task relation tools (U3) ────────────────────────────────────
+
+  server.registerTool(
+    "list_task_relations",
+    {
+      description:
+        "List all task relations (dependencies, subtasks) for a task.",
+      inputSchema: z.object({
+        taskId: nonEmptyString.describe("Task ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(
+          `/api/task-relation?taskId=${encodeURIComponent(args.taskId)}`,
+        ),
+      ),
+  );
+
+  server.registerTool(
+    "create_task_relation",
+    {
+      description:
+        "Create a relation between two tasks (blocks, blocked_by, subtask, related).",
+      inputSchema: z.object({
+        taskId: nonEmptyString.describe("Source task ID"),
+        relatedTaskId: nonEmptyString.describe("Target task ID"),
+        type: z
+          .enum(["blocks", "blocked_by", "subtask", "related"])
+          .describe("Relation type"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json("/api/task-relation", {
+          method: "POST",
+          body: JSON.stringify({
+            taskId: args.taskId,
+            relatedTaskId: args.relatedTaskId,
+            type: args.type,
+          }),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "delete_task_relation",
+    {
+      description: "Delete a task relation by ID.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Task relation ID to delete"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/task-relation/${encodeURIComponent(args.id)}`, {
+          method: "DELETE",
+        }),
+      ),
+  );
 }
