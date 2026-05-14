@@ -8,6 +8,7 @@ import createProjectCtrl from "./controllers/create-project";
 import deleteProjectCtrl from "./controllers/delete-project";
 import getProjectCtrl from "./controllers/get-project";
 import getProjectsCtrl from "./controllers/get-projects";
+import patchProjectCtrl from "./controllers/patch-project";
 import unarchiveProjectCtrl from "./controllers/unarchive-project";
 import updateProjectCtrl from "./controllers/update-project";
 
@@ -111,6 +112,41 @@ const project = new Hono<{
       const workspaceId = c.get("workspaceId");
       const projectData = await getProjectCtrl(id, workspaceId);
       return c.json(projectData);
+    },
+  )
+  .patch(
+    "/:id",
+    describeRoute({
+      operationId: "patchProject",
+      tags: ["Projects"],
+      description: "Partially update a project (only provided fields change)",
+      responses: {
+        200: {
+          description: "Project updated successfully",
+          content: {
+            "application/json": { schema: resolver(projectSchema) },
+          },
+        },
+      },
+    }),
+    validator("param", v.object({ id: v.string() })),
+    validator(
+      "json",
+      v.object({
+        name: v.optional(v.string()),
+        icon: v.optional(v.string()),
+        slug: v.optional(v.string()),
+        description: v.optional(v.string()),
+        isPublic: v.optional(v.boolean()),
+      }),
+    ),
+    workspaceAccess.fromProject(),
+    async (c) => {
+      const { id } = c.req.valid("param");
+      const patch = c.req.valid("json");
+      const workspaceId = c.get("workspaceId");
+      const updatedProject = await patchProjectCtrl(id, patch, workspaceId);
+      return c.json(updatedProject);
     },
   )
   .put(

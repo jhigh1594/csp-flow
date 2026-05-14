@@ -1,5 +1,5 @@
 import type * as React from "react";
-
+import { HelpPanel } from "@/components/help-panel";
 import { NavMain } from "@/components/nav-main";
 import { NavTeams } from "@/components/nav-teams";
 import { ThemeToggleDropdown } from "@/components/theme-toggle-dropdown";
@@ -45,7 +45,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <div className="flex items-center justify-between">
           <VersionDisplay />
-          <ThemeToggleDropdown />
+          <div className="flex items-center gap-1">
+            <HelpPanel />
+            <ThemeToggleDropdown />
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>

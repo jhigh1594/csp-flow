@@ -1,4 +1,5 @@
 import { createContext, type PropsWithChildren } from "react";
+import { useSSE } from "@/hooks/use-sse";
 import { authClient } from "@/lib/auth-client";
 import type { User } from "@/types/user";
 import { LoadingSkeleton } from "../../ui/loading-skeleton";
@@ -15,6 +16,10 @@ export const AuthContext = createContext<{
 
 function AuthProvider({ children }: PropsWithChildren) {
   const { data, isPending } = useSession();
+  const isAuthenticated = !!data?.user;
+
+  // Subscribe to SSE for real-time cache invalidation when authenticated.
+  useSSE(isAuthenticated);
 
   if (isPending) {
     return <LoadingSkeleton />;

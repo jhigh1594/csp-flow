@@ -21,6 +21,7 @@ import comment from "./comment";
 import config from "./config";
 import db, { schema } from "./database";
 import discordIntegration from "./discord-integration";
+import { sseHandler } from "./events/sse";
 import externalLink from "./external-link";
 import genericWebhookIntegration from "./generic-webhook-integration";
 import giteaIntegration, { handleGiteaWebhookRoute } from "./gitea-integration";
@@ -449,6 +450,22 @@ export function createApp() {
   });
 
   const projectApi = api.route("/project", project);
+
+  api.get(
+    "/events/stream",
+    describeRoute({
+      operationId: "sseEvents",
+      tags: ["Events"],
+      description: "Server-Sent Events stream for real-time event updates",
+      responses: {
+        200: {
+          description: "SSE event stream",
+        },
+      },
+    }),
+    sseHandler,
+  );
+
   const taskApi = api.route("/task", task);
   const columnApi = api.route("/column", column);
   const activityApi = api.route("/activity", activity);
