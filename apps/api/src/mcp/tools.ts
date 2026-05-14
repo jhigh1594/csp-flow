@@ -1544,6 +1544,342 @@ export function registerMcpTools(
       ),
   );
 
+  // ── Time entry tools (U5) ────────────────────────────────────────
+
+  server.registerTool(
+    "list_time_entries",
+    {
+      description: "List time entries for a task.",
+      inputSchema: z.object({
+        taskId: nonEmptyString.describe("Task ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/time-entry/task/${encodeURIComponent(args.taskId)}`, {
+          method: "GET",
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "create_time_entry",
+    {
+      description: "Log a time entry for a task.",
+      inputSchema: z.object({
+        taskId: nonEmptyString.describe("Task ID"),
+        startTime: isoDateTimeSchema.describe("Start time (ISO 8601)"),
+        endTime: optionalIsoDateTimeSchema.describe("End time (ISO 8601)"),
+        description: z.string().optional().describe("Time entry description"),
+      }),
+    },
+    async (args) => {
+      const body: Record<string, unknown> = {
+        taskId: args.taskId,
+        startTime: args.startTime,
+      };
+      if (args.endTime !== undefined) body.endTime = args.endTime;
+      if (args.description !== undefined) body.description = args.description;
+      return run(() =>
+        client.json("/api/time-entry", {
+          method: "POST",
+          body: JSON.stringify(body),
+        }),
+      );
+    },
+  );
+
+  server.registerTool(
+    "update_time_entry",
+    {
+      description: "Update a time entry.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Time entry ID"),
+        startTime: optionalIsoDateTimeSchema.describe(
+          "New start time (ISO 8601)",
+        ),
+        endTime: optionalIsoDateTimeSchema.describe("New end time (ISO 8601)"),
+        description: z.string().optional().describe("New description"),
+      }),
+    },
+    async (args) => {
+      const { id, ...patch } = args;
+      return run(() =>
+        client.json(`/api/time-entry/${encodeURIComponent(id)}`, {
+          method: "PUT",
+          body: JSON.stringify(patch),
+        }),
+      );
+    },
+  );
+
+  server.registerTool(
+    "delete_time_entry",
+    {
+      description: "Delete a time entry by ID.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Time entry ID to delete"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/time-entry/${encodeURIComponent(args.id)}`, {
+          method: "DELETE",
+        }),
+      ),
+  );
+
+  // ── Notification tools (U5) ──────────────────────────────────────
+
+  server.registerTool(
+    "list_notifications",
+    {
+      description: "List notifications for a workspace.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+      }),
+    },
+    async (args) => {
+      const qs = new URLSearchParams({ workspaceId: args.workspaceId });
+      return run(() =>
+        client.json(`/api/notification?${qs.toString()}`, { method: "GET" }),
+      );
+    },
+  );
+
+  server.registerTool(
+    "mark_notification_read",
+    {
+      description: "Mark a single notification as read.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Notification ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/notification/${encodeURIComponent(args.id)}/read`, {
+          method: "POST",
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "mark_all_notifications_read",
+    {
+      description: "Mark all notifications as read in a workspace.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json("/api/notification/read-all", {
+          method: "POST",
+          body: JSON.stringify({ workspaceId: args.workspaceId }),
+        }),
+      ),
+  );
+
+  server.registerTool(
+    "clear_notifications",
+    {
+      description: "Clear all notifications in a workspace.",
+      inputSchema: z.object({
+        workspaceId: nonEmptyString.describe("Workspace ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(
+          `/api/notification?workspaceId=${encodeURIComponent(args.workspaceId)}`,
+          {
+            method: "DELETE",
+          },
+        ),
+      ),
+  );
+
+  // ── Activity tools (U5) ──────────────────────────────────────────
+
+  server.registerTool(
+    "list_task_activities",
+    {
+      description: "List activity/audit log entries for a task.",
+      inputSchema: z.object({
+        taskId: nonEmptyString.describe("Task ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/activity/${encodeURIComponent(args.taskId)}`, {
+          method: "GET",
+        }),
+      ),
+  );
+
+  // ── Label gap tools (U5) ─────────────────────────────────────────
+
+  server.registerTool(
+    "get_labels_by_task",
+    {
+      description: "Get all labels attached to a specific task.",
+      inputSchema: z.object({
+        taskId: nonEmptyString.describe("Task ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/label?taskId=${encodeURIComponent(args.taskId)}`, {
+          method: "GET",
+        }),
+      ),
+  );
+
+  // ── Comment gap tools (U5) ───────────────────────────────────────
+
+  server.registerTool(
+    "update_comment",
+    {
+      description: "Update the content of an existing comment.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Comment ID"),
+        comment: nonEmptyString.describe("Updated comment content"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/comment/${encodeURIComponent(args.id)}`, {
+          method: "PUT",
+          body: JSON.stringify({ comment: args.comment }),
+        }),
+      ),
+  );
+
+  // ── Workflow rule tools (U5) ─────────────────────────────────────
+
+  server.registerTool(
+    "list_workflow_rules",
+    {
+      description: "List workflow rules for a project.",
+      inputSchema: z.object({
+        projectId: nonEmptyString.describe("Project ID"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(
+          `/api/workflow-rule?projectId=${encodeURIComponent(args.projectId)}`,
+          { method: "GET" },
+        ),
+      ),
+  );
+
+  server.registerTool(
+    "upsert_workflow_rule",
+    {
+      description:
+        "Create or update a workflow rule that triggers an action when a task transitions between statuses.",
+      inputSchema: z.object({
+        projectId: nonEmptyString.describe("Project ID"),
+        fromStatus: nonEmptyString.describe("Source status name"),
+        toStatus: nonEmptyString.describe("Target status name"),
+        action: nonEmptyString.describe(
+          "Action to trigger (e.g. assign, notify)",
+        ),
+        config: z
+          .record(z.unknown())
+          .optional()
+          .describe("Action configuration (key-value pairs)"),
+      }),
+    },
+    async (args) => {
+      const body: Record<string, unknown> = {
+        projectId: args.projectId,
+        fromStatus: args.fromStatus,
+        toStatus: args.toStatus,
+        action: args.action,
+      };
+      if (args.config !== undefined) body.config = args.config;
+      return run(() =>
+        client.json("/api/workflow-rule", {
+          method: "POST",
+          body: JSON.stringify(body),
+        }),
+      );
+    },
+  );
+
+  server.registerTool(
+    "delete_workflow_rule",
+    {
+      description: "Delete a workflow rule by ID.",
+      inputSchema: z.object({
+        id: nonEmptyString.describe("Workflow rule ID to delete"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json(`/api/workflow-rule/${encodeURIComponent(args.id)}`, {
+          method: "DELETE",
+        }),
+      ),
+  );
+
+  // ── User profile tools (U5) ──────────────────────────────────────
+
+  server.registerTool(
+    "update_profile",
+    {
+      description: "Update the current user's profile (name and/or avatar).",
+      inputSchema: z.object({
+        name: optionalNonEmptyString.describe("New display name"),
+        image: z.string().optional().describe("New avatar image URL"),
+      }),
+    },
+    async (args) => {
+      const body: Record<string, string> = {};
+      if (args.name !== undefined) body.name = args.name;
+      if (args.image !== undefined) body.image = args.image;
+      return run(() =>
+        client.json("/api/auth/update-user", {
+          method: "POST",
+          body: JSON.stringify(body),
+        }),
+      );
+    },
+  );
+
+  // ── Bulk operation tools (U5) ────────────────────────────────────
+
+  server.registerTool(
+    "bulk_update_tasks",
+    {
+      description:
+        "Apply the same updates to multiple tasks at once (e.g. change status, assignee, or priority for a batch of tasks).",
+      inputSchema: z.object({
+        projectId: nonEmptyString.describe("Project ID the tasks belong to"),
+        taskIds: z
+          .array(nonEmptyString)
+          .min(1)
+          .describe("Array of task IDs to update"),
+        updates: z
+          .record(z.unknown())
+          .describe("Fields to update (e.g. { status, priority, userId })"),
+      }),
+    },
+    async (args) =>
+      run(() =>
+        client.json("/api/task/bulk", {
+          method: "POST",
+          body: JSON.stringify({
+            projectId: args.projectId,
+            taskIds: args.taskIds,
+            updates: args.updates,
+          }),
+        }),
+      ),
+  );
+
   // ── Context injection tools (U10) ──────────────────────────────────
 
   registerContextTools(server, client);
