@@ -17,7 +17,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { produce } from "immer";
 import { useEffect, useState } from "react";
+import { shortcuts } from "@/constants/shortcuts";
+import { useDeleteTask } from "@/hooks/mutations/task/use-delete-task";
 import { useUpdateTask } from "@/hooks/mutations/task/use-update-task";
+import { useUpdateTaskStatus } from "@/hooks/mutations/task/use-update-task-status";
 import { useRegisterShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import useBulkSelectionStore from "@/store/bulk-selection";
 import useProjectStore from "@/store/project";
@@ -48,7 +51,16 @@ function KanbanBoard({
   } = useBulkSelectionStore();
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const { mutate: updateTask } = useUpdateTask();
+  const { mutate: updateTaskStatus } = useUpdateTaskStatus();
+  const { mutate: deleteTask } = useDeleteTask();
   const navigate = useNavigate();
+
+  const focusedTask =
+    project && focusedTaskId
+      ? project.columns
+          .flatMap((col) => col.tasks)
+          .find((t) => t.id === focusedTaskId)
+      : null;
 
   useEffect(() => {
     if (project?.columns) {
@@ -79,21 +91,77 @@ function KanbanBoard({
           navigate({ to: ".", search: { taskId: state.focusedTaskId } });
         }
       },
-      Enter: () => {
+      e: () => {
         if (focusedTaskId && project) {
           const task = project.columns
             .flatMap((col) => col.tasks)
             .find((t) => t.id === focusedTaskId);
           if (!task?.projectId) return;
           navigate({
-            to: "/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId",
+            to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/task/$taskId",
             params: {
               workspaceId: project.workspaceId,
+              teamId: teamId ?? "",
               projectId: task.projectId,
               taskId: focusedTaskId,
             },
           });
         }
+      },
+      enter: () => {
+        if (focusedTaskId && project) {
+          const task = project.columns
+            .flatMap((col) => col.tasks)
+            .find((t) => t.id === focusedTaskId);
+          if (!task?.projectId) return;
+          navigate({
+            to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/task/$taskId",
+            params: {
+              workspaceId: project.workspaceId,
+              teamId: teamId ?? "",
+              projectId: task.projectId,
+              taskId: focusedTaskId,
+            },
+          });
+        }
+      },
+      delete: () => {
+        if (focusedTaskId && window.confirm("Delete this task?")) {
+          deleteTask(focusedTaskId);
+          clearFocus();
+        }
+      },
+    },
+    sequentialShortcuts: {
+      [shortcuts.taskDetails.status]: {
+        t: () => {
+          if (!focusedTask) return;
+          updateTaskStatus({
+            ...focusedTask,
+            status: "todo",
+          } as typeof focusedTask);
+        },
+        i: () => {
+          if (!focusedTask) return;
+          updateTaskStatus({
+            ...focusedTask,
+            status: "in_progress",
+          } as typeof focusedTask);
+        },
+        r: () => {
+          if (!focusedTask) return;
+          updateTaskStatus({
+            ...focusedTask,
+            status: "in_review",
+          } as typeof focusedTask);
+        },
+        d: () => {
+          if (!focusedTask) return;
+          updateTaskStatus({
+            ...focusedTask,
+            status: "done",
+          } as typeof focusedTask);
+        },
       },
     },
   });

@@ -1,6 +1,7 @@
 import type React from "react";
 import type { ReactNode } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
+import CommandPalette from "@/components/command-palette";
 import { DemoAlert } from "@/components/demo-alert";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { isDemoMode } from "@/constants/urls";
@@ -71,6 +72,7 @@ function Layout({ children, className }: LayoutProps) {
           {children}
         </SidebarInset>
       </SidebarProvider>
+      <CommandPalette />
     </div>
   );
 }

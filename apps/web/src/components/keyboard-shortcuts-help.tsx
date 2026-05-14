@@ -102,8 +102,20 @@ function useShortcutCategories(): ShortcutCategory[] {
             description: t("navigation:keyboardShortcuts.items.prevTask"),
           },
           {
-            keys: ["Enter"],
+            keys: ["enter"],
             description: t("navigation:keyboardShortcuts.items.openTask"),
+          },
+          {
+            keys: [shortcuts.go.prefix, shortcuts.go.home],
+            description: t("navigation:keyboardShortcuts.items.goHome"),
+          },
+          {
+            keys: [shortcuts.go.prefix, shortcuts.go.members],
+            description: t("navigation:keyboardShortcuts.items.goMembers"),
+          },
+          {
+            keys: [shortcuts.go.prefix, shortcuts.go.settings],
+            description: t("navigation:keyboardShortcuts.items.goSettings"),
           },
         ],
       },
@@ -115,6 +127,35 @@ function useShortcutCategories(): ShortcutCategory[] {
             description: t(
               "navigation:keyboardShortcuts.items.quickSelectNumber",
             ),
+          },
+        ],
+      },
+      {
+        title: t("navigation:keyboardShortcuts.categories.taskActions"),
+        shortcuts: [
+          {
+            keys: ["e"],
+            description: t("navigation:keyboardShortcuts.items.editTask"),
+          },
+          {
+            keys: ["delete"],
+            description: t("navigation:keyboardShortcuts.items.deleteTask"),
+          },
+          {
+            keys: [shortcuts.taskDetails.status, "t"],
+            description: `${t("navigation:keyboardShortcuts.items.changeStatus")} → Todo`,
+          },
+          {
+            keys: [shortcuts.taskDetails.status, "i"],
+            description: `${t("navigation:keyboardShortcuts.items.changeStatus")} → In Progress`,
+          },
+          {
+            keys: [shortcuts.taskDetails.status, "r"],
+            description: `${t("navigation:keyboardShortcuts.items.changeStatus")} → In Review`,
+          },
+          {
+            keys: [shortcuts.taskDetails.status, "d"],
+            description: `${t("navigation:keyboardShortcuts.items.changeStatus")} → Done`,
           },
         ],
       },

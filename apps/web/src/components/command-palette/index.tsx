@@ -43,7 +43,7 @@ type PaletteGroup = {
 
 function CommandPalette() {
   const { t } = useTranslation();
-  const { setTheme } = useUserPreferencesStore();
+  const { setTheme, setViewMode } = useUserPreferencesStore();
   const navigate = useNavigate();
   const location = useLocation();
   const { data: workspace } = useActiveWorkspace();
@@ -87,6 +87,25 @@ function CommandPalette() {
           setIsCreateWorkspaceOpen(true);
         },
       },
+      [shortcuts.go.prefix]: {
+        [shortcuts.go.home]: () => {
+          if (!workspace?.id) return;
+          navigate({
+            to: "/dashboard/workspace/$workspaceId",
+            params: { workspaceId: workspace.id },
+          });
+        },
+        [shortcuts.go.members]: () => {
+          if (!workspace?.id) return;
+          navigate({
+            to: "/dashboard/workspace/$workspaceId/members",
+            params: { workspaceId: workspace.id },
+          });
+        },
+        [shortcuts.go.settings]: () => {
+          navigate({ to: "/dashboard/settings" });
+        },
+      },
     },
   });
 
@@ -122,6 +141,7 @@ function CommandPalette() {
           {
             value: "members",
             label: t("navigation:commandPalette.members"),
+            shortcut: `${shortcuts.go.prefix} ${shortcuts.go.members}`,
             onRun: () => {
               if (!workspace?.id) return;
               navigate({
@@ -183,8 +203,61 @@ function CommandPalette() {
           },
         ],
       },
+      {
+        value: "navigation",
+        label: t("navigation:commandPalette.navigation"),
+        items: [
+          {
+            value: "go-home",
+            label: t("navigation:commandPalette.goHome"),
+            shortcut: `${shortcuts.go.prefix} ${shortcuts.go.home}`,
+            onRun: () => {
+              if (!workspace?.id) return;
+              navigate({
+                to: "/dashboard/workspace/$workspaceId",
+                params: { workspaceId: workspace.id },
+              });
+            },
+          },
+          {
+            value: "go-settings",
+            label: t("navigation:commandPalette.goSettings"),
+            shortcut: `${shortcuts.go.prefix} ${shortcuts.go.settings}`,
+            onRun: () => navigate({ to: "/dashboard/settings" }),
+          },
+          {
+            value: "view-board",
+            label: t("navigation:commandPalette.boardView"),
+            shortcut: `${shortcuts.view.prefix} ${shortcuts.view.board}`,
+            onRun: () => setViewMode("board"),
+          },
+          {
+            value: "view-list",
+            label: t("navigation:commandPalette.listView"),
+            shortcut: `${shortcuts.view.prefix} ${shortcuts.view.list}`,
+            onRun: () => setViewMode("list"),
+          },
+          {
+            value: "view-gantt",
+            label: t("navigation:commandPalette.ganttView"),
+            shortcut: `${shortcuts.view.prefix} ${shortcuts.view.gantt}`,
+            onRun: () => {
+              const match = location.pathname.match(/\/project\/([^/]+)/);
+              if (!match || !workspace?.id) return;
+              navigate({
+                to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/gantt",
+                params: {
+                  workspaceId: workspace.id,
+                  teamId: location.pathname.match(/\/team\/([^/]+)/)?.[1] ?? "",
+                  projectId: match[1],
+                },
+              });
+            },
+          },
+        ],
+      },
     ],
-    [navigate, setTheme, t, workspace?.id],
+    [navigate, setTheme, setViewMode, t, workspace?.id, location.pathname],
   );
 
   const shortcutHandlers = useMemo(() => {

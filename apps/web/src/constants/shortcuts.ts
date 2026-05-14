@@ -37,6 +37,12 @@ export const shortcuts = {
     list: "l",
     backlog: "k",
   },
+  go: {
+    prefix: "g",
+    home: "h",
+    members: "m",
+    settings: "s",
+  },
   taskDetails: {
     status: "s",
     priority: "p",

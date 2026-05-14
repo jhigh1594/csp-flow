@@ -177,6 +177,9 @@ export function WorkspaceSwitcher() {
                   className="h-7 text-sm data-highlighted:bg-sidebar-accent data-highlighted:text-sidebar-accent-foreground"
                 >
                   <span>{t("navigation:workspaceSwitcher.addWorkspace")}</span>
+                  <DropdownMenuShortcut>
+                    {shortcuts.workspace.prefix} {shortcuts.workspace.create}
+                  </DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

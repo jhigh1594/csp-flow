@@ -14,6 +14,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { shortcuts } from "@/constants/shortcuts";
 import { usePendingInvitations } from "@/hooks/queries/invitation/use-pending-invitations";
 import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
 
@@ -34,6 +35,7 @@ export function NavMain() {
       isActive:
         window.location.pathname === `/dashboard/workspace/${workspace.id}`,
       badge: null,
+      shortcut: `${shortcuts.project.prefix} ${shortcuts.project.list}`,
     },
     {
       title: t("navigation:sidebar.members"),
@@ -87,6 +89,11 @@ export function NavMain() {
                     {item.badge !== null && (
                       <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-sm border border-sidebar-border/60 px-1 text-[11px] font-medium text-sidebar-foreground/80">
                         {item.badge}
+                      </span>
+                    )}
+                    {item.shortcut && (
+                      <span className="ml-auto flex h-4 items-center rounded border border-sidebar-border/60 bg-sidebar-accent/60 px-1 font-mono text-[0.625rem] text-sidebar-foreground/50">
+                        {item.shortcut}
                       </span>
                     )}
                   </SidebarMenuButton>

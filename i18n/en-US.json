@@ -1022,7 +1022,13 @@
 				"navigate": "Navigate",
 				"open": "Open",
 				"close": "Close"
-			}
+			},
+			"navigation": "Navigation",
+			"goHome": "Go to workspace home",
+			"goSettings": "Go to settings",
+			"boardView": "Switch to board view",
+			"listView": "Switch to list view",
+			"ganttView": "Switch to gantt view"
 		},
 		"notifications": "Notifications",
 		"sidebar": {
@@ -1092,7 +1098,8 @@
 				"create": "Create",
 				"views": "Views",
 				"navigation": "Navigation",
-				"quickSelect": "Quick Select (in popovers)"
+				"quickSelect": "Quick Select (in popovers)",
+				"taskActions": "Task Actions"
 			},
 			"items": {
 				"openCommandPalette": "Open command palette",
@@ -1109,7 +1116,14 @@
 				"nextTask": "Next task",
 				"prevTask": "Previous task",
 				"openTask": "Open selected task",
-				"quickSelectNumber": "Select option by number"
+				"quickSelectNumber": "Select option by number",
+				"ganttView": "Switch to gantt view",
+				"editTask": "Edit selected task",
+				"deleteTask": "Delete selected task",
+				"changeStatus": "Change task status",
+				"goHome": "Go to workspace home",
+				"goMembers": "Go to members",
+				"goSettings": "Go to settings"
 			}
 		}
 	},
