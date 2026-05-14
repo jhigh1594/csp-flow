@@ -2,7 +2,6 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import type { KaneoClient } from "../kaneo/client.js";
-import { buildFullTaskUpdateBody } from "../kaneo/task-helpers.js";
 import { errorResult, textResult } from "../utils/mcp-result.js";
 
 const prioritySchema = z.enum([
@@ -126,8 +125,7 @@ export function registerTools(
   server.registerTool(
     "update_project",
     {
-      description:
-        "Update project metadata (PATCH-style: only provided fields are changed).",
+      description: "Update project metadata. Only provided fields are changed.",
       inputSchema: z.object({
         id: nonEmptyString,
         name: optionalNonEmptyString,
@@ -139,49 +137,18 @@ export function registerTools(
     },
     async (args) => {
       const { id, ...patch } = args;
-      return run(async () => {
-        const existing = (await client.json(
-          `/api/project/${encodeURIComponent(id)}`,
-          { method: "GET" },
-        )) as Record<string, unknown>;
-        const name =
-          patch.name ??
-          (typeof existing.name === "string" ? existing.name : "");
-        if (!name) {
-          throw new Error("Cannot update project: missing name.");
-        }
-        const icon =
-          patch.icon !== undefined
-            ? patch.icon
-            : typeof existing.icon === "string"
-              ? existing.icon
-              : "Layout";
-        const slug =
-          patch.slug ??
-          (typeof existing.slug === "string" ? existing.slug : "");
-        if (!slug) {
-          throw new Error("Cannot update project: missing slug.");
-        }
-        const description =
-          patch.description !== undefined
-            ? patch.description
-            : typeof existing.description === "string"
-              ? existing.description
-              : "";
-        const isPublic =
-          patch.isPublic !== undefined
-            ? patch.isPublic
-            : typeof existing.isPublic === "boolean"
-              ? existing.isPublic
-              : false;
-
-        const body = { name, icon, slug, description, isPublic };
-
-        return client.json(`/api/project/${encodeURIComponent(id)}`, {
-          method: "PUT",
-          body: JSON.stringify(body),
-        });
-      });
+      const filtered = Object.fromEntries(
+        Object.entries(patch).filter(([, v]) => v !== undefined),
+      );
+      if (Object.keys(filtered).length === 0) {
+        return errorResult("No fields provided to update.");
+      }
+      return run(() =>
+        client.json(`/api/project/${encodeURIComponent(id)}`, {
+          method: "PATCH",
+          body: JSON.stringify(filtered),
+        }),
+      );
     },
   );
 
@@ -275,38 +242,92 @@ export function registerTools(
     },
   );
 
-  const updateTaskSchema = z.object({
-    taskId: nonEmptyString,
-    title: optionalNonEmptyString,
-    description: z.string().nullable().optional(),
-    status: optionalNonEmptyString,
-    priority: prioritySchema.optional(),
-    projectId: optionalNonEmptyString,
-    position: z.number().optional(),
-    startDate: nullableOptionalIsoDateTimeSchema,
-    dueDate: nullableOptionalIsoDateTimeSchema,
-    userId: nullableOptionalNonEmptyString,
-  });
-
   server.registerTool(
     "update_task",
     {
       description:
-        "Update a task (fetches current task, merges fields, then full update).",
-      inputSchema: updateTaskSchema,
+        "Update one or more task fields. Dispatches to field-specific API endpoints — no read-merge-write.",
+      inputSchema: z.object({
+        taskId: nonEmptyString,
+        title: optionalNonEmptyString,
+        description: z.string().nullable().optional(),
+        status: optionalNonEmptyString,
+        priority: prioritySchema.optional(),
+        userId: nullableOptionalNonEmptyString,
+        dueDate: nullableOptionalIsoDateTimeSchema,
+        startDate: nullableOptionalIsoDateTimeSchema,
+        roadmapGroup: nullableOptionalNonEmptyString,
+      }),
     },
     async (args) => {
       const { taskId, ...patch } = args;
+      const ops: Promise<unknown>[] = [];
+      const enc = encodeURIComponent(taskId);
+
+      if (patch.status !== undefined) {
+        ops.push(
+          client.json(`/api/task/status/${enc}`, {
+            method: "PUT",
+            body: JSON.stringify({ status: patch.status }),
+          }),
+        );
+      }
+      if (patch.priority !== undefined) {
+        ops.push(
+          client.json(`/api/task/priority/${enc}`, {
+            method: "PUT",
+            body: JSON.stringify({ priority: patch.priority }),
+          }),
+        );
+      }
+      if (patch.title !== undefined) {
+        ops.push(
+          client.json(`/api/task/title/${enc}`, {
+            method: "PUT",
+            body: JSON.stringify({ title: patch.title }),
+          }),
+        );
+      }
+      if (patch.description !== undefined) {
+        ops.push(
+          client.json(`/api/task/description/${enc}`, {
+            method: "PUT",
+            body: JSON.stringify({ description: patch.description ?? "" }),
+          }),
+        );
+      }
+      if (patch.userId !== undefined) {
+        ops.push(
+          client.json(`/api/task/assignee/${enc}`, {
+            method: "PUT",
+            body: JSON.stringify({ userId: patch.userId ?? "" }),
+          }),
+        );
+      }
+      if (patch.dueDate !== undefined) {
+        ops.push(
+          client.json(`/api/task/due-date/${enc}`, {
+            method: "PUT",
+            body: JSON.stringify({ dueDate: patch.dueDate }),
+          }),
+        );
+      }
+      if (patch.roadmapGroup !== undefined) {
+        ops.push(
+          client.json(`/api/task/roadmap-group/${enc}`, {
+            method: "PUT",
+            body: JSON.stringify({ roadmapGroup: patch.roadmapGroup }),
+          }),
+        );
+      }
+
+      if (ops.length === 0) {
+        return errorResult("No fields provided to update.");
+      }
+
       return run(async () => {
-        const existing = (await client.json(
-          `/api/task/${encodeURIComponent(taskId)}`,
-          { method: "GET" },
-        )) as Record<string, unknown>;
-        const body = buildFullTaskUpdateBody(existing, patch);
-        return client.json(`/api/task/${encodeURIComponent(taskId)}`, {
-          method: "PUT",
-          body: JSON.stringify(body),
-        });
+        await Promise.all(ops);
+        return client.json(`/api/task/${enc}`);
       });
     },
   );
