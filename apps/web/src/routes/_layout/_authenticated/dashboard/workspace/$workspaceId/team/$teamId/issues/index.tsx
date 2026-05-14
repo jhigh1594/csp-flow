@@ -373,13 +373,15 @@ function RouteComponent() {
   );
 
   // Gate: only initialize store when identity changes; don't overwrite optimistic drag updates
+  // Must wait until loading finishes so we don't seed the store with empty columns/tasks
   // biome-ignore lint/correctness/useExhaustiveDependencies: intentionally tracking storeProject.id not full object
   useEffect(() => {
+    if (isLoading) return;
     if (storeProject === undefined || storeProject.id !== teamId) {
       setProject(adapted);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [adapted, storeProject?.id, teamId, setProject]);
+  }, [adapted, storeProject?.id, teamId, setProject, isLoading]);
 
   const boardProject: ProjectWithTasks =
     storeProject !== undefined && storeProject.id === teamId
