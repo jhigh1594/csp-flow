@@ -35,7 +35,7 @@ export function NavMain() {
       isActive:
         window.location.pathname === `/dashboard/workspace/${workspace.id}`,
       badge: null,
-      shortcut: `${shortcuts.project.prefix} ${shortcuts.project.list}`,
+      shortcut: `${shortcuts.go.prefix} ${shortcuts.go.home}`,
     },
     {
       title: t("navigation:sidebar.members"),

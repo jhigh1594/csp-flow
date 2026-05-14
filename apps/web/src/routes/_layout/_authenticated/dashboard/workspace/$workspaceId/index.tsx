@@ -44,8 +44,8 @@ function RouteComponent() {
 
   useRegisterShortcuts({
     sequentialShortcuts: {
-      [shortcuts.project.prefix]: {
-        [shortcuts.project.create]: handleCreateProject,
+      [shortcuts.new.prefix]: {
+        [shortcuts.new.project]: handleCreateProject,
       },
     },
   });

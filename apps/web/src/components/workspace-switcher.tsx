@@ -91,12 +91,9 @@ export function WorkspaceSwitcher() {
 
   useRegisterShortcuts({
     sequentialShortcuts: {
-      [shortcuts.workspace.prefix]: {
-        [shortcuts.workspace.switch]: () => {
+      [shortcuts.go.prefix]: {
+        [shortcuts.go.workspace]: () => {
           setIsOpen(true);
-        },
-        [shortcuts.workspace.create]: () => {
-          setIsCreateWorkspaceModalOpen(true);
         },
       },
     },
@@ -178,7 +175,7 @@ export function WorkspaceSwitcher() {
                 >
                   <span>{t("navigation:workspaceSwitcher.addWorkspace")}</span>
                   <DropdownMenuShortcut>
-                    {shortcuts.workspace.prefix} {shortcuts.workspace.create}
+                    {shortcuts.new.prefix} {shortcuts.new.workspace}
                   </DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuContent>

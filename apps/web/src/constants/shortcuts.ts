@@ -1,19 +1,13 @@
 import { getModifierKeyText } from "@/hooks/use-keyboard-shortcuts";
 
 export const shortcuts = {
-  project: {
-    prefix: "p",
-    create: "c",
-    list: "l",
-  },
-  workspace: {
-    prefix: "w",
-    switch: "s",
-    create: "c",
-  },
-  notification: {
+  new: {
     prefix: "n",
-    open: "o",
+    project: "p",
+    workspace: "w",
+  },
+  create: {
+    key: "c",
   },
   sidebar: {
     prefix: getModifierKeyText(),
@@ -25,10 +19,6 @@ export const shortcuts = {
   },
   search: {
     prefix: "/",
-  },
-  task: {
-    prefix: "t",
-    create: "c",
   },
   view: {
     prefix: "v",
@@ -42,6 +32,7 @@ export const shortcuts = {
     home: "h",
     members: "m",
     settings: "s",
+    workspace: "w",
   },
   taskDetails: {
     status: "s",

@@ -57,6 +57,7 @@ function CommandPalette() {
 
   useRegisterShortcuts({
     shortcuts: {
+      [shortcuts.create.key]: () => setIsCreateTaskOpen(true),
       [shortcuts.help.key]: () => {
         document.dispatchEvent(new KeyboardEvent("keydown", { key: "?" }));
       },
@@ -69,21 +70,9 @@ function CommandPalette() {
       },
     },
     sequentialShortcuts: {
-      [shortcuts.project.prefix]: {
-        [shortcuts.project.list]: () => {
-          if (!workspace?.id) return;
-          navigate({
-            to: "/dashboard/workspace/$workspaceId",
-            params: { workspaceId: workspace.id },
-          });
-        },
-        [shortcuts.project.create]: () => setIsCreateProjectOpen(true),
-      },
-      [shortcuts.task.prefix]: {
-        [shortcuts.task.create]: () => setIsCreateTaskOpen(true),
-      },
-      [shortcuts.workspace.prefix]: {
-        [shortcuts.workspace.create]: () => {
+      [shortcuts.new.prefix]: {
+        [shortcuts.new.project]: () => setIsCreateProjectOpen(true),
+        [shortcuts.new.workspace]: () => {
           setIsCreateWorkspaceOpen(true);
         },
       },
@@ -123,7 +112,7 @@ function CommandPalette() {
           {
             value: "projects",
             label: t("navigation:commandPalette.projects"),
-            shortcut: `${shortcuts.project.prefix} ${shortcuts.project.list}`,
+            shortcut: `${shortcuts.go.prefix} ${shortcuts.go.home}`,
             onRun: () => {
               if (!workspace?.id) return;
               navigate({
@@ -153,13 +142,13 @@ function CommandPalette() {
           {
             value: "create-task",
             label: t("navigation:commandPalette.createTask"),
-            shortcut: `${shortcuts.task.prefix} ${shortcuts.task.create}`,
+            shortcut: shortcuts.create.key,
             onRun: () => setIsCreateTaskOpen(true),
           },
           {
             value: "create-project",
             label: t("navigation:commandPalette.createProject"),
-            shortcut: `${shortcuts.project.prefix} ${shortcuts.project.create}`,
+            shortcut: `${shortcuts.new.prefix} ${shortcuts.new.project}`,
             onRun: () => setIsCreateProjectOpen(true),
           },
         ],
@@ -171,7 +160,7 @@ function CommandPalette() {
           {
             value: "create-workspace",
             label: t("navigation:commandPalette.createWorkspace"),
-            shortcut: `${shortcuts.workspace.prefix} ${shortcuts.workspace.create}`,
+            shortcut: `${shortcuts.new.prefix} ${shortcuts.new.workspace}`,
             onRun: () => setIsCreateWorkspaceOpen(true),
           },
           {
@@ -281,6 +270,15 @@ function CommandPalette() {
     let timeout: ReturnType<typeof setTimeout> | undefined;
 
     const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.contentEditable === "true"
+      ) {
+        return;
+      }
+
       if (
         event.metaKey ||
         event.ctrlKey ||

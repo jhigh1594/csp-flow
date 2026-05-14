@@ -58,15 +58,15 @@ function useShortcutCategories(): ShortcutCategory[] {
         title: t("navigation:keyboardShortcuts.categories.create"),
         shortcuts: [
           {
-            keys: [shortcuts.task.prefix, shortcuts.task.create],
+            keys: [shortcuts.create.key],
             description: t("navigation:keyboardShortcuts.items.createTask"),
           },
           {
-            keys: [shortcuts.project.prefix, shortcuts.project.create],
+            keys: [shortcuts.new.prefix, shortcuts.new.project],
             description: t("navigation:keyboardShortcuts.items.createProject"),
           },
           {
-            keys: [shortcuts.workspace.prefix, shortcuts.workspace.create],
+            keys: [shortcuts.new.prefix, shortcuts.new.workspace],
             description: t(
               "navigation:keyboardShortcuts.items.createWorkspace",
             ),
