@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { KbdSequence } from "@/components/ui/kbd";
 import { shortcuts } from "@/constants/shortcuts";
+import { isEditableElement } from "@/lib/dom-utils";
 
 type ShortcutItem = {
   keys: string[];
@@ -173,12 +174,7 @@ export function KeyboardShortcutsHelp() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      const isTyping =
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.contentEditable === "true";
-
-      if (e.key === "?" && !isTyping) {
+      if (e.key === "?" && !isEditableElement(target)) {
         e.preventDefault();
         setOpen(true);
       }

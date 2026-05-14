@@ -25,6 +25,7 @@ import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { shortcuts } from "@/constants/shortcuts";
 import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
 import { useRegisterShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { isEditableElement } from "@/lib/dom-utils";
 import { useUserPreferencesStore } from "@/store/user-preferences";
 import CreateProjectModal from "../shared/modals/create-project-modal";
 
@@ -77,26 +78,30 @@ function CommandPalette() {
         },
       },
       [shortcuts.go.prefix]: {
-        [shortcuts.go.home]: () => {
-          if (!workspace?.id) return;
-          navigate({
-            to: "/dashboard/workspace/$workspaceId",
-            params: { workspaceId: workspace.id },
-          });
-        },
-        [shortcuts.go.members]: () => {
-          if (!workspace?.id) return;
-          navigate({
-            to: "/dashboard/workspace/$workspaceId/members",
-            params: { workspaceId: workspace.id },
-          });
-        },
+        [shortcuts.go.home]: () => navigateHome(),
+        [shortcuts.go.members]: () => navigateToMembers(),
         [shortcuts.go.settings]: () => {
           navigate({ to: "/dashboard/settings" });
         },
       },
     },
   });
+
+  const navigateHome = useCallback(() => {
+    if (!workspace?.id) return;
+    navigate({
+      to: "/dashboard/workspace/$workspaceId",
+      params: { workspaceId: workspace.id },
+    });
+  }, [navigate, workspace?.id]);
+
+  const navigateToMembers = useCallback(() => {
+    if (!workspace?.id) return;
+    navigate({
+      to: "/dashboard/workspace/$workspaceId/members",
+      params: { workspaceId: workspace.id },
+    });
+  }, [navigate, workspace?.id]);
 
   const runCommand = useCallback((command: () => void) => {
     command();
@@ -113,13 +118,7 @@ function CommandPalette() {
             value: "projects",
             label: t("navigation:commandPalette.projects"),
             shortcut: `${shortcuts.go.prefix} ${shortcuts.go.home}`,
-            onRun: () => {
-              if (!workspace?.id) return;
-              navigate({
-                to: "/dashboard/workspace/$workspaceId",
-                params: { workspaceId: workspace.id },
-              });
-            },
+            onRun: () => navigateHome(),
           },
           {
             value: "search",
@@ -131,13 +130,7 @@ function CommandPalette() {
             value: "members",
             label: t("navigation:commandPalette.members"),
             shortcut: `${shortcuts.go.prefix} ${shortcuts.go.members}`,
-            onRun: () => {
-              if (!workspace?.id) return;
-              navigate({
-                to: "/dashboard/workspace/$workspaceId/members",
-                params: { workspaceId: workspace.id },
-              });
-            },
+            onRun: () => navigateToMembers(),
           },
           {
             value: "create-task",
@@ -200,13 +193,7 @@ function CommandPalette() {
             value: "go-home",
             label: t("navigation:commandPalette.goHome"),
             shortcut: `${shortcuts.go.prefix} ${shortcuts.go.home}`,
-            onRun: () => {
-              if (!workspace?.id) return;
-              navigate({
-                to: "/dashboard/workspace/$workspaceId",
-                params: { workspaceId: workspace.id },
-              });
-            },
+            onRun: () => navigateHome(),
           },
           {
             value: "go-settings",
@@ -246,7 +233,16 @@ function CommandPalette() {
         ],
       },
     ],
-    [navigate, setTheme, setViewMode, t, workspace?.id, location.pathname],
+    [
+      navigate,
+      navigateHome,
+      navigateToMembers,
+      setTheme,
+      setViewMode,
+      t,
+      location.pathname,
+      workspace?.id,
+    ],
   );
 
   const shortcutHandlers = useMemo(() => {
@@ -271,13 +267,7 @@ function CommandPalette() {
 
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.contentEditable === "true"
-      ) {
-        return;
-      }
+      if (isEditableElement(target)) return;
 
       if (
         event.metaKey ||

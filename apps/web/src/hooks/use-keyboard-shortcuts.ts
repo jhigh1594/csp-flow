@@ -3,8 +3,10 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
+import { isEditableElement } from "@/lib/dom-utils";
 
 export function getModifierKeyText(): string {
   if (typeof window === "undefined") return "";
@@ -164,13 +166,7 @@ export function KeyboardShortcutsProvider({
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
       const target = event.target as HTMLElement;
-      if (
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.contentEditable === "true"
-      ) {
-        return;
-      }
+      if (isEditableElement(target)) return;
 
       const key = event.key.toLowerCase();
 
@@ -229,15 +225,19 @@ export function KeyboardShortcutsProvider({
     ],
   );
 
+  const handleKeyPressRef = useRef(handleKeyPress);
+  handleKeyPressRef.current = handleKeyPress;
+
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyPress);
+    const handler = (e: KeyboardEvent) => handleKeyPressRef.current(e);
+    document.addEventListener("keydown", handler);
     return () => {
-      document.removeEventListener("keydown", handleKeyPress);
+      document.removeEventListener("keydown", handler);
       if (prefixTimeout) {
         window.clearTimeout(prefixTimeout);
       }
     };
-  }, [handleKeyPress, prefixTimeout]);
+  }, [prefixTimeout]);
 
   useEffect(() => {
     return () => {

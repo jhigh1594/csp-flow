@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { isEditableElement } from "@/lib/dom-utils";
 
 type NumberedShortcutOption = {
   onSelect: () => void;
@@ -14,12 +15,7 @@ export function useNumberedShortcuts(
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      const isTypingInInput =
-        target.tagName === "INPUT" ||
-        target.tagName === "TEXTAREA" ||
-        target.contentEditable === "true";
-
-      if (isTypingInInput) return;
+      if (isEditableElement(target)) return;
 
       const num = Number.parseInt(e.key, 10);
       const isValidNumber =

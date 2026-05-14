@@ -92,38 +92,28 @@ function KanbanBoard({
         }
       },
       e: () => {
-        if (focusedTaskId && project) {
-          const task = project.columns
-            .flatMap((col) => col.tasks)
-            .find((t) => t.id === focusedTaskId);
-          if (!task?.projectId) return;
-          navigate({
-            to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/task/$taskId",
-            params: {
-              workspaceId: project.workspaceId,
-              teamId: teamId ?? "",
-              projectId: task.projectId,
-              taskId: focusedTaskId,
-            },
-          });
-        }
+        if (!focusedTask?.projectId) return;
+        navigate({
+          to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/task/$taskId",
+          params: {
+            workspaceId: project.workspaceId,
+            teamId: teamId ?? "",
+            projectId: focusedTask.projectId,
+            taskId: focusedTask.id,
+          },
+        });
       },
       enter: () => {
-        if (focusedTaskId && project) {
-          const task = project.columns
-            .flatMap((col) => col.tasks)
-            .find((t) => t.id === focusedTaskId);
-          if (!task?.projectId) return;
-          navigate({
-            to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/task/$taskId",
-            params: {
-              workspaceId: project.workspaceId,
-              teamId: teamId ?? "",
-              projectId: task.projectId,
-              taskId: focusedTaskId,
-            },
-          });
-        }
+        if (!focusedTask?.projectId) return;
+        navigate({
+          to: "/dashboard/workspace/$workspaceId/team/$teamId/project/$projectId/task/$taskId",
+          params: {
+            workspaceId: project.workspaceId,
+            teamId: teamId ?? "",
+            projectId: focusedTask.projectId,
+            taskId: focusedTask.id,
+          },
+        });
       },
       delete: () => {
         if (focusedTaskId && window.confirm("Delete this task?")) {
