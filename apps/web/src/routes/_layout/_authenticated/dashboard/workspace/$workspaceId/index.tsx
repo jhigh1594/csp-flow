@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { LayoutGrid, Plus } from "lucide-react";
-import { useState } from "react";
+import { CheckCircle2, Circle, LayoutGrid, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import WorkspaceLayout from "@/components/common/workspace-layout";
 import PageTitle from "@/components/page-title";
@@ -20,6 +20,8 @@ import {
 import icons from "@/constants/project-icons";
 import { shortcuts } from "@/constants/shortcuts";
 import useGetProjects from "@/hooks/queries/project/use-get-projects";
+import useGetTeams from "@/hooks/queries/team/use-get-teams";
+import useGetWorkspaceUsers from "@/hooks/queries/workspace-users/use-get-workspace-users";
 import { useRegisterShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { formatDateMedium } from "@/lib/format";
 
@@ -29,6 +31,118 @@ export const Route = createFileRoute(
   component: RouteComponent,
 });
 
+const STORAGE_KEY_PREFIX = "csp-flow-getting-started";
+
+type GettingStartedChecklistProps = {
+  workspaceId: string;
+  projectCount: number;
+  hasTeams: boolean;
+  memberCount: number;
+  onCreateProject: () => void;
+};
+
+function GettingStartedChecklist({
+  workspaceId,
+  projectCount,
+  hasTeams,
+  memberCount,
+  onCreateProject,
+}: GettingStartedChecklistProps) {
+  const storageKey = `${STORAGE_KEY_PREFIX}-${workspaceId}`;
+  const [dismissed, setDismissed] = useState(() => {
+    try {
+      return localStorage.getItem(storageKey) === "dismissed";
+    } catch {
+      return false;
+    }
+  });
+
+  const items = [
+    {
+      id: "project",
+      label: "Create your first project",
+      complete: projectCount >= 1,
+      action: onCreateProject,
+    },
+    {
+      id: "team",
+      label: "Create a team",
+      complete: hasTeams,
+    },
+    {
+      id: "invite",
+      label: "Invite team members",
+      complete: memberCount >= 2,
+    },
+  ];
+
+  const allComplete = items.every((item) => item.complete);
+
+  useEffect(() => {
+    if (allComplete && !dismissed) {
+      try {
+        localStorage.setItem(storageKey, "dismissed");
+        setDismissed(true);
+      } catch {
+        // localStorage unavailable
+      }
+    }
+  }, [allComplete, dismissed, storageKey]);
+
+  // Hide when: dismissed, 5+ projects, or all complete
+  if (dismissed || projectCount >= 5 || allComplete) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-lg border bg-card p-4 mb-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold">Getting Started</h3>
+        <button
+          type="button"
+          onClick={() => {
+            try {
+              localStorage.setItem(storageKey, "dismissed");
+            } catch {
+              // localStorage unavailable
+            }
+            setDismissed(true);
+          }}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Dismiss
+        </button>
+      </div>
+      <div className="space-y-2">
+        {items.map((item) => (
+          <div key={item.id} className="flex items-center gap-2.5 py-1">
+            {item.complete ? (
+              <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+            ) : (
+              <Circle className="w-4 h-4 text-muted-foreground shrink-0" />
+            )}
+            {item.complete ? (
+              <span className="text-sm text-muted-foreground line-through">
+                {item.label}
+              </span>
+            ) : item.action ? (
+              <button
+                type="button"
+                onClick={item.action}
+                className="text-sm text-foreground hover:text-primary transition-colors text-left"
+              >
+                {item.label}
+              </button>
+            ) : (
+              <span className="text-sm">{item.label}</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function RouteComponent() {
   const { t } = useTranslation();
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
@@ -37,6 +151,8 @@ function RouteComponent() {
   const { data: projects, isLoading } = useGetProjects({
     workspaceId,
   });
+  const { data: teams } = useGetTeams({ workspaceId });
+  const { data: members } = useGetWorkspaceUsers({ workspaceId });
 
   const handleCreateProject = () => {
     setIsCreateProjectOpen(true);
@@ -137,6 +253,13 @@ function RouteComponent() {
             </Button>
           }
         >
+          <GettingStartedChecklist
+            workspaceId={workspaceId}
+            projectCount={0}
+            hasTeams={!!teams?.length}
+            memberCount={members?.length ?? 0}
+            onCreateProject={handleCreateProject}
+          />
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center space-y-6">
               <div className="w-16 h-16 mx-auto rounded-xl bg-muted flex items-center justify-center">
@@ -183,6 +306,13 @@ function RouteComponent() {
           </Button>
         }
       >
+        <GettingStartedChecklist
+          workspaceId={workspaceId}
+          projectCount={projects?.length ?? 0}
+          hasTeams={!!teams?.length}
+          memberCount={members?.length ?? 0}
+          onCreateProject={handleCreateProject}
+        />
         <Table>
           <TableHeader className="p-4">
             <TableRow>
