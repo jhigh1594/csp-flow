@@ -3,8 +3,9 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { marked } from "marked";
 import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
+import { registerContextTools } from "./context-tools";
 
-class ApiClient {
+export class ApiClient {
   constructor(
     private baseUrl: string,
     private token: string,
@@ -46,17 +47,17 @@ class ApiClient {
   }
 }
 
-function textResult(data: unknown, isError = false): CallToolResult {
+export function textResult(data: unknown, isError = false): CallToolResult {
   const text =
     typeof data === "string" ? data : (JSON.stringify(data, null, 2) ?? "");
   return { content: [{ type: "text", text }], isError };
 }
 
-function errorResult(message: string): CallToolResult {
+export function errorResult(message: string): CallToolResult {
   return textResult({ error: message }, true);
 }
 
-function run(fn: () => Promise<unknown>): Promise<CallToolResult> {
+export function run(fn: () => Promise<unknown>): Promise<CallToolResult> {
   return fn()
     .then((data) => textResult(data))
     .catch((e: unknown) =>
@@ -1330,4 +1331,8 @@ export function registerMcpTools(
         }),
       ),
   );
+
+  // ── Context injection tools (U10) ──────────────────────────────────
+
+  registerContextTools(server, client);
 }
